@@ -45,15 +45,27 @@ class Header
     }
 
     /**
-     * Adds a new constant
-     * @param string $namespace
+     * Adds a new constant.
      * @param \Peg\Definitions\Element\Constant $constant
+     * @param string $namespace
      */
-    public function AddConstant($namespace, \Peg\Definitions\Element\Constant $constant)
+    public function AddConstant(\Peg\Definitions\Element\Constant $constant, $namespace = "\\")
     {
         $this->CreateNamespace($namespace);
 
         $this->namespaces[$namespace]->constants[$constant->name] = $constant;
+    }
+    
+    /**
+     * Adds a new enumeration.
+     * @param \Peg\Definitions\Element\Enumeration $enumeration
+     * @param string $namespace
+     */
+    public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration, $namespace = "\\")
+    {
+        $this->CreateNamespace($namespace);
+
+        $this->namespaces[$namespace]->enumerations[$enumeration->name] = $enumeration;
     }
 
     /**

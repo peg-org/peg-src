@@ -173,7 +173,7 @@ class Symbols
     }
     
     /**
-     * Add Constant to the symbols table
+     * Add Constant to the symbols table.
      * @param \Peg\Definitions\Element\Constant $constant
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
@@ -185,9 +185,17 @@ class Symbols
         $this->headers[$header]->AddConstant($namespace, $constant);
     }
     
-    public function AddEnumeration($name, array $options, $header, $namespace="\\")
+    /**
+     * Add Constant to the symbols table.
+     * @param \Peg\Definitions\Element\Enumeration $enumeration
+     * @param string $header Name of header file where the constant resides.
+     * @param string $namespace If omitted the constant is added at a global scope.
+     */
+    public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration, $header, $namespace="\\")
     {
+        $this->AddHeader($header);
         
+        $this->headers[$header]->AddEnumeration($namespace, $enumeration);
     }
 
 }

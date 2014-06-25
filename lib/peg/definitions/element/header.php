@@ -53,8 +53,8 @@ class Header
     {
         $this->CreateNamespace($namespace);
         
-        $constant->header = &$$this;
-        $constant->namespace = &$this->namespaces[$namespace];
+        $constant->header =& $this;
+        $constant->namespace =& $this->namespaces[$namespace];
 
         $this->namespaces[$namespace]->constants[$constant->name] = $constant;
     }
@@ -68,10 +68,25 @@ class Header
     {
         $this->CreateNamespace($namespace);
         
-        $enumeration->header = &$$this;
-        $enumeration->namespace = &$this->namespaces[$namespace];
+        $enumeration->header =& $this;
+        $enumeration->namespace =& $this->namespaces[$namespace];
 
         $this->namespaces[$namespace]->enumerations[$enumeration->name] = $enumeration;
+    }
+    
+    /**
+     * Adds a new enumeration.
+     * @param \Peg\Definitions\Element\Enumeration $typedef
+     * @param string $namespace
+     */
+    public function AddTypeDef(\Peg\Definitions\Element\TypeDef $typedef, $namespace = "\\")
+    {
+        $this->CreateNamespace($namespace);
+        
+        $typedef->header =& $this;
+        $typedef->namespace =& $this->namespaces[$namespace];
+
+        $this->namespaces[$namespace]->type_definitions[$typedef->name] = $typedef;
     }
 
     /**

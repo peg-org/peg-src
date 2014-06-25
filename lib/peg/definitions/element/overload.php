@@ -20,7 +20,7 @@ class Overload
     public $parameters;
     
     /**
-     * Flag that indicate if the method is deprecated.
+     * Flag that indicate if the method/function is deprecated.
      * @var bool
      */
     public $is_deprecated;

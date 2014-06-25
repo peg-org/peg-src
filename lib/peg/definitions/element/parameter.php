@@ -10,7 +10,7 @@ namespace Peg\Definitions\Element;
 /**
  * Represents a function or class method parameter.
  */
-class Parameter
+class Parameter extends VariableType
 {
     
     /**
@@ -20,52 +20,10 @@ class Parameter
     public $name;
     
     /**
-     * Type of the parameter without modifiers (eg: int, double, char, etc...)
-     * @var string
-     */
-    public $type;
-    
-    /**
      * The default value of the parameter.
      * @var string 
      */
     public $default_value;
-    
-    /**
-     * Flag that indicates if the parameter is constant (const).
-     * @var bool
-     */
-    public $is_const;
-    
-    /**
-     * Flag that indicates if the parameter is a reference (&).
-     * @var bool
-     */
-    public $is_reference;
-    
-    /**
-     * Flag that indicates if the parameter is a reference (*).
-     * @var bool
-     */
-    public $is_pointer;
-    
-    /**
-     * Amount of pointers indirection (*).
-     * @var int
-     */
-    public $indirection_level;
-    
-    /**
-     * Flag that indicates if the parameter is an array ([]).
-     * @var bool
-     */
-    public $is_array;
-    
-    /**
-     * Description of the element.
-     * @var string
-     */
-    public $description;
     
     /**
      * Reference to the overload owner.
@@ -82,53 +40,11 @@ class Parameter
      */
     public function __construct($name, $type, $default_value="")
     {
+        parent::__construct($type);
+        
         $this->name = $name;
         
-        $this->type = str_replace(
-            array("const ", "&", "*"), 
-            "", 
-            $type
-        );
-        
         $this->default_value = $default_value;
-        
-        if(substr_count($type, "const ") > 0)
-        {
-            $this->is_const = true;
-        }
-        else
-        {
-            $this->is_const = false;
-        }
-        
-        if(substr_count($type, "&") > 0)
-        {
-            $this->is_reference = true;
-        }
-        else
-        {
-            $this->is_reference = false;
-        }
-        
-        if($indirection = substr_count($type, "*") > 0)
-        {
-            $this->is_pointer = true;
-            $this->$indirection = $indirection;
-        }
-        else
-        {
-            $this->is_pointer = false;
-            $this->indirection_level = 0;
-        }
-        
-        if(substr_count($type, "[]") > 0)
-        {
-            $this->is_array = true;
-        }
-        else
-        {
-            $this->is_array = false;
-        }
     }
     
     /**

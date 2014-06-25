@@ -173,7 +173,7 @@ class Symbols
     }
     
     /**
-     * Add Constant to the symbols table.
+     * Adds a constant to the symbols table.
      * @param \Peg\Definitions\Element\Constant $constant
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
@@ -186,7 +186,7 @@ class Symbols
     }
     
     /**
-     * Add Constant to the symbols table.
+     * Adds an enumeration to the symbols table.
      * @param \Peg\Definitions\Element\Enumeration $enumeration
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
@@ -196,6 +196,19 @@ class Symbols
         $this->AddHeader($header);
         
         $this->headers[$header]->AddEnumeration($namespace, $enumeration);
+    }
+    
+    /**
+     * Adds a type definition to the symbols table.
+     * @param \Peg\Definitions\Element\TypeDef $typedef
+     * @param string $header Name of header file where the constant resides.
+     * @param string $namespace If omitted the constant is added at a global scope.
+     */
+    public function AddTypeDef(\Peg\Definitions\Element\TypeDef $typedef, $header, $namespace="\\")
+    {
+        $this->AddHeader($header);
+        
+        $this->headers[$header]->AddTypeDef($namespace, $typedef);
     }
 
 }

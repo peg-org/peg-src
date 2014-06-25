@@ -8,29 +8,17 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents an enumeration.
+ * Represents a C type definition (typedef).
  */
-class Enumeration
+class TypeDef extends VariableType
 {
-
+    
     /**
-     * Holds the name of the enumeration.
+     * Holds the name of the element
      * @var string
      */
     public $name;
-
-    /**
-     * List of options.
-     * @var array
-     */
-    public $options;
     
-    /**
-     * Description of the element.
-     * @var string
-     */
-    public $description;
-
     /**
      * Reference to the header containing this element.
      * @var \Peg\Definitions\Element\Header
@@ -42,17 +30,19 @@ class Enumeration
      * @var \Peg\Definitions\Element\NamespaceElement
      */
     public $namespace;
-
+    
     /**
-     * Initializes the enumeration element.
-     * @param string $name
-     * @param array $options
+     * Create a parameter element from a declaration specification, 
+     * 
+     * @param string $name Name of the parameter.
+     * @param string $type Parameter type by specification, eg: const int*
+     * @param string $default_value Default value of the parameter.
      */
-    public function __construct($name, array $options)
+    public function __construct($name, $type)
     {
-        $this->name = $name;
+        parent::__construct($type);
         
-        $this->$options = $options;
+        $this->name = $name;
     }
 
 }

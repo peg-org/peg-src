@@ -52,6 +52,9 @@ class Header
     public function AddConstant(\Peg\Definitions\Element\Constant $constant, $namespace = "\\")
     {
         $this->CreateNamespace($namespace);
+        
+        $constant->header = &$$this;
+        $constant->namespace = &$this->namespaces[$namespace];
 
         $this->namespaces[$namespace]->constants[$constant->name] = $constant;
     }
@@ -64,6 +67,9 @@ class Header
     public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration, $namespace = "\\")
     {
         $this->CreateNamespace($namespace);
+        
+        $enumeration->header = &$$this;
+        $enumeration->namespace = &$this->namespaces[$namespace];
 
         $this->namespaces[$namespace]->enumerations[$enumeration->name] = $enumeration;
     }
@@ -72,7 +78,7 @@ class Header
      * Adds a namespace to the namespaces array if not already listed.
      * @param string $name
      */
-    private function CreateNamespace($name)
+    private function CreateNamespace(&$name)
     {
         if($name == "")
             $name = "\\";

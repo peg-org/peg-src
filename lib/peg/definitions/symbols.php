@@ -13,60 +13,6 @@ class Symbols
 {
 
     /**
-     * Array of include files
-     * @var array
-     */
-    private $includes;
-
-    /**
-     * Array of constants
-     * @var array
-     */
-    private $constants;
-
-    /**
-     * Array of enumerations
-     * @var array
-     */
-    private $enumerations;
-
-    /**
-     * Array of functions
-     * @var array
-     */
-    private $functions;
-
-    /**
-     * Array of global variables
-     * @var array
-     */
-    private $variables;
-
-    /**
-     * Array of classes
-     * @var array
-     */
-    private $classes;
-
-    /**
-     * Array of class enumerations
-     * @var array
-     */
-    private $classes_enunmerations;
-
-    /**
-     * Array of class variables
-     * @var array
-     */
-    private $classes_variables;
-
-    /**
-     * Array of type definitions
-     * @var array
-     */
-    private $type_definitions;
-
-    /**
      * List of header files
      * @var \Peg\Definitions\Element\Header[]
      */
@@ -77,85 +23,224 @@ class Symbols
      * @var string
      */
     public $path;
+    
+    /**
+     * Mechanism used to load the symbols.
+     * @see \Peg\Definitions\Symbols
+     * @var string
+     */
+    public $load_type;
 
     /**
      * Initializes
-     * @param type $path The path where resides the definition files that represent
-     * the library.
+     * @param string $path The path where resides the 
+     * definition files that represent the library.
      */
-    public function __construct($path = null)
+    public function __construct(
+        $path = null, 
+        $load_type=\Peg\Definitions\SymbolsType::JSON
+    )
     {
-        $this->includes = array();
-        $this->constants = array();
-        $this->enumerations = array();
-        $this->functions = array();
-        $this->variables = array();
-        $this->classes = array();
-        $this->classes_enunmerations = array();
-        $this->classes_variables = array();
-        $this->type_definitions = array();
-        
         $this->headers = array();
+        $this->load_type = $load_type;
 
-        $this->Load($path);
-    }
-
-    public function Load($path = null)
-    {
-        if($path)
+        if($path != null)
         {
-            $this->path = rtrim($path, "/\\") . "/";
-
-            //Load definition files
-            $this->includes = Json::Decode(file_get_contents($this->path . "includes.json"));
-            $this->constants = Json::Decode(file_get_contents($this->path . "constants.json"));
-            $this->enumerations = Json::Decode(file_get_contents($this->path . "enumerations.json"));
-            $this->functions = Json::Decode(file_get_contents($this->path . "functions.json"));
-            $this->variables = Json::Decode(file_get_contents($this->path . "variables.json"));
-            $this->classes = Json::Decode(file_get_contents($this->path . "classes.json"));
-            $this->classes_enunmerations = Json::Decode(file_get_contents($this->path . "class_enumerations.json"));
-            $this->classes_variables = Json::Decode(file_get_contents($this->path . "class_variables.json"));
-            $this->type_definitions = Json::Decode(file_get_contents($this->path . "type_definitions.json"));
-
-            //Populate files array
-            foreach($this->includes as $file_name => $file_enabled)
+            if($load_type == SymbolsType::JSON)
             {
-                $file = new Element\Header($file_name);
-                $file->enabled = $file_enabled;
-
-                $this->LoadConstants($file);
-
-                $this->headers[$file_name] = $file;
+                $this->LoadFromJSON($path);
             }
-        }
-    }
-
-    /**
-     * Helper function to load all constants as symbol elements into a
-     * file tree namespaces.
-     * @param \Peg\Definitions\Element\Header $file
-     * @return \Peg\Definitions\Element\Constant
-     */
-    private function LoadConstants($file)
-    {
-        if(isset($this->constants[$file->name]))
-        {
-            foreach($this->constants[$file->name] as $namespace => $constants)
+            else
             {
-                foreach($constants as $constant_name => $constant_value)
-                {
-                    $constant = new \Peg\Definitions\Element\Constant;
-
-                    $constant->name = $constant_name;
-                    $constant->value = $constant_value;
-                    $constant->namespace = $namespace;
-
-                    $file->AddConstant($namespace, $constant);
-                }
+                $this->LoadFromPHP($path);
             }
         }
     }
     
+    /**
+     * Empty this symbols table.
+     */
+    public function Clear()
+    {
+        unset($this->headers);
+        
+        $this->headers = array();
+    }
+    
+    public function LoadFromPHP($path)
+    {
+        $this->path = rtrim($path, "/\\") . "/";
+        $this->load_type = SymbolsType::PHP;
+        
+        // This variable is used by the php definition files to reference
+        // this object and populate it with elements.
+        $symbols =& $this;
+        
+        include($this->path . "constants.php");
+        include($this->path . "enumerations.php");
+        include($this->path . "type_definitions.php");
+        include($this->path . "variables.php");
+        include($this->path . "functions.php");
+        include($this->path . "classes.php");
+    }
+
+    public function LoadFromJSON($path)
+    {
+        $this->path = rtrim($path, "/\\") . "/";
+        $this->load_type = SymbolsType::JSON;
+
+        //Populate headers array
+        $includes = Json::Decode(
+            file_get_contents($this->path . "includes.json")
+        );
+
+        foreach($includes as $header_name => $header_enabled)
+        {
+            $file = new Element\Header($header_name);
+            $file->enabled = $header_enabled;
+
+            $this->headers[$header_name] = $file;
+        }
+
+        unset($includes);
+
+        $this->LoadConstantsFromJson();
+        
+        $this->LoadEnumerationsFromJson();
+        
+        $this->LoadTypeDefFromJson();
+        
+        $this->LoadGlobalVariablesFromJson();
+    }
+
+    /**
+     * Helper function to load all constants as symbol elements into a
+     * header namespace.
+     */
+    private function LoadConstantsFromJson()
+    {
+        $constants_def = Json::Decode(
+            file_get_contents($this->path . "constants.json")
+        );
+
+        foreach($constants_def as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $constants)
+            {
+                foreach($constants as $constant_name => $constant_value)
+                {
+                    $constant = new Element\Constant(
+                        $constant_name,
+                        $constant_value
+                    );
+
+                    $this->headers[$header]->AddConstant(
+                        $constant,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($constants_def);
+    }
+
+    /**
+     * Helper function to load all enumerations as symbol elements into a
+     * header namespace.
+     */
+    private function LoadEnumerationsFromJson()
+    {
+        $enumerations_def = Json::Decode(
+            file_get_contents($this->path . "enumerations.json")
+        );
+
+        foreach($enumerations_def as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $enumerations)
+            {
+                foreach($enumerations as $enumeration_name => $enumeration_options)
+                {
+                    $enumeration = new Element\Enumeration(
+                        $enumeration_name,
+                        $enumeration_options
+                    );
+
+                    $this->headers[$header]->AddEnumeration(
+                        $enumeration,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($enumerations_def);
+    }
+
+    /**
+     * Helper function to load all type definitions as symbol elements into a
+     * header namespace.
+     */
+    private function LoadTypeDefFromJson()
+    {
+        $typedef_def = Json::Decode(file_get_contents(
+            $this->path . "type_definitions.json")
+        );
+
+        foreach($typedef_def as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $typedefs)
+            {
+                foreach($typedefs as $typedef_name => $typedef_type)
+                {
+                    $typedef = new Element\TypeDef(
+                        $typedef_name,
+                        $typedef_type
+                    );
+
+                    $this->headers[$header]->AddTypeDef(
+                        $typedef,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($typedef_def);
+    }
+    
+    /**
+     * Helper function to load all type definitions as symbol elements into a
+     * header namespace.
+     */
+    private function LoadGlobalVariablesFromJson()
+    {
+        $variables_def = Json::Decode(file_get_contents(
+            $this->path . "variables.json")
+        );
+
+        foreach($variables_def as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $variables)
+            {
+                foreach($variables as $variable_name => $variable_type)
+                {
+                    $variable = new Element\GlobalVariable(
+                        $variable_name,
+                        $variable_type
+                    );
+
+                    $this->headers[$header]->AddGlobalVariable(
+                        $variable,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($variables_def);
+    }
+
     /**
      * Add a header file.
      * @param string $name  Name of header file.
@@ -167,48 +252,77 @@ class Symbols
         if(!isset($this->headers[$name]))
         {
             $header = new Element\Header($name, $enabled);
-            
+
             $this->headers[$name] = $header;
         }
     }
-    
+
     /**
      * Adds a constant to the symbols table.
      * @param \Peg\Definitions\Element\Constant $constant
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
-    public function AddConstant(\Peg\Definitions\Element\Constant $constant, $header, $namespace="\\")
+    public function AddConstant(
+        \Peg\Definitions\Element\Constant $constant,
+        $header,
+        $namespace="\\"
+    )
     {
         $this->AddHeader($header);
-        
+
         $this->headers[$header]->AddConstant($namespace, $constant);
     }
-    
+
     /**
      * Adds an enumeration to the symbols table.
      * @param \Peg\Definitions\Element\Enumeration $enumeration
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
-    public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration, $header, $namespace="\\")
+    public function AddEnumeration(
+        \Peg\Definitions\Element\Enumeration $enumeration,
+        $header,
+        $namespace="\\"
+    )
     {
         $this->AddHeader($header);
-        
+
         $this->headers[$header]->AddEnumeration($namespace, $enumeration);
     }
-    
+
     /**
      * Adds a type definition to the symbols table.
      * @param \Peg\Definitions\Element\TypeDef $typedef
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
-    public function AddTypeDef(\Peg\Definitions\Element\TypeDef $typedef, $header, $namespace="\\")
+    public function AddTypeDef(
+        \Peg\Definitions\Element\TypeDef $typedef, 
+        $header, 
+        $namespace="\\"
+    )
     {
         $this->AddHeader($header);
-        
+
         $this->headers[$header]->AddTypeDef($namespace, $typedef);
+    }
+
+    /**
+     * Adds a global variable to the symbols table.
+     * @param \Peg\Definitions\Element\GlobalVariable $global_variable
+     * @param string $header Name of header file where the constant resides.
+     * @param string $namespace If omitted the constant is added at a global scope.
+     */
+    public function AddGlobalVar(
+        \Peg\Definitions\Element\GlobalVariable $global_variable, 
+        $header, 
+        $namespace="\\"
+    )
+    {
+        $this->AddHeader($header);
+
+        $this->headers[$header]->AddTypeDef($namespace, $global_variable);
     }
 
 }

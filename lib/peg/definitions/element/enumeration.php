@@ -47,12 +47,15 @@ class Enumeration
      * Initializes the enumeration element.
      * @param string $name
      * @param array $options
+     * @param string $description
      */
-    public function __construct($name, array $options)
+    public function __construct($name, array $options, $description="")
     {
         $this->name = $name;
         
         $this->$options = $options;
+        
+        $this->description = $description;
     }
 
 }

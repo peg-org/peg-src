@@ -32,15 +32,14 @@ class TypeDef extends VariableType
     public $namespace;
     
     /**
-     * Create a parameter element from a declaration specification, 
-     * 
+     * Create a typedef element. 
      * @param string $name Name of the parameter.
      * @param string $type Parameter type by specification, eg: const int*
-     * @param string $default_value Default value of the parameter.
+     * @param string $description
      */
-    public function __construct($name, $type)
+    public function __construct($name, $type, $description="")
     {
-        parent::__construct($type);
+        parent::__construct($type, $description);
         
         $this->name = $name;
     }

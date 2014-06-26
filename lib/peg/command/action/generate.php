@@ -12,7 +12,7 @@ use Peg\CommandLine\Error;
 use Peg\Utilities\FileSystem;
 
 /**
- * Action taken if the init command was executed.
+ * Action taken if the generate command was executed.
  */
 class Generate extends \Peg\CommandLine\Action
 {
@@ -23,13 +23,22 @@ class Generate extends \Peg\CommandLine\Action
         {
             foreach($file->namespaces as $namespace_name=>$namespace)
             {
+                if(!$namespace->HasConstants())
+                    continue;
+                
                 foreach($namespace->constants as $constant_name=>$constant)
                 {
-                    print $constant_name . "\n";
+                    print $constant_name . $namespace->is_global . "\n";
                 }
             }
         }
+        
+        foreach(Application::GetDefinitions()->headers as $file_name=>$header)
+        {
+            //print $file_name . "\n";
+        }
     }
+    
 }
 
 ?>

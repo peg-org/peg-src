@@ -42,6 +42,19 @@ class Constant
      * @var \Peg\Definitions\Element\NamespaceElement
      */
     public $namespace;
+    
+    /**
+     * Create a constant element.
+     * @param string $name
+     * @param string $value
+     * @param string $description
+     */
+    public function __construct($name, $value, $description="")
+    {
+        $this->name = $name;
+        $this->value = $value;
+        $this->description = $description;
+    }
 
 }
 

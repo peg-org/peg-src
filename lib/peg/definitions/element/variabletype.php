@@ -14,7 +14,7 @@ class VariableType
 {
     
     /**
-     * Type of the parameter without modifiers (eg: int, double, char, etc...)
+     * Type of the variable without modifiers (eg: int, double, char, etc...)
      * @var string
      */
     public $type;
@@ -32,13 +32,13 @@ class VariableType
     public $is_const;
     
     /**
-     * Flag that indicates if the parameter is a reference (&).
+     * Flag that indicates if the variable is a reference (&).
      * @var bool
      */
     public $is_reference;
     
     /**
-     * Flag that indicates if the parameter is a reference (*).
+     * Flag that indicates if the variable is a pointer reference (*).
      * @var bool
      */
     public $is_pointer;
@@ -50,7 +50,7 @@ class VariableType
     public $indirection_level;
     
     /**
-     * Flag that indicates if the parameter is an array ([]).
+     * Flag that indicates if the variable is an array ([]).
      * @var bool
      */
     public $is_array;
@@ -63,13 +63,11 @@ class VariableType
     
     
     /**
-     * Create a parameter element from a declaration specification, 
-     * 
-     * @param string $name Name of the parameter.
+     * Create a variable type.
      * @param string $type Parameter type by specification, eg: const int*
-     * @param string $default_value Default value of the parameter.
+     * @param string $description
      */
-    public function __construct($type)
+    public function __construct($type, $description="")
     {   
         $this->original_type = $type;
         
@@ -78,6 +76,8 @@ class VariableType
             "", 
             $type
         );
+        
+        $this->description = $description;
         
         if(substr_count($type, "const ") > 0)
         {

@@ -14,7 +14,13 @@ class Overload
 {
 
     /**
-     * Holds the name of the element
+     * The return type of the overload.
+     * @var \Peg\Definitions\Element\ReturnType
+     */
+    public $return_type;
+    
+    /**
+     * Holds the list of parameters for the overload.
      * @var \Peg\Definitions\Element\Parameter[]
      */
     public $parameters;
@@ -32,10 +38,43 @@ class Overload
     public $description;
     
     /**
-     * Reference to the function.
+     * Reference to the parent function element.
      * @var \Peg\Definitions\Element\FunctionElement
      */
     public $function;
+    
+    /**
+     * Helper function to set the overload return type.
+     * @param \Peg\Definitions\Element\ReturnType $return_type
+     * @return \Peg\Definitions\Element\Overload
+     */
+    public function SetReturnType(\Peg\Definitions\Element\ReturnType $return_type)
+    {
+        $this->return_type = $return_type;
+        
+        return $this;
+    }
+    
+    /**
+     * Adds a new parameter.
+     * @param \Peg\Definitions\Element\Parameter $parameter
+     * @return \Peg\Definitions\Element\Overload
+     */
+    public function AddParameter(\Peg\Definitions\Element\Parameter $parameter)
+    {
+        if(!isset($this->parameters[$parameter->name]))
+        {
+            $this->parameters[$parameter->name] = $parameter;
+        }
+        else
+        {
+            throw new Exception(
+                t("You are trying to add a parameter which is already listed")
+            );
+        }
+        
+        return $this;
+    }
 
 }
 

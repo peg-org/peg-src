@@ -8,28 +8,16 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents a function or class method element.
+ * Represents a global variable element.
  */
-class FunctionElement
+class GlobalVariable extends VariableType
 {
-
+    
     /**
      * Holds the name of the element
      * @var string
      */
     public $name;
-    
-    /**
-     * List of overloads for this function/method
-     * @var \Peg\Definitions\Element\Overload[]
-     */
-    public $overloads;
-    
-    /**
-     * Description of the element.
-     * @var string
-     */
-    public $description;
     
     /**
      * Reference to the header containing this element.
@@ -42,6 +30,19 @@ class FunctionElement
      * @var \Peg\Definitions\Element\NamespaceElement
      */
     public $namespace;
+    
+    /**
+     * Create a global variable element using a declaration specification
+     * for its type.
+     * @param string $name Name of the variable.
+     * @param string $type Parameter type by specification, eg: const int*
+     */
+    public function __construct($name, $type, $description="")
+    {
+        parent::__construct($type, $description);
+        
+        $this->name = $name;
+    }
 
 }
 

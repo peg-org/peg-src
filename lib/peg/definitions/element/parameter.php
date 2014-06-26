@@ -32,8 +32,7 @@ class Parameter extends VariableType
     public $overload;
     
     /**
-     * Create a parameter element from a declaration specification, 
-     * 
+     * Create a parameter element from a declaration specification for the type.
      * @param string $name Name of the parameter.
      * @param string $type Parameter type by specification, eg: const int*
      * @param string $default_value Default value of the parameter.

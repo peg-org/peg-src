@@ -8,7 +8,7 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents a function or class method parameter.
+ * Represents a function or class method return type.
  */
 class ReturnType extends VariableType
 {

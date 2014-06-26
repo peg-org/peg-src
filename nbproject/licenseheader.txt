@@ -1,6 +1,0 @@
-/**
- * @author Elizabeth M Smith
- * @author Jefferson González
- * @license MIT
- * @link http://github.com/peg-org/peg-src Source code. 
-*/

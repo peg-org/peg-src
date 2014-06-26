@@ -20,6 +20,12 @@ class Application
     private static $cli_parser;
 
     /**
+     * Reference to the plugins loader.
+     * @var \Peg\Plugins\Loader;
+     */
+    private static $plugin_loader;
+
+    /**
      * Reference to the help command.
      * @var \Peg\Command\Help
      */
@@ -36,16 +42,16 @@ class Application
      * @var \Peg\Command\Parse
      */
     private static $parse_command;
-    
+
     /**
      * Reference to the generate command.
      * @var \Peg\Command\Generate
      */
     private static $generate_command;
-    
+
     /**
      * Reference to the definition's symbols object.
-     * @var \Peg\Definitions\Symbols 
+     * @var \Peg\Definitions\Symbols
      */
     private static $symbols;
 
@@ -59,7 +65,7 @@ class Application
     public static function Initialize()
     {
         self::$cli_parser = new CommandLine\Parser;
-        
+
         // Set Application details
         self::$cli_parser->application_name = "peg";
         self::$cli_parser->application_version = "1.0";
@@ -70,12 +76,20 @@ class Application
         self::$init_command = new Command\Init;
         self::$parse_command = new Command\Parse;
         self::$generate_command = new Command\Generate;
-        
+
         // Register command operations
         self::$cli_parser->RegisterCommand(self::$help_command);
         self::$cli_parser->RegisterCommand(self::$init_command);
         self::$cli_parser->RegisterCommand(self::$parse_command);
         self::$cli_parser->RegisterCommand(self::$generate_command);
+
+        // Initialize the plugin loader and try to load any plugins.
+        self::$plugin_loader = new Plugins\Loader();
+
+        if(self::ValidExtension())
+        {
+            self::$plugin_loader->Start(self::GetCwd() . "/plugins");
+        }
     }
 
     /**
@@ -178,7 +192,7 @@ class Application
     {
         return self::$parse_command;
     }
-    
+
     /**
      * Gets a reference to generate command currently used by peg.
      * @return \Peg\Command\Parse
@@ -199,13 +213,22 @@ class Application
         {
             CommandLine\Error::Show(t("Invalid extension directory, definitions could not be loaded."));
         }
-        
+
         if(!is_object(self::$symbols))
         {
             self::$symbols = new Definitions\Symbols("definitions");
         }
-        
+
         return self::$symbols;
+    }
+
+    /**
+     * Get reference to the plugin loader currently used by peg.
+     * @return \Peg\Plugins\Loader
+     */
+    public static function &GetPluginLoader()
+    {
+        return self::$plugin_loader;
     }
 }
 

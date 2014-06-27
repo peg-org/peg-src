@@ -8,7 +8,8 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents an enumeration.
+ * Represents an enumeration declared independently on a header file or as
+ * part of a class.
  */
 class Enumeration
 {
@@ -30,6 +31,12 @@ class Enumeration
      * @var string
      */
     public $description;
+    
+    /**
+     * Reference to the class containing this element if applicable.
+     * @var \Peg\Definitions\Element\ClassElement
+     */
+    public $parent_class;
 
     /**
      * Reference to the header containing this element.

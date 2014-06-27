@@ -109,9 +109,9 @@ class Doxygen extends \Peg\Parse\Extractor
                 $kind = $file_members->item($member)->getAttribute("kind");
 
                 $location = str_replace(
-                        $this->headers_path, "", str_replace(
-                                "\\", "/", $file_xpath->evaluate("location", $file_members->item($member))->item(0)->getAttribute("file")
-                        )
+                    $this->headers_path, "", str_replace(
+                        "\\", "/", $file_xpath->evaluate("location", $file_members->item($member))->item(0)->getAttribute("file")
+                    )
                 );
 
                 $this->includes[$location] = true;
@@ -298,9 +298,9 @@ class Doxygen extends \Peg\Parse\Extractor
             for($member = 0; $member < $file_members->length; $member++)
             {
                 $location = str_replace(
-                        $this->headers_path, "", str_replace(
-                                "\\", "/", $file_xpath->evaluate("location", $file_members->item($member))->item(0)->getAttribute("file")
-                        )
+                    $this->headers_path, "", str_replace(
+                        "\\", "/", $file_xpath->evaluate("location", $file_members->item($member))->item(0)->getAttribute("file")
+                    )
                 );
 
                 $this->includes[$location] = true;

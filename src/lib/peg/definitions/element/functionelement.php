@@ -32,6 +32,12 @@ class FunctionElement
     public $description;
     
     /**
+     * Reference to the class containing this element if applicable.
+     * @var \Peg\Definitions\Element\ClassElement
+     */
+    public $parent_class;
+    
+    /**
      * Reference to the header containing this element.
      * @var \Peg\Definitions\Element\Header
      */
@@ -42,6 +48,23 @@ class FunctionElement
      * @var \Peg\Definitions\Element\NamespaceElement
      */
     public $namespace;
+    
+    /**
+     * Creates a function element.
+     * @param string $name
+     * @param string $description
+     */
+    public function __construct($name, $description="")
+    {
+        $this->name = $name;
+        $this->description = $description;
+    }
+    
+    public function AddOverload(\Peg\Definitions\Element\Overload $overload)
+    {
+        $overload->function =& $this;
+        $this->overloads[] = $overload;
+    }
 
 }
 

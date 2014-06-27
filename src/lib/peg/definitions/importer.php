@@ -86,7 +86,7 @@ class Importer extends \Signals\Signal
     private function LoadFromPHP($path)
     {
         $this->definitions_path = rtrim($path, "/\\") . "/";
-        $this->import_type = SymbolsType::PHP;
+        $this->import_type = Type::PHP;
         
         // This variable is used by the php definition files to reference
         // this object and populate it with elements.

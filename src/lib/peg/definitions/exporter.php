@@ -117,7 +117,9 @@ class Exporter extends \Signals\Signal
             "w"
         );
         
-        fwrite($output_file, "<?php\n");
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\Constant;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -137,7 +139,7 @@ class Exporter extends \Signals\Signal
                     
                     $output = "\n";
                     $output .= '$symbols->AddConstant(' . "\n";
-                    $output .= '    new Element\Constant(' . "\n";
+                    $output .= '    new Constant(' . "\n";
                     $output .= '        "'.$constant->name.'",' . "\n";
                     $output .= '        "'.$value.'",' . "\n";
                     $output .= '        "'.$description.'"' . "\n";
@@ -161,7 +163,9 @@ class Exporter extends \Signals\Signal
             "w"
         );
         
-        fwrite($output_file, "<?php\n");
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\Enumeration;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -180,7 +184,7 @@ class Exporter extends \Signals\Signal
                     
                     $output = "\n";
                     $output .= '$symbols->AddEnumeration(' . "\n";
-                    $output .= '    new Element\Enumeration(' . "\n";
+                    $output .= '    new Enumeration(' . "\n";
                     $output .= '        "'.$enumeration->name.'",' . "\n";
                     
                     $output .= '        [' . "\n";
@@ -212,7 +216,9 @@ class Exporter extends \Signals\Signal
             "w"
         );
         
-        fwrite($output_file, "<?php\n");
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\TypeDef;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -232,7 +238,7 @@ class Exporter extends \Signals\Signal
                     
                     $output = "\n";
                     $output .= '$symbols->AddTypeDef(' . "\n";
-                    $output .= '    new Element\TypeDef(' . "\n";
+                    $output .= '    new TypeDef(' . "\n";
                     $output .= '        "'.$typedef->name.'",' . "\n";
                     $output .= '        "'.$type.'",' . "\n";
                     $output .= '        "'.$description.'"' . "\n";
@@ -256,7 +262,9 @@ class Exporter extends \Signals\Signal
             "w"
         );
         
-        fwrite($output_file, "<?php\n");
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\GlobalVariable;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -276,7 +284,7 @@ class Exporter extends \Signals\Signal
                     
                     $output = "\n";
                     $output .= '$symbols->AddGlobalVar(' . "\n";
-                    $output .= '    new Element\GlobalVariable(' . "\n";
+                    $output .= '    new GlobalVariable(' . "\n";
                     $output .= '        "'.$variable->name.'",' . "\n";
                     $output .= '        "'.$type.'",' . "\n";
                     $output .= '        "'.$description.'"' . "\n";

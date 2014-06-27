@@ -62,7 +62,7 @@ class Symbols
     {
         $this->AddHeader($header);
 
-        $this->headers[$header]->AddConstant($namespace, $constant);
+        $this->headers[$header]->AddConstant($constant, $namespace);
     }
 
     /**
@@ -79,7 +79,7 @@ class Symbols
     {
         $this->AddHeader($header);
 
-        $this->headers[$header]->AddEnumeration($namespace, $enumeration);
+        $this->headers[$header]->AddEnumeration($enumeration, $namespace);
     }
 
     /**
@@ -96,7 +96,7 @@ class Symbols
     {
         $this->AddHeader($header);
 
-        $this->headers[$header]->AddTypeDef($namespace, $typedef);
+        $this->headers[$header]->AddTypeDef($typedef, $namespace);
     }
 
     /**
@@ -113,7 +113,7 @@ class Symbols
     {
         $this->AddHeader($header);
 
-        $this->headers[$header]->AddTypeDef($namespace, $global_variable);
+        $this->headers[$header]->AddGlobalVariable($global_variable, $namespace);
     }
 
 }

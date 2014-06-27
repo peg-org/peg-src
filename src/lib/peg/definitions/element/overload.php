@@ -26,6 +26,36 @@ class Overload
     public $parameters;
     
     /**
+     * Flag that indicate if the method is protected.
+     * @var bool
+     */
+    public $protected;
+    
+    /**
+     * Flag that indicate if the method is const.
+     * @var bool
+     */
+    public $constant;
+    
+    /**
+     * Flag that indicate if the method is static.
+     * @var bool
+     */
+    public $static;
+    
+    /**
+     * Flag that indicate if the method is virtual.
+     * @var bool
+     */
+    public $virtual;
+    
+    /**
+     * Flag that indicate if the method is pure virtual.
+     * @var bool
+     */
+    public $pure_virtual;
+    
+    /**
      * Flag that indicate if the method/function is deprecated.
      * @var bool
      */

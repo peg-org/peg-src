@@ -36,6 +36,7 @@ class GlobalVariable extends VariableType
      * for its type.
      * @param string $name Name of the variable.
      * @param string $type Parameter type by specification, eg: const int*
+     * @param string $description A description used to generate documentation.
      */
     public function __construct($name, $type, $description="")
     {

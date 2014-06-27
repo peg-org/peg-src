@@ -39,7 +39,7 @@ class NamespaceElement
 
     /**
      * Array of type definitions declared on the file.
-     * @var \Peg\Definitions\Element\TypeDefinition[]
+     * @var \Peg\Definitions\Element\TypeDef[]
      */
     public $type_definitions;
 

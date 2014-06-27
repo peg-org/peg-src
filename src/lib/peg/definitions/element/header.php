@@ -135,6 +135,96 @@ class Header
         if(!isset($this->namespaces[$name]))
             $this->namespaces[$name] = new NamespaceElement($name);
     }
+    
+    /**
+     * Check if the header has constants.
+     * @return bool
+     */
+    public function HasConstants()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasConstants())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the header has enumerations.
+     * @return bool
+     */
+    public function HasEnumerations()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasEnumerations())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the header has type definitions.
+     * @return bool
+     */
+    public function HasTypeDefs()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasTypeDefs())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the header has global variables.
+     * @return bool
+     */
+    public function HasGlobalVariables()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasGlobalVariables())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the header has functions.
+     * @return bool
+     */
+    public function HasFunctions()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasFunctions())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the header has classes.
+     * @return bool
+     */
+    public function HasClasses()
+    {
+        foreach($this->namespaces as $namespace)
+        {
+            if($namespace->HasClasses())
+                return true;
+        }
+        
+        return false;
+    }
 
 }
 

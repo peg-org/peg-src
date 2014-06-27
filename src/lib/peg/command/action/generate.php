@@ -28,7 +28,7 @@ class Generate extends \Peg\CommandLine\Action
                 
                 foreach($namespace->constants as $constant_name=>$constant)
                 {
-                    print $constant_name . $namespace->is_global . "\n";
+                    //print $constant_name . $namespace->is_global . "\n";
                 }
             }
         }

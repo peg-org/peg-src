@@ -216,7 +216,23 @@ class Application
 
         if(!is_object(self::$symbols))
         {
-            self::$symbols = new Definitions\Symbols("definitions");
+            self::$symbols = new Definitions\Symbols;
+            
+            $importer = new Definitions\Importer(
+                self::$symbols, 
+                "definitions"
+            );
+            
+            $importer->Start();
+            
+            // Code to test exporter
+            $exporter = new Definitions\Exporter(
+                self::$symbols, 
+                "output", 
+                Definitions\Type::PHP
+            );
+            
+            $exporter->Start();
         }
 
         return self::$symbols;

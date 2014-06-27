@@ -8,9 +8,11 @@
 namespace Peg\Definitions;
 
 /**
- * The different types of definitions that can be loaded by the Symbols class.
+ * The different types of cached definitions that can be imported/exported.
+ * @see \Peg\Definitions\Importer
+ * @see \Peg\Definitions\Exporter
  */
-class SymbolsType
+class Type
 {
     const JSON = "json";
     const PHP = "php";

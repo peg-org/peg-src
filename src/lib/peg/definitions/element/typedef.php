@@ -35,7 +35,7 @@ class TypeDef extends VariableType
      * Create a typedef element. 
      * @param string $name Name of the parameter.
      * @param string $type Parameter type by specification, eg: const int*
-     * @param string $description
+     * @param string $description A description used to generate documentation.
      */
     public function __construct($name, $type, $description="")
     {

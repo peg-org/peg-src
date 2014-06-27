@@ -60,7 +60,7 @@ class Enumeration
     {
         $this->name = $name;
         
-        $this->$options = $options;
+        $this->options = $options;
         
         $this->description = $description;
     }

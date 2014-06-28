@@ -116,8 +116,13 @@ class Importer extends \Signals\Signal
             include($this->definitions_path . "variables.php");
         }
         
-        /*include($this->definitions_path . "functions.php");
-        include($this->definitions_path . "classes.php");*/
+        if(file_exists($this->definitions_path . "functions.php"))
+        {
+            $this->SendMessage(t("Loading functions.php"));
+            include($this->definitions_path . "functions.php");
+        }
+        
+        /*include($this->definitions_path . "classes.php");*/
     }
 
     private function LoadFromJSON($path)
@@ -167,6 +172,12 @@ class Importer extends \Signals\Signal
         {
             $this->SendMessage(t("Loading variables.json"));
             $this->LoadGlobalVariablesFromJson();
+        }
+        
+        if(file_exists($this->definitions_path . "functions.json"))
+        {
+            $this->SendMessage(t("Loading functions.json"));
+            $this->LoadFunctionsFromJson();
         }
     }
 
@@ -296,6 +307,74 @@ class Importer extends \Signals\Signal
         }
 
         unset($variables_def);
+    }
+    
+    /**
+     * Helper function to load all type definitions as symbol elements into a
+     * header namespace.
+     */
+    private function LoadFunctionsFromJson()
+    {
+        $definitions = Json::Decode(
+            file_get_contents(
+                $this->definitions_path . "functions.json"
+            )
+        );
+
+        foreach($definitions as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $functions)
+            {
+                foreach($functions as $function_name => $function_overloads)
+                {
+                    $function = new Element\FunctionElement($function_name);
+                    
+                    foreach($function_overloads as $index=>$function_overload)
+                    {
+                        $overload = new Element\Overload(
+                            $function_overload["brief_description"]
+                        );
+                        
+                        $overload->SetReturnType(
+                            new Element\ReturnType(
+                                $function_overload["return_type"]
+                            )
+                        );
+                        
+                        if(isset($function_overload["parameters"]))
+                        {
+                            foreach($function_overload["parameters"] as $parameter)
+                            {
+                                if(!isset($parameter["value"]))
+                                    $parameter["value"] = "";
+
+                                $param = new Element\Parameter(
+                                    $parameter["name"], 
+                                    $parameter["type"], 
+                                    $parameter["value"]
+                                );
+                                
+                                if(isset($parameter["is_array"]))
+                                {
+                                    $param->is_array = true;
+                                }
+                                
+                                $overload->AddParameter($param);
+                            }
+                        }
+                        
+                        $function->AddOverload($overload);
+                    }
+                    
+                    $this->symbols->headers[$header]->AddFunction(
+                        $function,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($definitions);
     }
     
     /**

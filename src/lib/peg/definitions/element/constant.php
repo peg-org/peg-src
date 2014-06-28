@@ -8,7 +8,7 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents a constant defined on some include file.
+ * Represents a constant/#define defined on some include file.
  */
 class Constant
 {

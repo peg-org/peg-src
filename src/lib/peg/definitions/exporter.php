@@ -108,6 +108,9 @@ class Exporter extends \Signals\Signal
         
         $this->SendMessage(t("Creating variables.php"));
         $this->SaveGloablVariablesToPHP();
+        
+        $this->SendMessage(t("Creating functions.php"));
+        $this->SaveFunctionsToPHP();
     }
     
     private function SaveConstantsToPHP()
@@ -300,6 +303,91 @@ class Exporter extends \Signals\Signal
         
         fclose($output_file);
     }
+    
+    private function SaveFunctionsToPHP()
+    {
+        $output_file = fopen(
+            $this->definitions_path . "functions.php", 
+            "w"
+        );
+        
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\FunctionElement;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\Overload;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\ReturnType;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\Parameter;\n");
+        
+        foreach($this->symbols->headers as $header)
+        {
+            if(!$header->HasFunctions())
+                continue;
+            
+            foreach($header->namespaces as $namespace)
+            {
+                if(!$namespace->HasFunctions())
+                    continue;
+                
+                foreach($namespace->functions as $function)
+                {
+                    $description = addslashes($function->description);
+                    $namespace_name = addslashes($namespace->name);
+                    
+                    $output = "\n";
+                    
+                    $output .= '// Function ' . $function->name . "\n";
+                    $output .= '$function = new FunctionElement(' . "\n";
+                    $output .= '    "'.$function->name.'",' . "\n";
+                    $output .= '    "'.$description.'"' . "\n";
+                    $output .= ');' . "\n\n";
+                    
+                    foreach($function->overloads as $overload_index=>$overload)
+                    {
+                        $overload_description = addslashes($overload->description);
+                        
+                        $output .= '// Overload ' . $overload_index . "\n";
+                        $output .= '$overload = new Overload(' . "\n";
+                        $output .= '    "'.$overload_description.'"' . "\n";
+                        $output .= ');' . "\n";
+                        
+                        $output .= '$overload->SetReturnType(' . "\n";
+                        $output .= '    new ReturnType(' . "\n";
+                        $output .= '        "'.$overload->return_type->original_type.'"' . "\n";
+                        $output .= '    )' . "\n";
+                        $output .= ');' . "\n";
+                        
+                        if($overload->HasParameters())
+                        {
+                            foreach($overload->parameters as $parameter)
+                            {
+                                $parameter_value = addslashes($parameter->default_value);
+
+                                $output .= '$overload->AddParameter(' . "\n";
+                                $output .= '    new Parameter(' . "\n";
+                                $output .= '        "'.$parameter->name.'",' . "\n";
+                                $output .= '        "'.$parameter->original_type.'",' . "\n";
+                                $output .= '        "'.$parameter_value.'"' . "\n";
+                                $output .= '    )' . "\n";
+                                $output .= ');' . "\n";
+                            }
+                        }
+                        
+                        $output .= '$function->AddOverload($overload);' . "\n\n";
+                    }
+                    
+                    $output .= '$symbols->AddFunction(' . "\n";
+                    $output .= '    $function,' . "\n";
+                    $output .= '    "'.$header->name.'",' . "\n";
+                    $output .= '    "'.$namespace_name.'"' . "\n";
+                    $output .= ');' . "\n\n";
+                    
+                    fwrite($output_file, $output);
+                }
+            }
+        }
+        
+        fclose($output_file);
+    }
 
     private function SaveToJSON($path)
     {
@@ -332,6 +420,9 @@ class Exporter extends \Signals\Signal
         
         $this->SendMessage(t("Creating variables.json"));
         $this->SaveGlobalVariablesToJson();
+        
+        $this->SendMessage(t("Creating functions.json"));
+        $this->SaveFunctionsToJson();
     }
 
     /**
@@ -472,6 +563,71 @@ class Exporter extends \Signals\Signal
         );
         
         unset($variables);
+    }
+    
+    /**
+     * Helper function to load all type definitions as symbol elements into a
+     * header namespace.
+     */
+    private function SaveFunctionsToJson()
+    {
+        $functions = array();
+        
+        foreach($this->symbols->headers as $header)
+        {
+            if(!$header->HasFunctions())
+                continue;
+            
+            foreach($header->namespaces as $namespace)
+            {
+                if(!$namespace->HasFunctions())
+                    continue;
+                
+                foreach($namespace->functions as $function)
+                {
+                    foreach($function->overloads as $overload)
+                    {
+                        $parameters = array();
+                        
+                        if($overload->HasParameters())
+                        {
+                            foreach($overload->parameters as $parameter)
+                            {
+                                $parameters[] = [
+                                    "name" => $parameter->name,
+                                    "type" => $parameter->original_type,
+                                    "is_array" => $parameter->is_array
+                                ];
+                            }
+                            
+                            $functions[$header->name][$namespace->name]
+                                [$function->name][] = [
+                                    "description" => $overload->description,
+                                    "return_type" => $overload->return_type->original_type,
+                                    "parameters" => $parameters
+                                ]
+                            ;
+                        }
+                        else
+                        {
+                            $functions[$header->name][$namespace->name]
+                                [$function->name][] = [
+                                    "description" => $overload->description,
+                                    "return_type" => $overload->return_type->original_type
+                                ]
+                            ;
+                        }
+                    }
+                }
+            }
+        }
+        
+        file_put_contents(
+            $this->definitions_path . "functions.json", 
+            Json::Encode($functions)
+        );
+        
+        unset($functions);
     }
 
     /**

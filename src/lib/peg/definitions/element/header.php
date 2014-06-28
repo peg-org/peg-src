@@ -122,6 +122,26 @@ class Header
             ->global_variables[$global_variable->name] = $global_variable
         ;
     }
+    
+    /**
+     * Adds a new function.
+     * @param \Peg\Definitions\Element\FunctionElement $function
+     * @param string $namespace
+     */
+    public function AddFunction(
+        \Peg\Definitions\Element\FunctionElement $function, 
+        $namespace = "\\"
+    )
+    {
+        $this->CreateNamespace($namespace);
+        
+        $function->header =& $this;
+        $function->namespace =& $this->namespaces[$namespace];
+
+        $this->namespaces[$namespace]
+            ->functions[$function->name] = $function
+        ;
+    }
 
     /**
      * Adds a namespace to the namespaces array if not already listed.

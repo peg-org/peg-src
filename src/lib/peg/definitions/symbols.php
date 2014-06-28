@@ -7,8 +7,6 @@
 
 namespace Peg\Definitions;
 
-use Peg\Utilities\Json;
-
 /**
  * Represents a symbols table with all the definitions required to generate
  * a PHP extension.
@@ -21,6 +19,14 @@ class Symbols
      * @var \Peg\Definitions\Element\Header[]
      */
     public $headers;
+    
+    /**
+     * Default constructor.
+     */
+    public function __construct()
+    {
+        $this->headers = array();
+    }
     
     /**
      * Removes all the symbols stored on the container.
@@ -114,6 +120,23 @@ class Symbols
         $this->AddHeader($header);
 
         $this->headers[$header]->AddGlobalVariable($global_variable, $namespace);
+    }
+    
+    /**
+     * Adds a function to the symbols table.
+     * @param \Peg\Definitions\Element\FunctionElement $function
+     * @param string $header Name of header file where the constant resides.
+     * @param string $namespace If omitted the constant is added at a global scope.
+     */
+    public function AddFunction(
+        \Peg\Definitions\Element\FunctionElement $function, 
+        $header, 
+        $namespace="\\"
+    )
+    {
+        $this->AddHeader($header);
+
+        $this->headers[$header]->AddFunction($function, $namespace);
     }
 
 }

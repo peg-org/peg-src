@@ -378,7 +378,7 @@ class Doxygen extends \Peg\Parse\Extractor
                         if($this->verbose)
                             print t("Skipping:") . " " . t("function") . " '" . $function_name . "' " . t("seems to be a macro with undocumented parameter types.") . "\n";
 
-                        continue;
+                        continue 2;
                     }
 
                     $parameters[$function_parameter]["type"] = str_replace(array(" *", " &"), array("*", "&"), $file_xpath->evaluate("type", $function_parameters->item($function_parameter))->item(0)->nodeValue);

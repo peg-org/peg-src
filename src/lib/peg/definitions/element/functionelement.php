@@ -20,16 +20,16 @@ class FunctionElement
     public $name;
     
     /**
-     * List of overloads for this function/method
-     * @var \Peg\Definitions\Element\Overload[]
-     */
-    public $overloads;
-    
-    /**
      * Description of the element.
      * @var string
      */
     public $description;
+    
+    /**
+     * List of overloads for this function/method
+     * @var \Peg\Definitions\Element\Overload[]
+     */
+    public $overloads;
     
     /**
      * Reference to the class containing this element if applicable.
@@ -60,10 +60,17 @@ class FunctionElement
         $this->description = $description;
     }
     
+    /**
+     * Adds a new overload for the function.
+     * @param \Peg\Definitions\Element\Overload $overload
+     * @return \Peg\Definitions\Element\FunctionElement
+     */
     public function AddOverload(\Peg\Definitions\Element\Overload $overload)
     {
         $overload->function =& $this;
         $this->overloads[] = $overload;
+        
+        return $this;
     }
 
 }

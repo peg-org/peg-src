@@ -8,7 +8,7 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents a global variable element.
+ * Represents a global variable element declared on a header file.
  */
 class GlobalVariable extends VariableType
 {

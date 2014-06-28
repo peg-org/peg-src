@@ -87,41 +87,53 @@ class ClassElement
     /**
      * Add a parent class.
      * @param string $parent Name of parent class which may also include its namespace.
+     * @return \Peg\Definitions\Element\ClassElement
      */
     public function AddParent($parent)
     {
         $this->parents[$parent] = $parent;
         $this->has_parent = true;
+        
+        return $this;
     }
     
     /**
      * Adds a variable to the class.
      * @param \Peg\Definitions\Element\ClassVariable $variable
+     * @return \Peg\Definitions\Element\ClassElement
      */
     public function AddVariable(\Peg\Definitions\Element\ClassVariable $variable)
     {
         $variable->parent_class =& $this;
         $this->variables[$variable->name] = $variable;
+        
+        return $this;
     }
     
     /**
      * Adds an enumeration to the class.
      * @param \Peg\Definitions\Element\Enumeration $enumeration
+     * @return \Peg\Definitions\Element\ClassElement
      */
     public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration)
     {
         $enumeration->parent_class =& $this;
         $this->enumerations[$enumeration->name] = $enumeration;
+        
+        return $this;
     }
     
     /**
      * Adds a new method/function to the class.
      * @param \Peg\Definitions\Element\FunctionElement $method
+     * @return \Peg\Definitions\Element\ClassElement
      */
     public function AddMethod(\Peg\Definitions\Element\FunctionElement $method)
     {
         $method->parent_class =& $this;
         $this->methods[$method->name] = $method;
+        
+        return $this;
     }
 
 }

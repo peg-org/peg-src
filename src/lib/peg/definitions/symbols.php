@@ -138,6 +138,23 @@ class Symbols
 
         $this->headers[$header]->AddFunction($function, $namespace);
     }
+    
+    /**
+     * Adds a class to the symbols table.
+     * @param \Peg\Definitions\Element\ClassElement $class
+     * @param string $header Name of header file where the class resides.
+     * @param string $namespace If omitted the class is added at a global scope.
+     */
+    public function AddClass(
+        \Peg\Definitions\Element\ClassElement $class, 
+        $header, 
+        $namespace="\\"
+    )
+    {
+        $this->AddHeader($header);
+
+        $this->headers[$header]->AddClass($class, $namespace);
+    }
 
 }
 

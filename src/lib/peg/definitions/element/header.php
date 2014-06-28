@@ -142,6 +142,26 @@ class Header
             ->functions[$function->name] = $function
         ;
     }
+    
+    /**
+     * Adds a new class.
+     * @param \Peg\Definitions\Element\ClassElement $class
+     * @param string $namespace
+     */
+    public function AddClass(
+        \Peg\Definitions\Element\ClassElement $class, 
+        $namespace = "\\"
+    )
+    {
+        $this->CreateNamespace($namespace);
+        
+        $class->header =& $this;
+        $class->namespace =& $this->namespaces[$namespace];
+
+        $this->namespaces[$namespace]
+            ->classes[$class->name] = $class
+        ;
+    }
 
     /**
      * Adds a namespace to the namespaces array if not already listed.

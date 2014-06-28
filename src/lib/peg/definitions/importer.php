@@ -122,7 +122,11 @@ class Importer extends \Signals\Signal
             include($this->definitions_path . "functions.php");
         }
         
-        /*include($this->definitions_path . "classes.php");*/
+        if(file_exists($this->definitions_path . "classes.php"))
+        {
+            $this->SendMessage(t("Loading classes.php"));
+            include($this->definitions_path . "classes.php");
+        }
     }
 
     private function LoadFromJSON($path)
@@ -178,6 +182,12 @@ class Importer extends \Signals\Signal
         {
             $this->SendMessage(t("Loading functions.json"));
             $this->LoadFunctionsFromJson();
+        }
+        
+        if(file_exists($this->definitions_path . "classes.json"))
+        {
+            $this->SendMessage(t("Loading classes.json"));
+            $this->LoadClassesFromJson();
         }
     }
 
@@ -278,7 +288,7 @@ class Importer extends \Signals\Signal
     }
     
     /**
-     * Helper function to load all type definitions as symbol elements into a
+     * Helper function to load all global variables as symbol elements into a
      * header namespace.
      */
     private function LoadGlobalVariablesFromJson()
@@ -310,18 +320,18 @@ class Importer extends \Signals\Signal
     }
     
     /**
-     * Helper function to load all type definitions as symbol elements into a
+     * Helper function to load all functions as symbol elements into a
      * header namespace.
      */
     private function LoadFunctionsFromJson()
     {
-        $definitions = Json::Decode(
+        $functions_def = Json::Decode(
             file_get_contents(
                 $this->definitions_path . "functions.json"
             )
         );
 
-        foreach($definitions as $header => $namespaces)
+        foreach($functions_def as $header => $namespaces)
         {
             foreach($namespaces as $namespace => $functions)
             {
@@ -374,7 +384,198 @@ class Importer extends \Signals\Signal
             }
         }
 
-        unset($definitions);
+        unset($functions_def);
+    }
+    
+    /**
+     * Helper function to load all classes as symbol elements into a
+     * header namespace.
+     */
+    private function LoadClassesFromJson()
+    {
+        $classes_def = Json::Decode(
+            file_get_contents(
+                $this->definitions_path . "classes.json"
+            )
+        );
+        
+        $enumerations_def = array();
+        
+        if(file_exists($this->definitions_path . "class_enumerations.json"))
+        {
+            $enumerations_def = Json::Decode(
+                file_get_contents(
+                    $this->definitions_path . "class_enumerations.json"
+                )
+            );
+        }
+        
+        $variables_def = array();
+        
+        if(file_exists($this->definitions_path . "class_variables.json"))
+        {
+            $variables_def = Json::Decode(
+                file_get_contents(
+                    $this->definitions_path . "class_variables.json"
+                )
+            );
+        }
+
+        foreach($classes_def as $header => $namespaces)
+        {
+            foreach($namespaces as $namespace => $classes)
+            {
+                foreach($classes as $class_name => $methods)
+                {   
+                    $class = new Element\ClassElement(
+                        $class_name
+                    );
+                    
+                    if(isset($methods["_description"]))
+                    {
+                        $class->description = $methods["_description"];
+                        unset($methods["_description"]);
+                    }
+                    
+                    if(isset($methods["_parents"]))
+                    {
+                        $class->parents = $methods["_parents"];
+                        unset($methods["_parents"]);
+                    }
+                    
+                    if(isset($methods["_implements"]))
+                    {
+                        $class->parents = $methods["_implements"];
+                        unset($methods["_implements"]);
+                    }
+                    
+                    if(isset($methods["_struct"]))
+                    {
+                        $class->struct = true;
+                        unset($methods["_struct"]);
+                    }
+                    
+                    if(isset($methods["_forward_declaration"]))
+                    {
+                        $class->forward_declaration = true;
+                        unset($methods["_forward_declaration"]);
+                    }
+                    
+                    if(isset($methods["_platforms"]))
+                    {
+                        unset($methods["_platforms"]);
+                    }
+                    
+                    foreach($methods as $method_name => $method_overloads)
+                    {
+                        $method = new Element\FunctionElement($method_name);
+
+                        //print $method_name . "\n";
+                        
+                        foreach($method_overloads as $method_overload)
+                        {
+                            $overload = new Element\Overload(
+                                $method_overload["brief_description"]
+                            );
+
+                            $overload->SetReturnType(
+                                new Element\ReturnType(
+                                    $method_overload["return_type"]
+                                )
+                            );
+                            
+                            if(isset($method_overload["constant"]))
+                                $overload->constant = $method_overload["constant"];
+
+                            if(isset($method_overload["static"]))
+                                $overload->static = $method_overload["static"];
+
+                            if(isset($method_overload["virtual"]))
+                                $overload->virtual = $method_overload["virtual"];
+
+                            if(isset($method_overload["pure_virtual"]))
+                                $overload->pure_virtual = $method_overload["pure_virtual"];
+
+                            if(isset($method_overload["protected"]))
+                                $overload->protected = $method_overload["protected"];
+
+                            if(isset($method_overload["parameters"]))
+                            {
+                                foreach($method_overload["parameters"] as $parameter)
+                                {
+                                    if(!isset($parameter["value"]))
+                                        $parameter["value"] = "";
+
+                                    $param = new Element\Parameter(
+                                        $parameter["name"], 
+                                        $parameter["type"], 
+                                        $parameter["value"]
+                                    );
+
+                                    if(isset($parameter["is_array"]))
+                                    {
+                                        $param->is_array = true;
+                                    }
+
+                                    $overload->AddParameter($param);
+                                }
+                            }
+
+                            $method->AddOverload($overload);
+                        }
+                        
+                        $class->AddMethod($method);
+                    }
+                    
+                    if(isset($enumerations_def[$header][$namespace][$class_name]))
+                    {
+                        foreach($enumerations_def[$header][$namespace][$class_name] as $enumeration_name=>$enumerations_options)
+                        {
+                            $class->AddEnumeration(
+                                new Element\Enumeration(
+                                    $enumeration_name,
+                                    $enumerations_options
+                                )
+                            );
+                        }
+                    }
+                    
+                    if(isset($variables_def[$header][$namespace][$class_name]))
+                    {
+                        foreach($variables_def[$header][$namespace][$class_name] as $variable_name=>$variable_options)
+                        {
+                            $variable = new Element\ClassVariable(
+                                $variable_name, 
+                                $variable_options["type"]
+                            );
+                            
+                            if(isset($variable_options["static"]))
+                                $variable->static = $variable_options["static"];
+
+                            if(isset($variable_options["mutable"]))
+                                $variable->mutable = $variable_options["mutable"];
+
+                            if(isset($variable_options["protected"]))
+                                $variable->protected = $variable_options["protected"];
+
+                            if(isset($variable_options["public"]))
+                                $variable->public = $variable_options["public"];
+                            
+                            $class->AddVariable($variable);
+                        }
+                    }
+                    
+                    $this->symbols->headers[$header]->AddClass(
+                        $class,
+                        $namespace
+                    );
+                }
+            }
+        }
+
+        unset($classes_def);
+        unset($enumerations_def);
+        unset($variables_def);
     }
     
     /**

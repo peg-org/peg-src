@@ -97,10 +97,10 @@ class VariableType
             $this->is_reference = false;
         }
         
-        if($indirection = substr_count($type, "*") > 0)
+        if(($indirection = substr_count($type, "*")) > 0)
         {
             $this->is_pointer = true;
-            $this->$indirection = $indirection;
+            $this->indirection_level = $indirection;
         }
         else
         {

@@ -22,7 +22,7 @@ class Parse extends \Peg\CommandLine\Command
 
         $this->description = t("Extracts definitions which are then stored in the 'definitions' directory.");
 
-        $this->RegisterAction(new \Peg\Parse\Extractor\Doxygen());
+        $this->RegisterAction(new Action\Parse\Doxygen());
 
         $input_format = new Option(array(
             "long_name"     => "input-format",
@@ -33,8 +33,20 @@ class Parse extends \Peg\CommandLine\Command
                 . "\n" . t("Allowed values:") . " doxygen",
             "default_value" => "doxygen"
         ));
-
+        
         $this->AddOption($input_format);
+        
+        $output_format = new Option(array(
+            "long_name"     => "output-format",
+            "short_name"    => "o",
+            "type"          => OptionType::STRING,
+            "required"      => false,
+            "description"   => t("The kind of cached definition files to create. Default: json") 
+                . "\n" . t("Allowed values:") . " json, php",
+            "default_value" => "json"
+        ));
+
+        $this->AddOption($output_format);
 
         $source = new Option(array(
             "long_name"     => "source",
@@ -51,7 +63,7 @@ class Parse extends \Peg\CommandLine\Command
             "long_name"     => "headers",
             "short_name"    => "h",
             "type"          => OptionType::STRING,
-            "required"      => true,
+            "required"      => false,
             "description"   => t("The path were resides the header files of the library in order to correctly solve headers include path."),
             "default_value" => ""
         ));

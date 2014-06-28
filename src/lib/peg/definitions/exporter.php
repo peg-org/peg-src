@@ -11,13 +11,12 @@ use Peg\Utilities\Json;
 use Peg\Utilities\FileSystem;
 
 /**
- * Export definitions from a symbols table loaded in memory into files.
+ * Export definitions from a symbols object into cache files.
  */
 class Exporter extends \Signals\Signal
 {
     /**
-     * Reference to the symbols object that is going to be 
-     * populated by the importer.
+     * Reference to the symbols object that is going to be cached into files.
      * @var \Peg\Definitions\Symbols 
      */
     public $symbols;
@@ -29,7 +28,7 @@ class Exporter extends \Signals\Signal
     public $definitions_path;
     
     /**
-     * Mechanism used to load the symbols.
+     * Format used to store the cached symbols.
      * @see \Peg\Definitions\Type
      * @var string
      */
@@ -42,11 +41,10 @@ class Exporter extends \Signals\Signal
     private $signal_data;
     
     /**
-     * Initializes
+     * Constructor.
      * @param \Peg\Definitions\Symbols $symbols The table to populate.
-     * @param string $path The path where resides the cached
-     * definition files that represent the library.
-     * @param string $export_type
+     * @param string $path The path where will be stored the cache files.
+     * @param string $export_type The type of cache files to create.
      */
     public function __construct(
         \Peg\Definitions\Symbols &$symbols,
@@ -61,11 +59,17 @@ class Exporter extends \Signals\Signal
     }
     
     /**
-     * Begin exporting definitions to the symbols object specified on constructor.
+     * Begin exporting definitions from the symbols object specified on constructor.
      */
     public function Start()
     {
-        if(!file_exists($this->definitions_path))
+        if(!$this->definitions_path)
+        {
+            throw new \Exception(
+                t("Your are trying to export definitions without setting a path first.")
+            );
+        }
+        elseif(!file_exists($this->definitions_path))
         {
             FileSystem::MakeDir(
                 $this->definitions_path, 
@@ -361,12 +365,14 @@ class Exporter extends \Signals\Signal
                             foreach($overload->parameters as $parameter)
                             {
                                 $parameter_value = addslashes($parameter->default_value);
+                                $parameter_description = addslashes($parameter->description);
 
                                 $output .= '$overload->AddParameter(' . "\n";
                                 $output .= '    new Parameter(' . "\n";
                                 $output .= '        "'.$parameter->name.'",' . "\n";
                                 $output .= '        "'.$parameter->original_type.'",' . "\n";
-                                $output .= '        "'.$parameter_value.'"' . "\n";
+                                $output .= '        "'.$parameter_value.'",' . "\n";
+                                $output .= '        "'.$parameter_description.'"' . "\n";
                                 $output .= '    )' . "\n";
                                 $output .= ');' . "\n";
                             }
@@ -393,21 +399,6 @@ class Exporter extends \Signals\Signal
     {
         $this->definitions_path = rtrim($path, "/\\") . "/";
         $this->export_type = Type::JSON;
-
-        $includes = array();
-        
-        $this->SendMessage(t("Creating includes.json"));
-        foreach($this->symbols->headers as $header)
-        {
-            $includes[$header->name] = $header->enabled;
-        }
-        
-        file_put_contents(
-            $this->definitions_path . "includes.json", 
-            \Peg\Utilities\Json::Encode($includes)
-        );
-        
-        unset($includes);
         
         $this->SendMessage(t("Creating constants.json"));
         $this->SaveConstantsToJson();
@@ -423,6 +414,9 @@ class Exporter extends \Signals\Signal
         
         $this->SendMessage(t("Creating functions.json"));
         $this->SaveFunctionsToJson();
+        
+        $this->SendMessage(t("Creating classes.json"));
+        $this->SaveClassesToJson();
     }
 
     /**
@@ -445,9 +439,23 @@ class Exporter extends \Signals\Signal
                 
                 foreach($namespace->constants as $constant)
                 {
-                    $constants[$header->name][$namespace->name]
-                        [$constant->name] = $constant->value
-                    ;
+                    if(trim($constant->description))
+                    {
+                        $constants[$header->name][$namespace->name]
+                            [$constant->name] = [
+                                "value" => $constant->value,
+                                "description" => $constant->description
+                            ]
+                        ;
+                    }
+                    else
+                    {
+                        $constants[$header->name][$namespace->name]
+                            [$constant->name] = [
+                                "value" => $constant->value
+                            ]
+                        ;
+                    }
                 }
             }
         }
@@ -480,9 +488,23 @@ class Exporter extends \Signals\Signal
                 
                 foreach($namespace->enumerations as $enumeration)
                 {
-                    $enumerations[$header->name][$namespace->name]
-                        [$enumeration->name] = $enumeration->options
-                    ;
+                    if(trim($enumeration->description))
+                    {
+                        $enumerations[$header->name][$namespace->name]
+                            [$enumeration->name] = [
+                                "options" => $enumeration->options,
+                                "description" => $enumeration->description
+                            ]
+                        ;
+                    }
+                    else
+                    {
+                        $enumerations[$header->name][$namespace->name]
+                            [$enumeration->name] = [
+                                "options" => $enumeration->options
+                            ]
+                        ;
+                    }
                 }
             }
         }
@@ -515,9 +537,23 @@ class Exporter extends \Signals\Signal
                 
                 foreach($namespace->type_definitions as $typedef)
                 {
-                    $typedefs[$header->name][$namespace->name]
-                        [$typedef->name] = $typedef->original_type
-                    ;
+                    if(trim($typedef->description))
+                    {
+                        $typedefs[$header->name][$namespace->name]
+                            [$typedef->name] = [
+                                "type" => $typedef->original_type,
+                                "description" => $typedef->description
+                            ]
+                        ;
+                    }
+                    else
+                    {
+                        $typedefs[$header->name][$namespace->name]
+                            [$typedef->name] = [
+                                "type" => $typedef->original_type
+                            ]
+                        ;
+                    }
                 }
             }
         }
@@ -550,9 +586,23 @@ class Exporter extends \Signals\Signal
                 
                 foreach($namespace->global_variables as $variable)
                 {
-                    $variables[$header->name][$namespace->name]
-                        [$variable->name] = $variable->original_type
-                    ;
+                    if(trim($variable->description))
+                    {
+                        $variables[$header->name][$namespace->name]
+                            [$variable->name] = [
+                                "type" => $variable->original_type,
+                                "description" => $variable->description
+                            ]
+                        ;
+                    }
+                    else
+                    {
+                        $variables[$header->name][$namespace->name]
+                            [$variable->name] = [
+                                "type" => $variable->original_type
+                            ]
+                        ;
+                    }
                 }
             }
         }
@@ -593,11 +643,23 @@ class Exporter extends \Signals\Signal
                         {
                             foreach($overload->parameters as $parameter)
                             {
-                                $parameters[] = [
-                                    "name" => $parameter->name,
-                                    "type" => $parameter->original_type,
-                                    "is_array" => $parameter->is_array
-                                ];
+                                if(trim($parameter->description))
+                                {
+                                    $parameters[] = [
+                                        "name" => $parameter->name,
+                                        "type" => $parameter->original_type,
+                                        "is_array" => $parameter->is_array,
+                                        "description" => $parameter->description
+                                    ];
+                                }
+                                else
+                                {
+                                    $parameters[] = [
+                                        "name" => $parameter->name,
+                                        "type" => $parameter->original_type,
+                                        "is_array" => $parameter->is_array
+                                    ];
+                                }
                             }
                             
                             $functions[$header->name][$namespace->name]
@@ -628,6 +690,150 @@ class Exporter extends \Signals\Signal
         );
         
         unset($functions);
+    }
+    
+    /**
+     * Helper function to load all type definitions as symbol elements into a
+     * header namespace.
+     */
+    private function SaveClassesToJson()
+    {
+        $classes = array();
+        $enumerations = array();
+        $variables = array();
+        
+        foreach($this->symbols->headers as $header)
+        {
+            if(!$header->HasClasses())
+                continue;
+            
+            foreach($header->namespaces as $namespace)
+            {
+                if(!$namespace->HasClasses())
+                    continue;
+                
+                foreach($namespace->classes as $class)
+                {   
+                    // Get methods
+                    foreach($class->methods as $function)
+                    {
+                        foreach($function->overloads as $overload)
+                        {
+                            $parameters = array();
+
+                            if($overload->HasParameters())
+                            {
+                                foreach($overload->parameters as $parameter)
+                                {
+                                    if(trim($parameter->description))
+                                    {
+                                        $parameters[] = [
+                                            "name" => $parameter->name,
+                                            "type" => $parameter->original_type,
+                                            "is_array" => $parameter->is_array,
+                                            "description" => $parameter->description
+                                        ];
+                                    }
+                                    else
+                                    {
+                                        $parameters[] = [
+                                            "name" => $parameter->name,
+                                            "type" => $parameter->original_type,
+                                            "is_array" => $parameter->is_array
+                                        ];
+                                    }
+                                }
+
+                                $classes[$header->name][$namespace->name]
+                                    [$class->name][$function->name][] = [
+                                        "description" => $overload->description,
+                                        "return_type" => $overload->return_type->original_type,
+                                        "parameters" => $parameters
+                                    ]
+                                ;
+                            }
+                            else
+                            {
+                                $classes[$header->name][$namespace->name]
+                                    [$class->name][$function->name][] = [
+                                        "description" => $overload->description,
+                                        "return_type" => $overload->return_type->original_type
+                                    ]
+                                ;
+                            }
+                        }
+                    }
+                    
+                    // Get enumerations
+                    foreach($class->enumerations as $enumeration)
+                    {
+                        if(trim($enumeration->description))
+                        {
+                            $enumerations[$header->name][$namespace->name]
+                                [$class->name][$enumeration->name] = [
+                                    "options" => $enumeration->options,
+                                    "description" => $enumeration->description
+                                ]
+                            ;
+                        }
+                        else
+                        {
+                            $enumerations[$header->name][$namespace->name]
+                                [$class->name][$enumeration->name] = [
+                                    "options" => $enumeration->options
+                                ]
+                            ;
+                        }
+                    }
+                    
+                    // Get variables
+                    foreach($class->variables as $variable)
+                    {
+                        $variable_array = array();
+                        
+                        if(trim($variable->type))
+                            $variable_array["type"] = $variable->type;
+                        
+                        if(trim($variable->static))
+                            $variable_array["static"] = $variable->static;
+                        
+                        if(trim($variable->protected))
+                            $variable_array["protected"] = $variable->protected;
+                        
+                        if(trim($variable->mutable))
+                            $variable_array["mutable"] = $variable->mutable;
+                        
+                        if(trim($variable->description))
+                            $variable_array["description"] = $variable->description;
+                        
+                        $variables[$header->name][$namespace->name]
+                            [$class->name][$variable->name] = $variable_array
+                        ;
+                    }
+                }
+            }
+        }
+        
+        file_put_contents(
+            $this->definitions_path . "classes.json", 
+            Json::Encode($classes)
+        );
+        
+        unset($classes);
+        
+        file_put_contents(
+            $this->definitions_path . "class_enumerations.json", 
+            Json::Encode($enumerations)
+        );
+        
+        unset($enumerations);
+        
+        file_put_contents(
+            $this->definitions_path . "class_variables.json", 
+            Json::Encode($variables)
+        );
+        
+        unset($variables);
     }
 
     /**

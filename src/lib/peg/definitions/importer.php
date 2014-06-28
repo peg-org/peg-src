@@ -10,7 +10,7 @@ namespace Peg\Definitions;
 use Peg\Utilities\Json;
 
 /**
- * Loads definitions into a symbols table.
+ * Loads cached definitions into a symbols object.
  */
 class Importer extends \Signals\Signal
 {
@@ -22,13 +22,13 @@ class Importer extends \Signals\Signal
     public $symbols;
     
     /**
-     * Directory path to definition files.
+     * Directory path where reside the cached files.
      * @var string
      */
     public $definitions_path;
     
     /**
-     * Mechanism used to load the symbols.
+     * Format used to load the symbols.
      * @see \Peg\Definitions\Type
      * @var string
      */
@@ -41,11 +41,10 @@ class Importer extends \Signals\Signal
     private $signal_data;
     
     /**
-     * Initializes
+     * Constructor.
      * @param \Peg\Definitions\Symbols $symbols The table to populate.
-     * @param string $path The path where resides the cached
-     * definition files that represent the library.
-     * @param string $import_type
+     * @param string $path The path where resides the cached files.
+     * @param string $import_type The type of cache files to import.
      */
     public function __construct(
         \Peg\Definitions\Symbols &$symbols,
@@ -64,6 +63,13 @@ class Importer extends \Signals\Signal
      */
     public function Start()
     {
+        if(!file_exists($this->definitions_path))
+        {
+            throw new \Exception(
+                t("Trying to import symbols from a non existent directory.")
+            );
+        }
+        
         $this->SendMessage(
             sprintf(
                 t("Starting import of definitions stored in %s format."),
@@ -205,11 +211,15 @@ class Importer extends \Signals\Signal
         {
             foreach($namespaces as $namespace => $constants)
             {
-                foreach($constants as $constant_name => $constant_value)
+                foreach($constants as $constant_name => $constant_data)
                 {
+                    if(!isset($constant_data["description"]))
+                        $constant_data["description"] = "";
+                    
                     $constant = new Element\Constant(
                         $constant_name,
-                        $constant_value
+                        $constant_data["value"],
+                        $constant_data["description"]
                     );
 
                     $this->symbols->headers[$header]->AddConstant(
@@ -237,11 +247,15 @@ class Importer extends \Signals\Signal
         {
             foreach($namespaces as $namespace => $enumerations)
             {
-                foreach($enumerations as $enumeration_name => $enumeration_options)
+                foreach($enumerations as $enumeration_name => $enumeration_data)
                 {
+                    if(!isset($enumeration_data["description"]))
+                        $enumeration_data["description"] = "";
+                    
                     $enumeration = new Element\Enumeration(
                         $enumeration_name,
-                        $enumeration_options
+                        $enumeration_data["options"],
+                        $enumeration_data["description"]
                     );
 
                     $this->symbols->headers[$header]->AddEnumeration(
@@ -269,11 +283,15 @@ class Importer extends \Signals\Signal
         {
             foreach($namespaces as $namespace => $typedefs)
             {
-                foreach($typedefs as $typedef_name => $typedef_type)
+                foreach($typedefs as $typedef_name => $typedef_data)
                 {
+                    if(!isset($typedef_data["description"]))
+                        $typedef_data["description"] = "";
+                    
                     $typedef = new Element\TypeDef(
                         $typedef_name,
-                        $typedef_type
+                        $typedef_data["type"],
+                        $typedef_data["description"]
                     );
 
                     $this->symbols->headers[$header]->AddTypeDef(
@@ -301,11 +319,15 @@ class Importer extends \Signals\Signal
         {
             foreach($namespaces as $namespace => $variables)
             {
-                foreach($variables as $variable_name => $variable_type)
+                foreach($variables as $variable_name => $variable_data)
                 {
+                    if(!isset($variable_data["description"]))
+                        $variable_data["description"] = "";
+                    
                     $variable = new Element\GlobalVariable(
                         $variable_name,
-                        $variable_type
+                        $variable_data["type"],
+                        $variable_data["description"]
                     );
 
                     $this->symbols->headers[$header]->AddGlobalVariable(
@@ -342,7 +364,7 @@ class Importer extends \Signals\Signal
                     foreach($function_overloads as $index=>$function_overload)
                     {
                         $overload = new Element\Overload(
-                            $function_overload["brief_description"]
+                            $function_overload["description"]
                         );
                         
                         $overload->SetReturnType(
@@ -357,11 +379,15 @@ class Importer extends \Signals\Signal
                             {
                                 if(!isset($parameter["value"]))
                                     $parameter["value"] = "";
+                                
+                                if(!isset($parameter["description"]))
+                                    $parameter["description"] = "";
 
                                 $param = new Element\Parameter(
                                     $parameter["name"], 
                                     $parameter["type"], 
-                                    $parameter["value"]
+                                    $parameter["value"],
+                                    $parameter["description"]
                                 );
                                 
                                 if(isset($parameter["is_array"]))
@@ -431,6 +457,7 @@ class Importer extends \Signals\Signal
                         $class_name
                     );
                     
+                    // Set class details
                     if(isset($methods["_description"]))
                     {
                         $class->description = $methods["_description"];
@@ -439,14 +466,8 @@ class Importer extends \Signals\Signal
                     
                     if(isset($methods["_parents"]))
                     {
-                        $class->parents = $methods["_parents"];
+                        $class->AddParents($methods["_parents"]);
                         unset($methods["_parents"]);
-                    }
-                    
-                    if(isset($methods["_implements"]))
-                    {
-                        $class->parents = $methods["_implements"];
-                        unset($methods["_implements"]);
                     }
                     
                     if(isset($methods["_struct"]))
@@ -466,16 +487,15 @@ class Importer extends \Signals\Signal
                         unset($methods["_platforms"]);
                     }
                     
+                    // Add methods
                     foreach($methods as $method_name => $method_overloads)
                     {
                         $method = new Element\FunctionElement($method_name);
-
-                        //print $method_name . "\n";
                         
                         foreach($method_overloads as $method_overload)
                         {
                             $overload = new Element\Overload(
-                                $method_overload["brief_description"]
+                                $method_overload["description"]
                             );
 
                             $overload->SetReturnType(
@@ -505,11 +525,15 @@ class Importer extends \Signals\Signal
                                 {
                                     if(!isset($parameter["value"]))
                                         $parameter["value"] = "";
+                                    
+                                    if(!isset($parameter["description"]))
+                                        $parameter["description"] = "";
 
                                     $param = new Element\Parameter(
                                         $parameter["name"], 
                                         $parameter["type"], 
-                                        $parameter["value"]
+                                        $parameter["value"],
+                                        $parameter["description"]
                                     );
 
                                     if(isset($parameter["is_array"]))
@@ -527,19 +551,25 @@ class Importer extends \Signals\Signal
                         $class->AddMethod($method);
                     }
                     
+                    // Add enumerations
                     if(isset($enumerations_def[$header][$namespace][$class_name]))
                     {
-                        foreach($enumerations_def[$header][$namespace][$class_name] as $enumeration_name=>$enumerations_options)
+                        foreach($enumerations_def[$header][$namespace][$class_name] as $enumeration_name=>$enumeration_data)
                         {
+                            if(!isset($enumeration_data["description"]))
+                                $enumeration_data["description"] = "";
+                            
                             $class->AddEnumeration(
                                 new Element\Enumeration(
                                     $enumeration_name,
-                                    $enumerations_options
+                                    $enumeration_data["options"],
+                                    $enumeration_data["description"]
                                 )
                             );
                         }
                     }
                     
+                    // Add variables
                     if(isset($variables_def[$header][$namespace][$class_name]))
                     {
                         foreach($variables_def[$header][$namespace][$class_name] as $variable_name=>$variable_options)
@@ -560,6 +590,9 @@ class Importer extends \Signals\Signal
 
                             if(isset($variable_options["public"]))
                                 $variable->public = $variable_options["public"];
+                            
+                            if(!isset($variable_options["description"]))
+                                $variable->description = $variable_options["description"];
                             
                             $class->AddVariable($variable);
                         }

@@ -20,6 +20,12 @@ class ClassElement
     public $name;
     
     /**
+     * Flag that indicates if this class should be treated as a struct.
+     * @var bool
+     */
+    public $struct;
+    
+    /**
      * Flag that indicates if this class should be treated as a forward
      * declaration.
      * @var bool
@@ -82,6 +88,11 @@ class ClassElement
     {
         $this->name = $name;
         $this->description = $description;
+        
+        $this->parents = array();
+        $this->variables = array();
+        $this->enumerations = array();
+        $this->methods = array();
     }
     
     /**
@@ -93,6 +104,19 @@ class ClassElement
     {
         $this->parents[$parent] = $parent;
         $this->has_parent = true;
+        
+        return $this;
+    }
+    
+    /**
+     * Adds an array of parent classes.
+     * @param array $parents Name of parent classes which may also include its namespace.
+     * @return \Peg\Definitions\Element\ClassElement
+     */
+    public function AddParents(array $parents)
+    {
+        foreach($parents as $parent)
+            $this->AddParent($parent);
         
         return $this;
     }

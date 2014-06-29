@@ -1,7 +1,5 @@
 <?php
 /**
- * Base class for implementing a definitions extractor.
- *
  * @author Jefferson González
  * @license MIT
  * @link http://github.com/peg-org/peg-src Source code.
@@ -19,18 +17,57 @@ use Peg\Utilities\FileSystem;
  */
 abstract class Base extends \Peg\CommandLine\Action
 {
-
+    /**
+     * Reference to command that called this action.
+     * @var \Peg\CommandLine\Command
+     */
     protected $command;
+    
+    /**
+     * Format of the files to parse/lex.
+     * @var string
+     */
     protected $input_format;
+    
+    /**
+     * Format used to store the parsed definition files.
+     * @see \Peg\Definitions\Type
+     * @var string
+     */
     protected $output_format;
+    
+    /**
+     * This is used optionally by a children implementing this class in order
+     * for them to correctly resolve a header file. For example: doxygen xml
+     * files store the full path to the header file where a symbol was found, eg:
+     * /home/user/libs/wx/frame.h, if this variable is set to /home/user/libs/
+     * the final header file will be stored on the symbols object as wx/frame.h
+     * @var string
+     */
     protected $headers_path;
+    
+    /**
+     * Flag that indicates if the lexer/parser should output messages of its 
+     * current status.
+     * @var bool
+     */
     protected $verbose;
 
+    /**
+     * You derived class should override this and set the 
+     * input_format name of your parser/lexer so it is called apropiately
+     * when this variable is set.
+     * @param string $input_format Format of files to parse, eg: doxygen
+     */
     public function __construct($input_format)
     {
         $this->input_format = $input_format;
     }
 
+    /**
+     * You shouldn't override this method, instead write a Start() implementation.
+     * @param \Peg\CommandLine\Command $command
+     */
     public function OnCall(\Peg\CommandLine\Command $command)
     {
         if(!Application::ValidExtension())

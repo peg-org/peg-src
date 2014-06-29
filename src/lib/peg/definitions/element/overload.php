@@ -65,7 +65,7 @@ class Overload
      * Flag that indicate if the method/function is deprecated.
      * @var bool
      */
-    public $is_deprecated;
+    public $deprecated;
     
     /**
      * Reference to the parent function element.

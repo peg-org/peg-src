@@ -8,9 +8,9 @@
 namespace Peg\Plugins;
 
 /**
- * Class that serves as the interface to write plugins.
+ * Base interface to write plugins. All plugins should inherit from this class.
  */
-class PluginInterface
+class Base
 {
 
     /**

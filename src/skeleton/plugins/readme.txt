@@ -17,8 +17,8 @@ namespace Peg\Plugins;
 
 use Peg\Application;
 
-// Your plugin must implement the PluginInterface
-class MyPlugin extends \Peg\Plugins\PluginInterface
+// Your plugin must implement Peg\Plugins\Base
+class MyPlugin extends \Peg\Plugins\Base
 {
     // On this method you can add any kind of code to modify peg behavior.
     // In this case we are just changing the application name from peg to gen.

@@ -22,7 +22,7 @@ class Exporter extends \Signals\Signal
     public $symbols;
     
     /**
-     * Directory path to definition files.
+     * Directory where the symbols cache files will be saved.
      * @var string
      */
     public $definitions_path;
@@ -55,7 +55,7 @@ class Exporter extends \Signals\Signal
         $this->symbols =& $symbols;
         $this->definitions_path = $path;
         $this->export_type = $export_type;
-        $this->signal_data = new \Signals\SignalData;
+        $this->signal_data = new \Peg\Signals\Definitions\ExportMessage;
     }
     
     /**
@@ -99,8 +99,15 @@ class Exporter extends \Signals\Signal
         $this->SendMessage(t("Export completed."));
     }
     
+    /**
+     * Saves all symbols into php files.
+     * @param string $path Directory where files will be stored.
+     */
     private function SaveToPHP($path)
     {
+        $this->definitions_path = rtrim($path, "/\\") . "/";
+        $this->export_type = Type::PHP;
+        
         $this->SendMessage(t("Creating constants.php"));
         $this->SaveConstantsToPHP();
         
@@ -115,8 +122,14 @@ class Exporter extends \Signals\Signal
         
         $this->SendMessage(t("Creating functions.php"));
         $this->SaveFunctionsToPHP();
+        
+        $this->SendMessage(t("Creating classes.php"));
+        $this->SaveClassesToPHP();
     }
     
+    /**
+     * Save constant/#define symbols into a constants.php file.
+     */
     private function SaveConstantsToPHP()
     {
         $output_file = fopen(
@@ -163,6 +176,9 @@ class Exporter extends \Signals\Signal
         fclose($output_file);
     }
     
+    /**
+     * Save enumeration symbols into a enumerations.php file.
+     */
     private function SaveEnumerationsToPHP()
     {
         $output_file = fopen(
@@ -216,6 +232,9 @@ class Exporter extends \Signals\Signal
         fclose($output_file);
     }
     
+    /**
+     * Save typedef symbols into a type_definitions.php file.
+     */
     private function SaveTypeDefToPHP()
     {
         $output_file = fopen(
@@ -262,6 +281,9 @@ class Exporter extends \Signals\Signal
         fclose($output_file);
     }
     
+    /**
+     * Save global variable symbols into a variables.php file.
+     */
     private function SaveGloablVariablesToPHP()
     {
         $output_file = fopen(
@@ -308,6 +330,9 @@ class Exporter extends \Signals\Signal
         fclose($output_file);
     }
     
+    /**
+     * Save function symbols into a functions.php file.
+     */
     private function SaveFunctionsToPHP()
     {
         $output_file = fopen(
@@ -367,13 +392,20 @@ class Exporter extends \Signals\Signal
                                 $parameter_value = addslashes($parameter->default_value);
                                 $parameter_description = addslashes($parameter->description);
 
+                                $output .= '$parameter = new Parameter(' . "\n";
+                                $output .= '    "'.$parameter->name.'",' . "\n";
+                                $output .= '    "'.$parameter->original_type.'",' . "\n";
+                                $output .= '    "'.$parameter_value.'",' . "\n";
+                                $output .= '    "'.$parameter_description.'"' . "\n";
+                                $output .= ');' . "\n";
+                                
+                                if($parameter->is_array)
+                                {
+                                    $output .= '$parameter->is_array = true;' . "\n";
+                                }
+                                
                                 $output .= '$overload->AddParameter(' . "\n";
-                                $output .= '    new Parameter(' . "\n";
-                                $output .= '        "'.$parameter->name.'",' . "\n";
-                                $output .= '        "'.$parameter->original_type.'",' . "\n";
-                                $output .= '        "'.$parameter_value.'",' . "\n";
-                                $output .= '        "'.$parameter_description.'"' . "\n";
-                                $output .= '    )' . "\n";
+                                $output .= '    $parameter' . "\n";
                                 $output .= ');' . "\n";
                             }
                         }
@@ -394,7 +426,187 @@ class Exporter extends \Signals\Signal
         
         fclose($output_file);
     }
+    
+    /**
+     * Save classes symbols into a classes.php file.
+     */
+    private function SaveClassesToPHP()
+    {
+        $output_file = fopen(
+            $this->definitions_path . "classes.php", 
+            "w"
+        );
+        
+        fwrite($output_file, "<?php\n\n");
+        
+        fwrite($output_file, "use Peg\Definitions\Element\ClassElement;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\FunctionElement;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\Overload;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\ReturnType;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\Parameter;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\Enumeration;\n");
+        fwrite($output_file, "use Peg\Definitions\Element\ClassVariable;\n");
+        
+        foreach($this->symbols->headers as $header)
+        {
+            if(!$header->HasClasses())
+                continue;
+            
+            foreach($header->namespaces as $namespace)
+            {
+                if(!$namespace->HasClasses())
+                    continue;
+                
+                foreach($namespace->classes as $class)
+                {
+                    $description = addslashes($class->description);
+                    $namespace_name = addslashes($namespace->name);
+                    
+                    $output = "\n";
+                    $output .= '// Class ' . $class->name . "\n";
+                    $output .= '$class = new ClassElement(' . "\n";
+                    $output .= '    "'.$class->name.'",' . "\n";
+                    $output .= '    "'.$description.'"' . "\n";
+                    $output .= ');' . "\n\n";
+                    
+                    // Write class methods
+                    foreach($class->methods as $method)
+                    {
+                        $description = addslashes($method->description);
 
+                        $output .= "\n";
+
+                        $output .= '// Method ' . $class->name . '::' . $method->name . "\n";
+                        $output .= '$method = new FunctionElement(' . "\n";
+                        $output .= '    "'.$method->name.'",' . "\n";
+                        $output .= '    "'.$description.'"' . "\n";
+                        $output .= ');' . "\n\n";
+
+                        foreach($method->overloads as $overload_index=>$overload)
+                        {
+                            $overload_description = addslashes($overload->description);
+
+                            $output .= '// Overload ' . $overload_index . "\n";
+                            $output .= '$overload = new Overload(' . "\n";
+                            $output .= '    "'.$overload_description.'"' . "\n";
+                            $output .= ');' . "\n";
+
+                            $output .= '$overload->SetReturnType(' . "\n";
+                            $output .= '    new ReturnType(' . "\n";
+                            $output .= '        "'.$overload->return_type->original_type.'"' . "\n";
+                            $output .= '    )' . "\n";
+                            $output .= ');' . "\n";
+                            
+                            if($overload->static)
+                                $output .= '$overload->static = true;' . "\n";
+                            
+                            if($overload->protected)
+                                $output .= '$overload->protected = true;' . "\n";
+                            
+                            if($overload->virtual)
+                                $output .= '$overload->virtual = true;' . "\n";
+                            
+                            if($overload->pure_virtual)
+                                $output .= '$overload->pure_virtual = true;' . "\n";
+                            
+                            if($overload->constant)
+                                $output .= '$overload->constant = true;' . "\n";
+
+                            if($overload->HasParameters())
+                            {
+                                foreach($overload->parameters as $parameter)
+                                {
+                                    $parameter_value = addslashes($parameter->default_value);
+                                    $parameter_description = addslashes($parameter->description);
+                                    
+                                    $output .= '$parameter = new Parameter(' . "\n";
+                                    $output .= '    "'.$parameter->name.'",' . "\n";
+                                    $output .= '    "'.$parameter->original_type.'",' . "\n";
+                                    $output .= '    "'.$parameter_value.'",' . "\n";
+                                    $output .= '    "'.$parameter_description.'"' . "\n";
+                                    $output .= ');' . "\n";
+                                    
+                                    if($parameter->is_array)
+                                    {
+                                        $output .= '$parameter->is_array = true;' . "\n";
+                                    }
+
+                                    $output .= '$overload->AddParameter(' . "\n";
+                                    $output .= '    $parameter' . "\n";
+                                    $output .= ');' . "\n";
+                                }
+                            }
+
+                            $output .= '$method->AddOverload($overload);' . "\n\n";
+                        }
+
+                        $output .= '$class->AddMethod(' . "\n";
+                        $output .= '    $method' . "\n";
+                        $output .= ');' . "\n\n";
+                    }
+                    
+                    // Write class enumerations
+                    foreach($class->enumerations as $enumeration)
+                    {
+                        $description = addslashes($enumeration->description);
+
+                        $output .= "\n";
+                        $output .= '// Enumeration ' . $class->name . '::' . $enumeration->name . "\n";
+                        $output .= '$class->AddEnumeration(' . "\n";
+                        $output .= '    new Enumeration(' . "\n";
+                        $output .= '        "'.$enumeration->name.'",' . "\n";
+
+                        $output .= '        [' . "\n";
+                        foreach($enumeration->options as $option)
+                        {
+                            $output .= '            "'.$option.'",' . "\n";
+                        }
+                        $output = rtrim($output, ",\n") . "\n";
+                        $output .= '        ],' . "\n";
+
+                        $output .= '        "'.$description.'"' . "\n";
+                        $output .= '    )' . "\n";
+                        $output .= ');' . "\n";
+
+                        fwrite($output_file, $output);
+                    }
+                    
+                    // Write class variables
+                    foreach($class->variables as $variable)
+                    {
+                        $type = addslashes($variable->original_type);
+                        $description = addslashes($variable->description);
+
+                        $output .= "\n";
+                        $output .= '$class->AddVariable(' . "\n";
+                        $output .= '    new ClassVariable(' . "\n";
+                        $output .= '        "'.$variable->name.'",' . "\n";
+                        $output .= '        "'.$type.'",' . "\n";
+                        $output .= '        "'.$description.'"' . "\n";
+                        $output .= '    )' . "\n";
+                        $output .= ');' . "\n";
+
+                        fwrite($output_file, $output);
+                    }
+                    
+                    $output .= '$symbols->AddClass(' . "\n";
+                    $output .= '    $class,' . "\n";
+                    $output .= '    "'.$header->name.'",' . "\n";
+                    $output .= '    "'.$namespace_name.'"' . "\n";
+                    $output .= ');' . "\n\n";
+                    
+                    fwrite($output_file, $output);
+                }
+            }
+        }
+        
+        fclose($output_file);
+    }
+
+    /**
+     * Saves all symbols into json files.
+     * @param string $path Directory where files will be stored.
+     */
     private function SaveToJSON($path)
     {
         $this->definitions_path = rtrim($path, "/\\") . "/";
@@ -420,8 +632,7 @@ class Exporter extends \Signals\Signal
     }
 
     /**
-     * Helper function to load all constants as symbol elements into a
-     * header namespace.
+     * Save constant/#define symbols into constants.json.
      */
     private function SaveConstantsToJson()
     {
@@ -460,17 +671,19 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "constants.json", 
-            Json::Encode($constants)
-        );
-        
-        unset($constants);
+        if(count($constants) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "constants.json", 
+                Json::Encode($constants)
+            );
+
+            unset($constants);
+        }
     }
 
     /**
-     * Helper function to load all enumerations as symbol elements into a
-     * header namespace.
+     * Save enumeration symbols into enumerations.json.
      */
     private function SaveEnumerationsToJson()
     {
@@ -509,17 +722,19 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "enumerations.json", 
-            Json::Encode($enumerations)
-        );
-        
-        unset($enumerations);
+        if(count($enumerations) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "enumerations.json", 
+                Json::Encode($enumerations)
+            );
+
+            unset($enumerations);
+        }
     }
 
     /**
-     * Helper function to load all type definitions as symbol elements into a
-     * header namespace.
+     * Save typedef symbols into type_definitions.json.
      */
     private function SaveTypeDefToJson()
     {
@@ -558,17 +773,19 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "type_definitions.json", 
-            Json::Encode($typedefs)
-        );
-        
-        unset($typedefs);
+        if(count($typedefs) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "type_definitions.json", 
+                Json::Encode($typedefs)
+            );
+
+            unset($typedefs);
+        }
     }
     
     /**
-     * Helper function to load all type definitions as symbol elements into a
-     * header namespace.
+     * Save global variable symbols into variables.json.
      */
     private function SaveGlobalVariablesToJson()
     {
@@ -607,17 +824,19 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "variables.json", 
-            Json::Encode($variables)
-        );
-        
-        unset($variables);
+        if(count($variables) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "variables.json", 
+                Json::Encode($variables)
+            );
+
+            unset($variables);
+        }
     }
     
     /**
-     * Helper function to load all type definitions as symbol elements into a
-     * header namespace.
+     * Save function symbols into functions.json.
      */
     private function SaveFunctionsToJson()
     {
@@ -684,17 +903,21 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "functions.json", 
-            Json::Encode($functions)
-        );
-        
-        unset($functions);
+        if(count($functions) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "functions.json", 
+                Json::Encode($functions)
+            );
+
+            unset($functions);
+        }
     }
     
     /**
-     * Helper function to load all type definitions as symbol elements into a
-     * header namespace.
+     * Save class symbols into classes.json, the class
+     * enumerations into class_enumerations.json and its variables into
+     * class_variables.json.
      */
     private function SaveClassesToJson()
     {
@@ -814,26 +1037,35 @@ class Exporter extends \Signals\Signal
             }
         }
         
-        file_put_contents(
-            $this->definitions_path . "classes.json", 
-            Json::Encode($classes)
-        );
+        if(count($classes) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "classes.json", 
+                Json::Encode($classes)
+            );
+            
+            unset($classes);
+        }
         
-        unset($classes);
+        if(count($enumerations) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "class_enumerations.json", 
+                Json::Encode($enumerations)
+            );
+            
+            unset($enumerations);
+        }
         
-        file_put_contents(
-            $this->definitions_path . "class_enumerations.json", 
-            Json::Encode($enumerations)
-        );
-        
-        unset($enumerations);
-        
-        file_put_contents(
-            $this->definitions_path . "class_variables.json", 
-            Json::Encode($variables)
-        );
-        
-        unset($variables);
+        if(count($variables) > 0)
+        {
+            file_put_contents(
+                $this->definitions_path . "class_variables.json", 
+                Json::Encode($variables)
+            );
+
+            unset($variables);
+        }
     }
 
     /**

@@ -220,7 +220,8 @@ class Application
             
             $importer = new Definitions\Importer(
                 self::$symbols, 
-                "definitions"
+                "definitions",
+                Definitions\Type::PHP
             );
             
             $importer->Start();
@@ -229,7 +230,7 @@ class Application
             $exporter = new Definitions\Exporter(
                 self::$symbols, 
                 "output", 
-                Definitions\Type::PHP
+                Definitions\Type::JSON
             );
             
             $exporter->Start();

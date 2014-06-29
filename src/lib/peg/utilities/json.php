@@ -23,7 +23,7 @@ class Json
      * @param array $data
      * @return string
      */
-    function Encode($data)
+    public static function Encode($data)
     {
         return json_encode($data, JSON_PRETTY_PRINT);
     }
@@ -34,7 +34,7 @@ class Json
      * @param string $data Json encoded data.
      * @return array
      */
-    function Decode($data)
+    public static function Decode($data)
     {
         return json_decode($data, true);
     }

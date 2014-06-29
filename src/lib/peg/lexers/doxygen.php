@@ -120,7 +120,6 @@ class Doxygen extends \Peg\Lexers\Base
                             t("Warning:") . " " 
                             . t("no initializer value for") 
                             . " #" . $define_name 
-                            . "\n"
                         );
 
                     // Skip macro function defines
@@ -572,7 +571,6 @@ class Doxygen extends \Peg\Lexers\Base
                         $this->SendMessage(t("Skipping:") . " " . t("function") 
                             . " '" . $function_name . "' " 
                             . t("seems to be a macro with undocumented parameter types.") 
-                            . "\n"
                         );
 
                         continue 2;
@@ -879,6 +877,22 @@ class Doxygen extends \Peg\Lexers\Base
                             $function_type
                         )
                     );
+                    
+                    // Check if a method has been deprecated.
+                    $function_deprecated = false;
+
+                    if(
+                        strstr(
+                            $class_xpath->evaluate(
+                                "detaileddescription", 
+                                $class_member->item($member)
+                            )->item(0)->nodeValue, 
+                            "Deprecated"
+                        ) !== false
+                    )
+                    {
+                        $function_deprecated = true;
+                    }
 
                     // If method is implemented only on some platforms we store them
                     // This seems to be wxWidgets specific.

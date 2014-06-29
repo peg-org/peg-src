@@ -15,7 +15,7 @@ class Loader
 
     /**
      * A list of loaded plugins.
-     * @var \Peg\Plugins\PluginInterface[]
+     * @var \Peg\Plugins\Base[]
      */
     public $plugins;
 

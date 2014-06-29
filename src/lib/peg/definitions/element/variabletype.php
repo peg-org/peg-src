@@ -8,7 +8,7 @@
 namespace Peg\Definitions\Element;
 
 /**
- * Represents a function or class method parameter.
+ * Represents a variable type.
  */
 class VariableType
 {

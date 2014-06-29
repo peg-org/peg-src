@@ -22,7 +22,7 @@ class Importer extends \Signals\Signal
     public $symbols;
     
     /**
-     * Directory path where reside the cached files.
+     * Path where reside the cached files.
      * @var string
      */
     public $definitions_path;
@@ -89,6 +89,11 @@ class Importer extends \Signals\Signal
         $this->SendMessage(t("Import completed."));
     }
     
+    /**
+     * Load all kind of symbols from php files previously created
+     * by \Peg\Definitions\Exporter.
+     * @param string $path Directory where the php files reside.
+     */
     private function LoadFromPHP($path)
     {
         $this->definitions_path = rtrim($path, "/\\") . "/";
@@ -135,30 +140,15 @@ class Importer extends \Signals\Signal
         }
     }
 
+    /**
+     * Load all kind of symbols from json files previously created
+     * by \Peg\Definitions\Exporter.
+     * @param string $path Directory where the json files reside.
+     */
     private function LoadFromJSON($path)
     {
         $this->definitions_path = rtrim($path, "/\\") . "/";
         $this->import_type = Type::JSON;
-
-        if(file_exists($this->definitions_path . "includes.json"))
-        {
-            $this->SendMessage(t("Loading includes.json"));
-            
-            //Populate headers array
-            $includes = Json::Decode(
-                file_get_contents($this->definitions_path . "includes.json")
-            );
-
-            foreach($includes as $header_name => $header_enabled)
-            {
-                $file = new Element\Header($header_name);
-                $file->enabled = $header_enabled;
-
-                $this->symbols->headers[$header_name] = $file;
-            }
-
-            unset($includes);
-        }
 
         if(file_exists($this->definitions_path . "constants.json"))
         {
@@ -198,8 +188,7 @@ class Importer extends \Signals\Signal
     }
 
     /**
-     * Helper function to load all constants as symbol elements into a
-     * header namespace.
+     * Load all constant symbols from constants.json
      */
     private function LoadConstantsFromJson()
     {
@@ -234,8 +223,7 @@ class Importer extends \Signals\Signal
     }
 
     /**
-     * Helper function to load all enumerations as symbol elements into a
-     * header namespace.
+     * Load all enumeration symbols from enumerations.json
      */
     private function LoadEnumerationsFromJson()
     {
@@ -270,8 +258,7 @@ class Importer extends \Signals\Signal
     }
 
     /**
-     * Helper function to load all type definitions as symbol elements into a
-     * header namespace.
+     * Load all typedef symbols from type_definitions.json
      */
     private function LoadTypeDefFromJson()
     {
@@ -306,8 +293,7 @@ class Importer extends \Signals\Signal
     }
     
     /**
-     * Helper function to load all global variables as symbol elements into a
-     * header namespace.
+     * Load all global variable symbols from variables.json
      */
     private function LoadGlobalVariablesFromJson()
     {
@@ -342,8 +328,7 @@ class Importer extends \Signals\Signal
     }
     
     /**
-     * Helper function to load all functions as symbol elements into a
-     * header namespace.
+     * Load all function symbols from functions.json
      */
     private function LoadFunctionsFromJson()
     {
@@ -414,8 +399,8 @@ class Importer extends \Signals\Signal
     }
     
     /**
-     * Helper function to load all classes as symbol elements into a
-     * header namespace.
+     * Load all class symbols from classes.json, its enumerations from
+     * class_enumerations.json and variables from class_variables.json.
      */
     private function LoadClassesFromJson()
     {
@@ -591,7 +576,7 @@ class Importer extends \Signals\Signal
                             if(isset($variable_options["public"]))
                                 $variable->public = $variable_options["public"];
                             
-                            if(!isset($variable_options["description"]))
+                            if(isset($variable_options["description"]))
                                 $variable->description = $variable_options["description"];
                             
                             $class->AddVariable($variable);

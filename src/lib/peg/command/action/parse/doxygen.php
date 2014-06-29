@@ -1,7 +1,5 @@
 <?php
 /**
- * A doxygen definitions extractor that is divided into different methods.
- *
  * @author Jefferson González
  * @license MIT
  * @link http://github.com/peg-org/peg-src Source code.
@@ -13,7 +11,8 @@ use Peg\Parse\DefinitionsType;
 use Peg\Application;
 
 /**
- * Implements a doxygen xml extractor of definitions.
+ * Implements a doxygen definitions parser action using \Peg\Lexers\Doxygen.
+ * @see \Peg\Lexers\Doxygen
  */
 class Doxygen extends \Peg\Command\Action\Parse\Base
 {
@@ -33,8 +32,8 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
     }
 
     /**
-     * Initializes the parsing process
-     * @param string $path Were the doxygen xml documentation resides.
+     * Initializes the parsing/lexing process.
+     * @param string $path Were the doxygen xml files reside.
      */
     public function Start($path)
     {
@@ -45,7 +44,7 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
         {
             $this->lexer->Listen(
                 \Peg\Signals\Lexers::LEXER_MESSAGE, 
-                function(\Signals\SignalData $signal_data){
+                function(\Peg\Signals\Lexers\Message $signal_data){
                     print $signal_data->message . "\n";
                 }
             );
@@ -58,7 +57,7 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
         {
             $this->lexer->exporter->Listen(
                 \Peg\Signals\Definitions::EXPORT_MESSAGE, 
-                function(\Signals\SignalData $signal_data){
+                function(\Peg\Signals\Definitions\ExportMessage $signal_data){
                     print $signal_data->message . "\n";
                 }
             );

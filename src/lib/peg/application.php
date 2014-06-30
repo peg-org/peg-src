@@ -64,6 +64,9 @@ class Application
      */
     public static function Initialize()
     {
+        // Set the settings backend to ini by default.
+        Settings::SetBackEnd(new Config\INI);
+        
         self::$cli_parser = new CommandLine\Parser;
 
         // Set Application details

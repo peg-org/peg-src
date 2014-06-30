@@ -1,62 +1,35 @@
 <?php
 /**
- * Defines a class for easily working with ini files.
- *
  * @author Jefferson González
  * @license MIT
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Utilities;
+namespace Peg\Config;
 
 /**
- * Manage configuration files.
+ * Ini implementation to manage configuration files.
  */
-class Configuration
+class INI extends \Peg\Config\Base
 {
 
     /**
-     * All settings stored on a configuration file.
-     * @var array
-     */
-    protected static $settings;
-
-    /**
-     * Directory of configuration file.
-     * @var string
-     */
-    protected static $directory;
-
-    /**
-     * Full path of configuration file.
-     * @var string
-     */
-    protected static $file;
-
-    /**
-     * Dont permit instantiation of this class.
-     * @param string $directory Directory where the configuration file resides.
-     * @param string $configuration_file Name of the configuration file.
-     */
-    private function __construct(){}
-
-    /**
-     * Loads all configuration options of a give file and creates it if does
+     * Loads all configuration options of a given file and creates it if does
      * not exists.
      * @param string $directory
      * @param string $configuration_file
      */
-    static function Load($directory, $configuration_file)
+    public function Load($directory, $configuration_file)
     {
-        self::$settings = array();
+        $this->settings = array();
 
-        self::$directory = $directory;
+        $this->directory = $directory;
 
-        self::$file = self::$directory . "/$configuration_file";
+        $this->file = $this->directory . "/$configuration_file";
 
-        if(file_exists(self::$file))
+        if(file_exists($this->file))
         {
-            self::$settings = parse_ini_file(self::$file, true);
+            $this->settings = parse_ini_file($this->file, true);
         }
     }
 
@@ -65,11 +38,11 @@ class Configuration
      * @param string $valueName
      * @return boolean
      */
-    static function Get($valueName)
+    public function Get($valueName)
     {
-        if(isset(self::$settings[$valueName]))
+        if(isset($this->settings[$valueName]))
         {
-            return self::$settings[$valueName];
+            return $this->settings[$valueName];
         }
 
         return false;
@@ -79,9 +52,9 @@ class Configuration
      * Get all settings.
      * @return array
      */
-    static function GetAll()
+    public function GetAll()
     {
-        return self::$settings;
+        return $this->settings;
     }
 
     /**
@@ -90,13 +63,13 @@ class Configuration
      * @param string $valueName
      * @return boolean|string
      */
-    static function GetSectionValue($sectionName, $valueName)
+    public function GetSectionValue($sectionName, $valueName)
     {
-        if(isset(self::$settings[$sectionName]))
+        if(isset($this->settings[$sectionName]))
         {
-            if(isset(self::$settings[$sectionName][$valueName]))
+            if(isset($this->settings[$sectionName][$valueName]))
             {
-                return self::$settings[$sectionName][$valueName];
+                return $this->settings[$sectionName][$valueName];
             }
         }
 
@@ -108,11 +81,11 @@ class Configuration
      * @param type $valueName
      * @param type $value
      */
-    static function Set($valueName, $value)
+    public function Set($valueName, $value)
     {
-        self::$settings[$valueName] = $value;
+        $this->settings[$valueName] = $value;
 
-        self::WriteINI();
+        self::Write();
     }
 
     /**
@@ -121,21 +94,21 @@ class Configuration
      * @param string $valueName
      * @param string $value
      */
-    static function SetSectionValue($sectionName, $valueName, $value)
+    public function SetSectionValue($sectionName, $valueName, $value)
     {
-        self::$settings[$sectionName][$valueName] = $value;
+        $this->settings[$sectionName][$valueName] = $value;
 
-        self::WriteINI();
+        self::Write();
     }
 
     /**
      * Writes a configuration file using the settings array.
      */
-    static function WriteINI()
+    public function Write()
     {
         $content = "";
 
-        foreach(self::$settings as $key => $data)
+        foreach($this->settings as $key => $data)
         {
             if(is_array($data))
             {
@@ -192,7 +165,7 @@ class Configuration
             }
         }
 
-        file_put_contents(self::$file, $content);
+        file_put_contents($this->file, $content);
     }
 
 }

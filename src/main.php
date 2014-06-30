@@ -55,6 +55,9 @@ function t($text)
     return $language_object->Translate($text);
 }
 
+// Set a default timezone to prevent warnings
+date_default_timezone_set("UTC");
+
 // Initialize the application
 Peg\Application::Initialize();
 

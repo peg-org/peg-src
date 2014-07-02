@@ -35,7 +35,7 @@ class Settings
 
     /**
      * Loads the peg.conf file on the given directory.
-     * @param type $directory
+     * @param string $directory
      */
     public static function Load($directory)
     {
@@ -44,13 +44,35 @@ class Settings
         self::$backend->Load($directory, "peg.conf");
     }
     
+    /**
+     * Gets the value of a specific option.
+     * @param string $option
+     * @return string|bool
+     */
     public static function Get($option)
     {
         self::CheckBackend();
         
         return self::$backend->Get($option);
     }
+    
+    /**
+     * Gets the value of a specific option inside a section.
+     * @param string $section Eg: parser
+     * @param string $option Eg: input_format
+     * @return string|bool
+     */
+    public static function GetSectionValue($section, $option)
+    {
+        self::CheckBackend();
+        
+        return self::$backend->GetSectionValue($section, $option);
+    }
 
+    /**
+     * Get a comma separated list of authors.
+     * @return string
+     */
     public static function GetAuthors()
     {
         self::CheckBackend();
@@ -58,6 +80,10 @@ class Settings
         return self::$backend->Get("authors");
     }
 
+    /**
+     * Get a comma separated list of contributors.
+     * @return string
+     */
     public static function GetContributors()
     {
         self::CheckBackend();
@@ -65,6 +91,10 @@ class Settings
         return self::$backend->Get("contributors");
     }
 
+    /**
+     * Get the current extension name.
+     * @return string
+     */
     public static function GetExtensionName()
     {
         self::CheckBackend();
@@ -84,6 +114,10 @@ class Settings
         return $name;
     }
 
+    /**
+     * Get the current extension version.
+     * @return string
+     */
     public static function GetVersion()
     {
         self::CheckBackend();
@@ -91,13 +125,36 @@ class Settings
         return self::$backend->Get("version");
     }
     
+    /**
+     * Modify or add a new option.
+     * @param string $option Option to add or modify.
+     * @param string $value New value of the option.
+     */
     public static function Set($option, $value)
     {
         self::CheckBackend();
 
         self::$backend->Set($option, $value);
     }
+    
+    /**
+     * Modify or add a new section with an option.
+     * @param string $section Name of section to modify or create.
+     * @param string $option Name of option to add or modify in the section.
+     * @param string $value New value of the option.
+     */
+    public static function SetSectionValue($section, $option, $value)
+    {
+        self::CheckBackend();
 
+        self::$backend->SetSectionValue($section, $option, $value);
+    }
+
+    /**
+     * Set the authors of the extension. This should be a comma 
+     * seperated list with the names of the authors.
+     * @param string $authors
+     */
     public static function SetAuthors($authors)
     {
         self::CheckBackend();
@@ -108,6 +165,11 @@ class Settings
         self::$backend->Set("authors", $authors);
     }
 
+    /**
+     * Set the contributors of the extension. This should be a comma 
+     * seperated list with the names of the contributors.
+     * @param string $contributors
+     */
     public static function SetContributors($contributors)
     {
         self::CheckBackend();
@@ -118,6 +180,11 @@ class Settings
         self::$backend->Set("contributors", $contributors);
     }
 
+    /**
+     * Set the extension name, which is used in some important parts of the
+     * code generator.
+     * @param string $name
+     */
     public static function SetExtensionName($name)
     {
         self::CheckBackend();
@@ -127,6 +194,11 @@ class Settings
         self::$backend->Set("name", $name);
     }
 
+    /**
+     * Sets the version of the extension which is used in some important
+     * parts of the code generator.
+     * @param string $number
+     */
     public static function SetVersion($number)
     {
         self::CheckBackend();
@@ -136,6 +208,11 @@ class Settings
         self::$backend->Set("version", $number);
     }
     
+    /**
+     * Helper called by all other methods to make sure that a backend 
+     * was set before calling them.
+     * @throws \Exception
+     */
     private static function CheckBackend()
     {   
         if(!is_object(self::$backend))

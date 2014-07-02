@@ -153,7 +153,7 @@ class Language
 
         $found_original = false;
 
-        foreach($file_rows as $row)
+        foreach($file_rows as $row_position=>$row)
         {
             if(!$found_original)
             {
@@ -161,17 +161,46 @@ class Language
                 {
                     $found_original = true;
                     $string = str_replace("msgid ", "", trim($row));
-
                     $pattern = "/(\")(.*)(\")/";
                     $replace = "\$2";
-                    $string = preg_replace($pattern, $replace, $string);
-                    $string = str_replace(
-                        array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
-                        array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
-                        $string
-                    );
 
-                    $original_string = $string;
+                    if($string != '""')
+                    {
+                        $string = preg_replace($pattern, $replace, $string);
+
+                        $string = str_replace(
+                            array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
+                            array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
+                            $string
+                        );
+
+                        $original_string = $string;
+                    }
+                    else
+                    {
+                        $original_string = "";
+
+                        $row_position++;
+                        $string = trim($file_rows[$row_position]);
+
+                        while($string{0} == '"')
+                        {
+                            $original_string .= preg_replace(
+                                $pattern,
+                                $replace,
+                                $string
+                            );
+
+                            $row_position++;
+                            $string = trim($file_rows[$row_position]);
+                        }
+
+                        $original_string = str_replace(
+                            array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
+                            array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
+                            $original_string
+                        );
+                    }
                 }
             }
             else
@@ -183,14 +212,46 @@ class Language
 
                     $pattern = "/(\")(.*)(\")/";
                     $replace = "\$2";
-                    $string = preg_replace($pattern, $replace, $string);
-                    $string = str_replace(
-                        array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
-                        array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
-                        $string
-                    );
 
-                    $translations[$original_string] = $string;
+                    if($string != '""')
+                    {
+                        $string = preg_replace($pattern, $replace, $string);
+
+                        $string = str_replace(
+                            array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
+                            array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
+                            $string
+                        );
+
+                        $translations[$original_string] = $string;
+                    }
+                    else
+                    {
+                        $translation_string = "";
+
+                        $row_position++;
+                        $string = trim($file_rows[$row_position]);
+
+                        while($string{0} == '"')
+                        {
+                            $translation_string .= preg_replace(
+                                $pattern,
+                                $replace,
+                                $string
+                            );
+
+                            $row_position++;
+                            $string = trim($file_rows[$row_position]);
+                        }
+
+                        $translation_string = str_replace(
+                            array("\\t", "\\n", "\\r", "\\0", "\\v", "\\f", "\\\\", "\\\""),
+                            array("\t", "\n", "\r", "\0", "\v", "\f", "\\", "\""),
+                            $translation_string
+                        );
+
+                        $translations[$original_string] = $translation_string;
+                    }
                 }
             }
         }

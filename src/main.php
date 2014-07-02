@@ -36,7 +36,7 @@ function peg_autoloader($class_name)
 {
     $file = str_replace("\\", "/", $class_name) . ".php";
 
-    include(PEG_LIBRARY_PATH . "lib/" . strtolower($file));
+    include(PEG_LIBRARY_PATH . "lib/" . $file);
 }
 
 spl_autoload_register("peg_autoloader");

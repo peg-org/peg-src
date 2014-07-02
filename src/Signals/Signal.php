@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-namespace Peg\Signals;
+namespace Peg\Lib\Signals;
 
 /**
  * Signal management that can be implemented at a per object basic.
@@ -27,9 +27,9 @@ class Signal
     /**
      * Calls all callbacks listening for a given signal type.
      * @param string $signal_type
-     * @param \Peg\Signals\SignalData $signal_data
+     * @param \Peg\Lib\Signals\SignalData $signal_data
      */
-    public function Send($signal_type, \Peg\Signals\SignalData &$signal_data=null)
+    public function Send($signal_type, \Peg\Lib\Signals\SignalData &$signal_data=null)
     {
         if(!isset($this->listeners[$signal_type]))
             return;

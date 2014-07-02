@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents an include file with all its elements.
@@ -27,7 +27,7 @@ class Header
 
     /**
      * List of namespaces declared on the file.
-     * @var \Peg\Definitions\Element\NamespaceElement[]
+     * @var \Peg\Lib\Definitions\Element\NamespaceElement[]
      */
     public $namespaces;
 
@@ -47,11 +47,11 @@ class Header
 
     /**
      * Adds a new constant.
-     * @param \Peg\Definitions\Element\Constant $constant
+     * @param \Peg\Lib\Definitions\Element\Constant $constant
      * @param string $namespace
      */
     public function AddConstant(
-        \Peg\Definitions\Element\Constant $constant, 
+        \Peg\Lib\Definitions\Element\Constant $constant, 
         $namespace = "\\"
     )
     {
@@ -65,11 +65,11 @@ class Header
     
     /**
      * Adds a new enumeration.
-     * @param \Peg\Definitions\Element\Enumeration $enumeration
+     * @param \Peg\Lib\Definitions\Element\Enumeration $enumeration
      * @param string $namespace
      */
     public function AddEnumeration(
-        \Peg\Definitions\Element\Enumeration $enumeration, 
+        \Peg\Lib\Definitions\Element\Enumeration $enumeration, 
         $namespace = "\\"
     )
     {
@@ -85,11 +85,11 @@ class Header
     
     /**
      * Adds a new enumeration.
-     * @param \Peg\Definitions\Element\Enumeration $typedef
+     * @param \Peg\Lib\Definitions\Element\Enumeration $typedef
      * @param string $namespace
      */
     public function AddTypeDef(
-        \Peg\Definitions\Element\TypeDef $typedef, 
+        \Peg\Lib\Definitions\Element\TypeDef $typedef, 
         $namespace = "\\"
     )
     {
@@ -105,11 +105,11 @@ class Header
     
     /**
      * Adds a new global variable.
-     * @param \Peg\Definitions\Element\GlobalVariable $global_variable
+     * @param \Peg\Lib\Definitions\Element\GlobalVariable $global_variable
      * @param string $namespace
      */
     public function AddGlobalVariable(
-        \Peg\Definitions\Element\GlobalVariable $global_variable, 
+        \Peg\Lib\Definitions\Element\GlobalVariable $global_variable, 
         $namespace = "\\"
     )
     {
@@ -125,11 +125,11 @@ class Header
     
     /**
      * Adds a new function.
-     * @param \Peg\Definitions\Element\FunctionElement $function
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function
      * @param string $namespace
      */
     public function AddFunction(
-        \Peg\Definitions\Element\FunctionElement $function, 
+        \Peg\Lib\Definitions\Element\FunctionElement $function, 
         $namespace = "\\"
     )
     {
@@ -145,11 +145,11 @@ class Header
     
     /**
      * Adds a new class.
-     * @param \Peg\Definitions\Element\ClassElement $class
+     * @param \Peg\Lib\Definitions\Element\ClassElement $class
      * @param string $namespace
      */
     public function AddClass(
-        \Peg\Definitions\Element\ClassElement $class, 
+        \Peg\Lib\Definitions\Element\ClassElement $class, 
         $namespace = "\\"
     )
     {

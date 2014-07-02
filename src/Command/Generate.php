@@ -5,15 +5,15 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command;
+namespace Peg\Lib\Command;
 
-use Peg\CommandLine\Option;
-use Peg\CommandLine\OptionType;
+use Peg\Lib\CommandLine\Option;
+use Peg\Lib\CommandLine\OptionType;
 
 /**
  * Command to generate the extension source code from the cached definition files.
  */
-class Generate extends \Peg\CommandLine\Command
+class Generate extends \Peg\Lib\CommandLine\Command
 {
 
     public function __construct()
@@ -22,7 +22,7 @@ class Generate extends \Peg\CommandLine\Command
 
         $this->description = t("Generates the extension source code and configuration files.");
 
-        $this->RegisterAction(new \Peg\Command\Action\Generate());
+        $this->RegisterAction(new \Peg\Lib\Command\Action\Generate());
         
         $format = new Option(array(
             "long_name"     => "format",

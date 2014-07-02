@@ -12,13 +12,13 @@ How to write your first plugin:
 
 ----------------------------COPY AFTER THIS LINE--------------------------------
 <?php
-// Your plugin must be part of the Peg\Plugins namespace
-namespace Peg\Plugins;
+// Your plugin must be part of the Peg\Lib\Plugins namespace
+namespace Peg\Lib\Plugins;
 
-use Peg\Application;
+use Peg\Lib\Application;
 
-// Your plugin must implement Peg\Plugins\Base
-class MyPlugin extends \Peg\Plugins\Base
+// Your plugin must implement Peg\Lib\Plugins\Base
+class MyPlugin extends \Peg\Lib\Plugins\Base
 {
     // On this method you can add any kind of code to modify peg behavior.
     // In this case we are just changing the application name from peg to gen.

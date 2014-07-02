@@ -5,17 +5,17 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command\Action;
+namespace Peg\Lib\Command\Action;
 
-use Peg\Application;
+use Peg\Lib\Application;
 
 /**
  * Action taken when help is called.
  */
-class Help extends \Peg\CommandLine\Action
+class Help extends \Peg\Lib\CommandLine\Action
 {
 
-    public function OnCall(\Peg\CommandLine\Command $command)
+    public function OnCall(\Peg\Lib\CommandLine\Command $command)
     {
         if(strlen($command->value) > 0)
         {
@@ -25,7 +25,7 @@ class Help extends \Peg\CommandLine\Action
             }
             else
             {
-                \Peg\CommandLine\Error::Show(t("Invalid command supplied."));
+                \Peg\Lib\CommandLine\Error::Show(t("Invalid command supplied."));
             }
         }
         else
@@ -36,9 +36,9 @@ class Help extends \Peg\CommandLine\Action
 
     /**
      * Prints help for a specific command.
-     * $param \Peg\CommandLine\Command $command
+     * $param \Peg\Lib\CommandLine\Command $command
      */
-    public function PrintHelp(\Peg\CommandLine\Command $command)
+    public function PrintHelp(\Peg\Lib\CommandLine\Command $command)
     {
         // Store the lenght of longest command name
         $max_command_len = 0;

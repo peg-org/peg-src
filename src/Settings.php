@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg;
+namespace Peg\Lib;
 
 /**
  * For managing the configuration options of a valid peg
@@ -16,7 +16,7 @@ class Settings
 
     /**
      * The configurations object used to manipulate the settings.
-     * @var \Peg\Config\Base
+     * @var \Peg\Lib\Config\Base
      */
     private static $backend;
     
@@ -26,9 +26,9 @@ class Settings
     /**
      * Sets the back-end or implementation that will be used to manage
      * the retreival and storage of settings.
-     * @param \Peg\Config\Base $backend
+     * @param \Peg\Lib\Config\Base $backend
      */
-    public static function SetBackEnd(\Peg\Config\Base $backend)
+    public static function SetBackEnd(\Peg\Lib\Config\Base $backend)
     {
         self::$backend = $backend;
     }

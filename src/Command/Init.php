@@ -5,15 +5,15 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command;
+namespace Peg\Lib\Command;
 
-use Peg\CommandLine\Option;
-use Peg\CommandLine\OptionType;
+use Peg\Lib\CommandLine\Option;
+use Peg\Lib\CommandLine\OptionType;
 
 /**
  * In charge of initializing a directory to produce an extension.
  */
-class Init extends \Peg\CommandLine\Command
+class Init extends \Peg\Lib\CommandLine\Command
 {
 
     public function __construct()

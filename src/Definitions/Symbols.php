@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions;
+namespace Peg\Lib\Definitions;
 
 /**
  * Represents a symbols table with all the definitions required to generate
@@ -16,7 +16,7 @@ class Symbols
 
     /**
      * List of header files (#include)
-     * @var \Peg\Definitions\Element\Header[]
+     * @var \Peg\Lib\Definitions\Element\Header[]
      */
     public $headers;
     
@@ -56,12 +56,12 @@ class Symbols
 
     /**
      * Adds a constant to the symbols table.
-     * @param \Peg\Definitions\Element\Constant $constant
+     * @param \Peg\Lib\Definitions\Element\Constant $constant
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
     public function AddConstant(
-        \Peg\Definitions\Element\Constant $constant,
+        \Peg\Lib\Definitions\Element\Constant $constant,
         $header,
         $namespace="\\"
     )
@@ -73,12 +73,12 @@ class Symbols
 
     /**
      * Adds an enumeration to the symbols table.
-     * @param \Peg\Definitions\Element\Enumeration $enumeration
+     * @param \Peg\Lib\Definitions\Element\Enumeration $enumeration
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
     public function AddEnumeration(
-        \Peg\Definitions\Element\Enumeration $enumeration,
+        \Peg\Lib\Definitions\Element\Enumeration $enumeration,
         $header,
         $namespace="\\"
     )
@@ -90,12 +90,12 @@ class Symbols
 
     /**
      * Adds a type definition to the symbols table.
-     * @param \Peg\Definitions\Element\TypeDef $typedef
+     * @param \Peg\Lib\Definitions\Element\TypeDef $typedef
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
     public function AddTypeDef(
-        \Peg\Definitions\Element\TypeDef $typedef, 
+        \Peg\Lib\Definitions\Element\TypeDef $typedef, 
         $header, 
         $namespace="\\"
     )
@@ -107,12 +107,12 @@ class Symbols
 
     /**
      * Adds a global variable to the symbols table.
-     * @param \Peg\Definitions\Element\GlobalVariable $global_variable
+     * @param \Peg\Lib\Definitions\Element\GlobalVariable $global_variable
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
     public function AddGlobalVar(
-        \Peg\Definitions\Element\GlobalVariable $global_variable, 
+        \Peg\Lib\Definitions\Element\GlobalVariable $global_variable, 
         $header, 
         $namespace="\\"
     )
@@ -124,12 +124,12 @@ class Symbols
     
     /**
      * Adds a function to the symbols table.
-     * @param \Peg\Definitions\Element\FunctionElement $function
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function
      * @param string $header Name of header file where the constant resides.
      * @param string $namespace If omitted the constant is added at a global scope.
      */
     public function AddFunction(
-        \Peg\Definitions\Element\FunctionElement $function, 
+        \Peg\Lib\Definitions\Element\FunctionElement $function, 
         $header, 
         $namespace="\\"
     )
@@ -141,12 +141,12 @@ class Symbols
     
     /**
      * Adds a class to the symbols table.
-     * @param \Peg\Definitions\Element\ClassElement $class
+     * @param \Peg\Lib\Definitions\Element\ClassElement $class
      * @param string $header Name of header file where the class resides.
      * @param string $namespace If omitted the class is added at a global scope.
      */
     public function AddClass(
-        \Peg\Definitions\Element\ClassElement $class, 
+        \Peg\Lib\Definitions\Element\ClassElement $class, 
         $header, 
         $namespace="\\"
     )

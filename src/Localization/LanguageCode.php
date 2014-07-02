@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Localization;
+namespace Peg\Lib\Localization;
 
 /**
  * Defines a class that serves as enumeration of the different language codes

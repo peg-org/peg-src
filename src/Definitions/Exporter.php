@@ -5,19 +5,19 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions;
+namespace Peg\Lib\Definitions;
 
-use Peg\Utilities\Json;
-use Peg\Utilities\FileSystem;
+use Peg\Lib\Utilities\Json;
+use Peg\Lib\Utilities\FileSystem;
 
 /**
  * Export definitions from a symbols object into cache files.
  */
-class Exporter extends \Peg\Signals\Signal
+class Exporter extends \Peg\Lib\Signals\Signal
 {
     /**
      * Reference to the symbols object that is going to be cached into files.
-     * @var \Peg\Definitions\Symbols 
+     * @var \Peg\Lib\Definitions\Symbols 
      */
     public $symbols;
     
@@ -29,33 +29,33 @@ class Exporter extends \Peg\Signals\Signal
     
     /**
      * Format used to store the cached symbols.
-     * @see \Peg\Definitions\Type
+     * @see \Peg\Lib\Definitions\Type
      * @var string
      */
     public $export_type;
     
     /**
      * Data that is send each time a signal is launched.
-     * @var \Peg\Signals\Data\Definitions\ExportMessage 
+     * @var \Peg\Lib\Signals\Data\Definitions\ExportMessage 
      */
     private $signal_data;
     
     /**
      * Constructor.
-     * @param \Peg\Definitions\Symbols $symbols The table to populate.
+     * @param \Peg\Lib\Definitions\Symbols $symbols The table to populate.
      * @param string $path The path where will be stored the cache files.
      * @param string $export_type The type of cache files to create.
      */
     public function __construct(
-        \Peg\Definitions\Symbols &$symbols,
+        \Peg\Lib\Definitions\Symbols &$symbols,
         $path = null, 
-        $export_type=\Peg\Definitions\Type::JSON
+        $export_type=\Peg\Lib\Definitions\Type::JSON
     )
     {
         $this->symbols =& $symbols;
         $this->definitions_path = $path;
         $this->export_type = $export_type;
-        $this->signal_data = new \Peg\Signals\Data\Definitions\ExportMessage;
+        $this->signal_data = new \Peg\Lib\Signals\Data\Definitions\ExportMessage;
     }
     
     /**
@@ -139,7 +139,7 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\Constant;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Constant;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -188,7 +188,7 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\Enumeration;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Enumeration;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -244,7 +244,7 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\TypeDef;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\TypeDef;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -293,7 +293,7 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\GlobalVariable;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\GlobalVariable;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -342,10 +342,10 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\FunctionElement;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\Overload;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\ReturnType;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\Parameter;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\FunctionElement;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Overload;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\ReturnType;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Parameter;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -439,13 +439,13 @@ class Exporter extends \Peg\Signals\Signal
         
         fwrite($output_file, "<?php\n\n");
         
-        fwrite($output_file, "use Peg\Definitions\Element\ClassElement;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\FunctionElement;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\Overload;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\ReturnType;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\Parameter;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\Enumeration;\n");
-        fwrite($output_file, "use Peg\Definitions\Element\ClassVariable;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\ClassElement;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\FunctionElement;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Overload;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\ReturnType;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Parameter;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\Enumeration;\n");
+        fwrite($output_file, "use Peg\Lib\Definitions\Element\ClassVariable;\n");
         
         foreach($this->symbols->headers as $header)
         {
@@ -1077,7 +1077,7 @@ class Exporter extends \Peg\Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Type\Definitions::EXPORT_MESSAGE,
+            \Peg\Lib\Signals\Type\Definitions::EXPORT_MESSAGE,
             $this->signal_data
         );
     }

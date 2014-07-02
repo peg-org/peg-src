@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg;
+namespace Peg\Lib;
 
 /**
  * Holds global options and objects.
@@ -15,43 +15,43 @@ class Application
 
     /**
      * Reference to the global parser.
-     * @var \Peg\CommandLine\Parser
+     * @var \Peg\Lib\CommandLine\Parser
      */
     private static $cli_parser;
 
     /**
      * Reference to the plugins loader.
-     * @var \Peg\Plugins\Loader;
+     * @var \Peg\Lib\Plugins\Loader;
      */
     private static $plugin_loader;
 
     /**
      * Reference to the help command.
-     * @var \Peg\Command\Help
+     * @var \Peg\Lib\Command\Help
      */
     private static $help_command;
 
     /**
      * Reference to the init command.
-     * @var \Peg\Command\Init
+     * @var \Peg\Lib\Command\Init
      */
     private static $init_command;
 
     /**
      * Reference to the parse command.
-     * @var \Peg\Command\Parse
+     * @var \Peg\Lib\Command\Parse
      */
     private static $parse_command;
 
     /**
      * Reference to the generate command.
-     * @var \Peg\Command\Generate
+     * @var \Peg\Lib\Command\Generate
      */
     private static $generate_command;
 
     /**
      * Reference to the definition's symbols object.
-     * @var \Peg\Definitions\Symbols
+     * @var \Peg\Lib\Definitions\Symbols
      */
     private static $symbols;
 
@@ -162,7 +162,7 @@ class Application
 
     /**
      * Gets the global command line parser.
-     * @return \Peg\CommandLine\Parser
+     * @return \Peg\Lib\CommandLine\Parser
      */
     public static function &GetCLIParser()
     {
@@ -171,7 +171,7 @@ class Application
 
     /**
      * Gets a reference to init command currently used by peg.
-     * @return \Peg\Command\Init
+     * @return \Peg\Lib\Command\Init
      */
     public static function &GetInitCommand()
     {
@@ -180,7 +180,7 @@ class Application
 
     /**
      * Gets a reference to help command currently used by peg.
-     * @return \Peg\Command\Help
+     * @return \Peg\Lib\Command\Help
      */
     public static function &GetHelpCommand()
     {
@@ -189,7 +189,7 @@ class Application
 
     /**
      * Gets a reference to parse command currently used by peg.
-     * @return \Peg\Command\Parse
+     * @return \Peg\Lib\Command\Parse
      */
     public static function &GetParseCommand()
     {
@@ -198,7 +198,7 @@ class Application
 
     /**
      * Gets a reference to generate command currently used by peg.
-     * @return \Peg\Command\Parse
+     * @return \Peg\Lib\Command\Parse
      */
     public static function &GetGenerateCommand()
     {
@@ -208,7 +208,7 @@ class Application
     /**
      * Loads definitions files if not yet loaded and returns a reference to a
      * symbols object that can be used throught the application.
-     * @return \Peg\Definitions\Symbols
+     * @return \Peg\Lib\Definitions\Symbols
      */
     public static function &GetDefinitions()
     {
@@ -244,7 +244,7 @@ class Application
 
     /**
      * Get reference to the plugin loader currently used by peg.
-     * @return \Peg\Plugins\Loader
+     * @return \Peg\Lib\Plugins\Loader
      */
     public static function &GetPluginLoader()
     {

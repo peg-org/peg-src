@@ -5,20 +5,20 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command\Action;
+namespace Peg\Lib\Command\Action;
 
-use Peg\Settings;
-use Peg\Application;
-use Peg\CommandLine\Error;
-use Peg\Utilities\FileSystem;
+use Peg\Lib\Settings;
+use Peg\Lib\Application;
+use Peg\Lib\CommandLine\Error;
+use Peg\Lib\Utilities\FileSystem;
 
 /**
  * Action taken if the init command was executed.
  */
-class Init extends \Peg\CommandLine\Action
+class Init extends \Peg\Lib\CommandLine\Action
 {
 
-    public function OnCall(\Peg\CommandLine\Command $command)
+    public function OnCall(\Peg\Lib\CommandLine\Command $command)
     {
         // Get option values
         $authors = $command->GetOption("authors")->GetValue();

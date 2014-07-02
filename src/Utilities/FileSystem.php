@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Utilities;
+namespace Peg\Lib\Utilities;
 
 /**
  * Function to manage files and directories

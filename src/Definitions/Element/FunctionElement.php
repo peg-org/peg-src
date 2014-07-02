@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a function or class method element.
@@ -27,25 +27,25 @@ class FunctionElement
     
     /**
      * List of overloads for this function/method
-     * @var \Peg\Definitions\Element\Overload[]
+     * @var \Peg\Lib\Definitions\Element\Overload[]
      */
     public $overloads;
     
     /**
      * Reference to the class containing this element if applicable.
-     * @var \Peg\Definitions\Element\ClassElement
+     * @var \Peg\Lib\Definitions\Element\ClassElement
      */
     public $parent_class;
     
     /**
      * Reference to the header containing this element.
-     * @var \Peg\Definitions\Element\Header
+     * @var \Peg\Lib\Definitions\Element\Header
      */
     public $header;
     
     /**
      * Reference to the namespace containing this element.
-     * @var \Peg\Definitions\Element\NamespaceElement
+     * @var \Peg\Lib\Definitions\Element\NamespaceElement
      */
     public $namespace;
     
@@ -62,10 +62,10 @@ class FunctionElement
     
     /**
      * Adds a new overload for the function.
-     * @param \Peg\Definitions\Element\Overload $overload
-     * @return \Peg\Definitions\Element\FunctionElement
+     * @param \Peg\Lib\Definitions\Element\Overload $overload
+     * @return \Peg\Lib\Definitions\Element\FunctionElement
      */
-    public function AddOverload(\Peg\Definitions\Element\Overload $overload)
+    public function AddOverload(\Peg\Lib\Definitions\Element\Overload $overload)
     {
         $overload->function =& $this;
         $this->overloads[] = $overload;

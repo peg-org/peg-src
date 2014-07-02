@@ -5,19 +5,19 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions;
+namespace Peg\Lib\Definitions;
 
-use Peg\Utilities\Json;
+use Peg\Lib\Utilities\Json;
 
 /**
  * Loads cached definitions into a symbols object.
  */
-class Importer extends \Peg\Signals\Signal
+class Importer extends \Peg\Lib\Signals\Signal
 {
     /**
      * Reference to the symbols object that is going to be 
      * populated by the importer.
-     * @var \Peg\Definitions\Symbols 
+     * @var \Peg\Lib\Definitions\Symbols 
      */
     public $symbols;
     
@@ -29,33 +29,33 @@ class Importer extends \Peg\Signals\Signal
     
     /**
      * Format used to load the symbols.
-     * @see \Peg\Definitions\Type
+     * @see \Peg\Lib\Definitions\Type
      * @var string
      */
     public $import_type;
     
     /**
      * Data that is send each time a signal is launched.
-     * @var \Peg\Signals\Data\Definitions\ImportMessage 
+     * @var \Peg\Lib\Signals\Data\Definitions\ImportMessage 
      */
     private $signal_data;
     
     /**
      * Constructor.
-     * @param \Peg\Definitions\Symbols $symbols The table to populate.
+     * @param \Peg\Lib\Definitions\Symbols $symbols The table to populate.
      * @param string $path The path where resides the cached files.
      * @param string $import_type The type of cache files to import.
      */
     public function __construct(
-        \Peg\Definitions\Symbols &$symbols,
+        \Peg\Lib\Definitions\Symbols &$symbols,
         $path = null, 
-        $import_type=\Peg\Definitions\Type::JSON
+        $import_type=\Peg\Lib\Definitions\Type::JSON
     )
     {
         $this->symbols =& $symbols;
         $this->definitions_path = $path;
         $this->import_type = $import_type;
-        $this->signal_data = new \Peg\Signals\Data\Definitions\ImportMessage;
+        $this->signal_data = new \Peg\Lib\Signals\Data\Definitions\ImportMessage;
     }
     
     /**
@@ -91,7 +91,7 @@ class Importer extends \Peg\Signals\Signal
     
     /**
      * Load all kind of symbols from php files previously created
-     * by \Peg\Definitions\Exporter.
+     * by \Peg\Lib\Definitions\Exporter.
      * @param string $path Directory where the php files reside.
      */
     private function LoadFromPHP($path)
@@ -142,7 +142,7 @@ class Importer extends \Peg\Signals\Signal
 
     /**
      * Load all kind of symbols from json files previously created
-     * by \Peg\Definitions\Exporter.
+     * by \Peg\Lib\Definitions\Exporter.
      * @param string $path Directory where the json files reside.
      */
     private function LoadFromJSON($path)
@@ -605,7 +605,7 @@ class Importer extends \Peg\Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Type\Definitions::IMPORT_MESSAGE,
+            \Peg\Lib\Signals\Type\Definitions::IMPORT_MESSAGE,
             $this->signal_data
         );
     }

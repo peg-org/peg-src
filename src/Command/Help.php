@@ -5,14 +5,14 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command;
+namespace Peg\Lib\Command;
 
-use Peg\Application;
+use Peg\Lib\Application;
 
 /**
  * Display overall help or for a given command.
  */
-class Help extends \Peg\CommandLine\Command
+class Help extends \Peg\Lib\CommandLine\Command
 {
 
     public function __construct()

@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-namespace Peg\Signals;
+namespace Peg\Lib\Signals;
 
 /**
  * Assist on the management of signals send at a global scope
@@ -27,9 +27,9 @@ class SignalHandler
      * Calls all callbacks listening for a given signal type.
      * The $var1-$var6 are optional parameters passed to the callback.
      * @param string $signal_type
-     * @param \Peg\Signals\SignalData $signal_data
+     * @param \Peg\Lib\Signals\SignalData $signal_data
      */
-    public static function Send($signal_type, \Peg\Signals\SignalData &$signal_data = null)
+    public static function Send($signal_type, \Peg\Lib\Signals\SignalData &$signal_data = null)
     {
         if(!isset(self::$listeners[$signal_type]))
             return;

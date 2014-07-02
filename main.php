@@ -37,7 +37,7 @@ if(!file_exists(PEG_SKELETON_PATH))
 function peg_autoloader($class_name)
 {
     $file = str_replace("\\", "/", $class_name) . ".php";
-    $file = str_replace("Peg/", "", $file);
+    $file = str_replace("Peg/Lib/", "", $file);
 
     include(PEG_LIBRARY_PATH . "src/" . $file);
 }
@@ -52,7 +52,7 @@ function t($text)
 
     if(!$language_object)
     {
-        $language_object = new Peg\Localization\Language(PEG_LOCALE_PATH);
+        $language_object = new Peg\Lib\Localization\Language(PEG_LOCALE_PATH);
     }
 
     return $language_object->Translate($text);
@@ -62,10 +62,10 @@ function t($text)
 date_default_timezone_set("UTC");
 
 // Initialize the application
-Peg\Application::Initialize();
+Peg\Lib\Application::Initialize();
 
 // Retrieve a reference of main command line parser
-$parser = Peg\Application::GetCLIParser();
+$parser = Peg\Lib\Application::GetCLIParser();
 
 // Start the command line parser
 $parser->Start($argc, $argv);

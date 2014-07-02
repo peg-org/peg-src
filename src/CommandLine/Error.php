@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\CommandLine;
+namespace Peg\Lib\CommandLine;
 
 /**
  * Functions to throw error messages.

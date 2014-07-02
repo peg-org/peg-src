@@ -5,10 +5,10 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\CommandLine;
+namespace Peg\Lib\CommandLine;
 
 /**
- * Enumeration used to declare a \Peg\CommandLine\Option type
+ * Enumeration used to declare a \Peg\Lib\CommandLine\Option type
  */
 class OptionType
 {

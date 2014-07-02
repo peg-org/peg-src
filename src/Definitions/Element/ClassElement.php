@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a class element.
@@ -46,19 +46,19 @@ class ClassElement
     
     /**
      * List of member variables.
-     * @var \Peg\Definitions\Element\ClassVariable[]
+     * @var \Peg\Lib\Definitions\Element\ClassVariable[]
      */
     public $variables;
     
     /**
      * List of enumerations.
-     * @var \Peg\Definitions\Element\Enumeration[]
+     * @var \Peg\Lib\Definitions\Element\Enumeration[]
      */
     public $enumerations;
     
     /**
      * List of methods.
-     * @var \Peg\Definitions\Element\FunctionElement[]
+     * @var \Peg\Lib\Definitions\Element\FunctionElement[]
      */
     public $methods;
     
@@ -70,13 +70,13 @@ class ClassElement
     
     /**
      * Reference to the header containing this element.
-     * @var \Peg\Definitions\Element\Header
+     * @var \Peg\Lib\Definitions\Element\Header
      */
     public $header;
     
     /**
      * Reference to the namespace containing this element.
-     * @var \Peg\Definitions\Element\NamespaceElement
+     * @var \Peg\Lib\Definitions\Element\NamespaceElement
      */
     public $namespace;
     
@@ -98,7 +98,7 @@ class ClassElement
     /**
      * Add a parent class.
      * @param string $parent Name of parent class which may also include its namespace.
-     * @return \Peg\Definitions\Element\ClassElement
+     * @return \Peg\Lib\Definitions\Element\ClassElement
      */
     public function AddParent($parent)
     {
@@ -111,7 +111,7 @@ class ClassElement
     /**
      * Adds an array of parent classes.
      * @param array $parents Name of parent classes which may also include its namespace.
-     * @return \Peg\Definitions\Element\ClassElement
+     * @return \Peg\Lib\Definitions\Element\ClassElement
      */
     public function AddParents(array $parents)
     {
@@ -123,10 +123,10 @@ class ClassElement
     
     /**
      * Adds a variable to the class.
-     * @param \Peg\Definitions\Element\ClassVariable $variable
-     * @return \Peg\Definitions\Element\ClassElement
+     * @param \Peg\Lib\Definitions\Element\ClassVariable $variable
+     * @return \Peg\Lib\Definitions\Element\ClassElement
      */
-    public function AddVariable(\Peg\Definitions\Element\ClassVariable $variable)
+    public function AddVariable(\Peg\Lib\Definitions\Element\ClassVariable $variable)
     {
         $variable->parent_class =& $this;
         $this->variables[$variable->name] = $variable;
@@ -136,10 +136,10 @@ class ClassElement
     
     /**
      * Adds an enumeration to the class.
-     * @param \Peg\Definitions\Element\Enumeration $enumeration
-     * @return \Peg\Definitions\Element\ClassElement
+     * @param \Peg\Lib\Definitions\Element\Enumeration $enumeration
+     * @return \Peg\Lib\Definitions\Element\ClassElement
      */
-    public function AddEnumeration(\Peg\Definitions\Element\Enumeration $enumeration)
+    public function AddEnumeration(\Peg\Lib\Definitions\Element\Enumeration $enumeration)
     {
         $enumeration->parent_class =& $this;
         $this->enumerations[$enumeration->name] = $enumeration;
@@ -149,10 +149,10 @@ class ClassElement
     
     /**
      * Adds a new method/function to the class.
-     * @param \Peg\Definitions\Element\FunctionElement $method
-     * @return \Peg\Definitions\Element\ClassElement
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $method
+     * @return \Peg\Lib\Definitions\Element\ClassElement
      */
-    public function AddMethod(\Peg\Definitions\Element\FunctionElement $method)
+    public function AddMethod(\Peg\Lib\Definitions\Element\FunctionElement $method)
     {
         $method->parent_class =& $this;
         $this->methods[$method->name] = $method;

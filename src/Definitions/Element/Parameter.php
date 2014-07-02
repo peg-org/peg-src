@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a function or class method parameter.
@@ -27,7 +27,7 @@ class Parameter extends VariableType
     
     /**
      * Reference to the overload owner.
-     * @var \Peg\Definitions\Element\Overload
+     * @var \Peg\Lib\Definitions\Element\Overload
      */
     public $overload;
     

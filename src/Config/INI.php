@@ -5,12 +5,12 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Config;
+namespace Peg\Lib\Config;
 
 /**
  * Ini implementation to manage configuration files.
  */
-class INI extends \Peg\Config\Base
+class INI extends \Peg\Lib\Config\Base
 {
 
     /**

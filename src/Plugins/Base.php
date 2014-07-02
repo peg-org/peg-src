@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
 */
 
-namespace Peg\Plugins;
+namespace Peg\Lib\Plugins;
 
 /**
  * Base interface to write plugins. All plugins should inherit from this class.

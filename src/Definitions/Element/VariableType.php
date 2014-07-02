@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a variable type.

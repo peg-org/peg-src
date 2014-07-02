@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Config;
+namespace Peg\Lib\Config;
 
 /**
  * Base structure for managing configuration files. Every configuration manager

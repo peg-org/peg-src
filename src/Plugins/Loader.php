@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
 */
 
-namespace Peg\Plugins;
+namespace Peg\Lib\Plugins;
 
 /**
  * A basic plugin loader.
@@ -15,7 +15,7 @@ class Loader
 
     /**
      * A list of loaded plugins.
-     * @var \Peg\Plugins\Base[]
+     * @var \Peg\Lib\Plugins\Base[]
      */
     public $plugins;
 
@@ -52,7 +52,7 @@ class Loader
                     continue;
 
                 $class_name = $file_parts[0];
-                $class_name_ns = "Peg\\Plugins\\$class_name";
+                $class_name_ns = "Peg\Lib\\Plugins\\$class_name";
                 $file_extension = $file_parts[1];
 
                 if($file_extension == "php")

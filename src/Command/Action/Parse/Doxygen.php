@@ -5,21 +5,21 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command\Action\Parse;
+namespace Peg\Lib\Command\Action\Parse;
 
-use Peg\Parse\DefinitionsType;
-use Peg\Application;
+use Peg\Lib\Parse\DefinitionsType;
+use Peg\Lib\Application;
 
 /**
- * Implements a doxygen definitions parser action using \Peg\Lexers\Doxygen.
- * @see \Peg\Lexers\Doxygen
+ * Implements a doxygen definitions parser action using \Peg\Lib\Lexers\Doxygen.
+ * @see \Peg\Lib\Lexers\Doxygen
  */
-class Doxygen extends \Peg\Command\Action\Parse\Base
+class Doxygen extends \Peg\Lib\Command\Action\Parse\Base
 {
 
     /**
      * The lexer that is going to be used for extracting definitions.
-     * @var \Peg\Lexers\Doxygen
+     * @var \Peg\Lib\Lexers\Doxygen
      */
     public $lexer;
     
@@ -37,14 +37,14 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
      */
     public function Start($path)
     {
-        $this->lexer = new \Peg\Lexers\Doxygen($path, $this->headers_path);
+        $this->lexer = new \Peg\Lib\Lexers\Doxygen($path, $this->headers_path);
         
         // Start lexer
         if($this->verbose)
         {
             $this->lexer->Listen(
-                \Peg\Signals\Type\Lexers::LEXER_MESSAGE, 
-                function(\Peg\Signals\Data\Lexers\Message $signal_data){
+                \Peg\Lib\Signals\Type\Lexers::LEXER_MESSAGE, 
+                function(\Peg\Lib\Signals\Data\Lexers\Message $signal_data){
                     print $signal_data->message . "\n";
                 }
             );
@@ -56,8 +56,8 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
         if($this->verbose)
         {
             $this->lexer->exporter->Listen(
-                \Peg\Signals\Type\Definitions::EXPORT_MESSAGE, 
-                function(\Peg\Signals\Data\Definitions\ExportMessage $signal_data){
+                \Peg\Lib\Signals\Type\Definitions::EXPORT_MESSAGE, 
+                function(\Peg\Lib\Signals\Data\Definitions\ExportMessage $signal_data){
                     print $signal_data->message . "\n";
                 }
             );

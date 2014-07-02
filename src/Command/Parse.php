@@ -5,15 +5,15 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Command;
+namespace Peg\Lib\Command;
 
-use Peg\CommandLine\Option;
-use Peg\CommandLine\OptionType;
+use Peg\Lib\CommandLine\Option;
+use Peg\Lib\CommandLine\OptionType;
 
 /**
  * Command to parse files and generate a definitions cache representing them.
  */
-class Parse extends \Peg\CommandLine\Command
+class Parse extends \Peg\Lib\CommandLine\Command
 {
 
     public function __construct()

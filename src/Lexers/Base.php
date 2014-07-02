@@ -5,13 +5,13 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Lexers;
+namespace Peg\Lib\Lexers;
 
 /**
  * Base for a lexer that extract and generates definition
  * files.
  */
-abstract class Base extends \Peg\Signals\Signal
+abstract class Base extends \Peg\Lib\Signals\Signal
 {
 
     /**
@@ -30,19 +30,19 @@ abstract class Base extends \Peg\Signals\Signal
     
     /**
      * The symbols object used to store definitions.
-     * @var \Peg\Definitions\Symbols
+     * @var \Peg\Lib\Definitions\Symbols
      */
     public $symbols;
     
     /**
      * Object used to create the symbols cache files.
-     * @var \Peg\Definitions\Exporter
+     * @var \Peg\Lib\Definitions\Exporter
      */
     public $exporter;
     
     /**
      * Object used to send message signals.
-     * @var \Peg\Signals\Data\Lexers\Message
+     * @var \Peg\Lib\Signals\Data\Lexers\Message
      */
     protected $signal_data;
     
@@ -63,23 +63,23 @@ abstract class Base extends \Peg\Signals\Signal
         
         $this->headers_path = $headers_path;
         
-        $this->symbols = new \Peg\Definitions\Symbols();
+        $this->symbols = new \Peg\Lib\Definitions\Symbols();
         
-        $this->exporter = new \Peg\Definitions\Exporter($this->symbols);
+        $this->exporter = new \Peg\Lib\Definitions\Exporter($this->symbols);
         
-        $this->signal_data = new \Peg\Signals\Data\Lexers\Message();
+        $this->signal_data = new \Peg\Lib\Signals\Data\Lexers\Message();
     }
 
     /**
      * Generates definition files in a specified path.
      * Can generate definitions of a specific type if the $type is specified
-     * using one of the values from \Peg\Definitions\Type
+     * using one of the values from \Peg\Lib\Definitions\Type
      * @param string $path
      * @param string $type The type of definitions file to generate.
      */
     public function SaveDefinitions(
         $path = null, 
-        $type=\Peg\Definitions\Type::JSON
+        $type=\Peg\Lib\Definitions\Type::JSON
     )
     {
         $this->exporter->definitions_path = $path;
@@ -97,7 +97,7 @@ abstract class Base extends \Peg\Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Type\Lexers::LEXER_MESSAGE,
+            \Peg\Lib\Signals\Type\Lexers::LEXER_MESSAGE,
             $this->signal_data
         );
     }

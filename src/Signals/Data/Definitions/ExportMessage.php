@@ -5,12 +5,12 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Signals\Data\Definitions;
+namespace Peg\Lib\Signals\Data\Definitions;
 
 /**
  * Object sent by the EXPORT_MESSAGE signal. 
  */
-class ExportMessage extends \Peg\Signals\SignalData
+class ExportMessage extends \Peg\Lib\Signals\SignalData
 {
     /**
      * A message representing current task been performed by the exporter.

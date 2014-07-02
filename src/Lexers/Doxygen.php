@@ -7,7 +7,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Lexers;
+namespace Peg\Lib\Lexers;
 
 use \DOMDocument;
 use \DOMXPath;
@@ -15,7 +15,7 @@ use \DOMXPath;
 /**
  * Implements a doxygen xml extractor of definitions.
  */
-class Doxygen extends \Peg\Lexers\Base
+class Doxygen extends \Peg\Lib\Lexers\Base
 {
 
     /**
@@ -134,7 +134,7 @@ class Doxygen extends \Peg\Lexers\Base
                         continue;
                     }
 
-                    $constant = new \Peg\Definitions\Element\Constant(
+                    $constant = new \Peg\Lib\Definitions\Element\Constant(
                         $define_name,
                         $define_initializer,
                         $define_description
@@ -176,7 +176,7 @@ class Doxygen extends \Peg\Lexers\Base
                             $enum_values->item($enum_value)
                         )->item(0)->nodeValue;
                         
-                        $constant = new \Peg\Definitions\Element\Constant(
+                        $constant = new \Peg\Lib\Definitions\Element\Constant(
                             $enum_option,
                             1,
                             $enum_description
@@ -276,7 +276,7 @@ class Doxygen extends \Peg\Lexers\Base
                         )->item(0)->nodeValue;
                     }
                     
-                    $enumeration = new \Peg\Definitions\Element\Enumeration(
+                    $enumeration = new \Peg\Lib\Definitions\Element\Enumeration(
                         $enum_name,
                         $enum_options,
                         $enum_description
@@ -357,7 +357,7 @@ class Doxygen extends \Peg\Lexers\Base
                     $file_members->item($member)
                 )->item(0)->nodeValue;
 
-                $variable = new \Peg\Definitions\Element\GlobalVariable(
+                $variable = new \Peg\Lib\Definitions\Element\GlobalVariable(
                     $global_variable_name, 
                     str_replace(
                         array(" *", " &"), 
@@ -439,7 +439,7 @@ class Doxygen extends \Peg\Lexers\Base
                     $file_members->item($member)
                 )->item(0)->nodeValue;
 
-                $typedef = new \Peg\Definitions\Element\TypeDef(
+                $typedef = new \Peg\Lib\Definitions\Element\TypeDef(
                     $typedef_name, 
                     $typedef_type, 
                     $typedef_description
@@ -530,12 +530,12 @@ class Doxygen extends \Peg\Lexers\Base
                     $function_type
                 );
 
-                $function_overload = new \Peg\Definitions\Element\Overload(
+                $function_overload = new \Peg\Lib\Definitions\Element\Overload(
                     $function_description
                 );
                 
                 $function_overload->SetReturnType(
-                    new \Peg\Definitions\Element\ReturnType(
+                    new \Peg\Lib\Definitions\Element\ReturnType(
                         $function_type
                     )
                 );
@@ -618,7 +618,7 @@ class Doxygen extends \Peg\Lexers\Base
                         ;
                     }
                     
-                    $parameter = new \Peg\Definitions\Element\Parameter(
+                    $parameter = new \Peg\Lib\Definitions\Element\Parameter(
                         $param_name, 
                         $param_type, 
                         $param_value
@@ -639,7 +639,7 @@ class Doxygen extends \Peg\Lexers\Base
         
         foreach($functions as $function_name=>$function_overloads)
         {
-            $function = new \Peg\Definitions\Element\FunctionElement(
+            $function = new \Peg\Lib\Definitions\Element\FunctionElement(
                 $function_name
             );
             
@@ -805,7 +805,7 @@ class Doxygen extends \Peg\Lexers\Base
             }
             
             // Initialize class object
-            $class = new \Peg\Definitions\Element\ClassElement(
+            $class = new \Peg\Lib\Definitions\Element\ClassElement(
                 $class_name, 
                 $class_description
             );
@@ -868,12 +868,12 @@ class Doxygen extends \Peg\Lexers\Base
                     }
                     
                     // Create method overload
-                    $function_overload = new \Peg\Definitions\Element\Overload(
+                    $function_overload = new \Peg\Lib\Definitions\Element\Overload(
                         $function_description
                     );
 
                     $function_overload->SetReturnType(
-                        new \Peg\Definitions\Element\ReturnType(
+                        new \Peg\Lib\Definitions\Element\ReturnType(
                             $function_type
                         )
                     );
@@ -1016,7 +1016,7 @@ class Doxygen extends \Peg\Lexers\Base
                                 )->item(0)->nodeValue;
                             }
                             
-                            $param = new \Peg\Definitions\Element\Parameter( 
+                            $param = new \Peg\Lib\Definitions\Element\Parameter( 
                                 $param_name, 
                                 $param_type, 
                                 $param_value
@@ -1064,7 +1064,7 @@ class Doxygen extends \Peg\Lexers\Base
                         )->item(0)->nodeValue;
                     }
                     
-                    $enumeration = new \Peg\Definitions\Element\Enumeration(
+                    $enumeration = new \Peg\Lib\Definitions\Element\Enumeration(
                         $enum_name,
                         $enum_options,
                         $enum_description
@@ -1091,7 +1091,7 @@ class Doxygen extends \Peg\Lexers\Base
                         "briefdescription", $class_member->item($member)
                     )->item(0)->nodeValue;
                     
-                    $variable = new \Peg\Definitions\Element\ClassVariable(
+                    $variable = new \Peg\Lib\Definitions\Element\ClassVariable(
                         $variable_name, 
                         $variable_type, 
                         $variable_description
@@ -1120,7 +1120,7 @@ class Doxygen extends \Peg\Lexers\Base
             
             foreach($methods as $method_name=>$method_overloads)
             {
-                $function = new \Peg\Definitions\Element\FunctionElement(
+                $function = new \Peg\Lib\Definitions\Element\FunctionElement(
                     $method_name
                 );
 

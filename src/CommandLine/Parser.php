@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\CommandLine;
+namespace Peg\Lib\CommandLine;
 
 /**
  * Class in charge of parsing the command line options
@@ -27,13 +27,13 @@ class Parser
 
     /**
      * List of command line options registered on the parser.
-     * @var \Peg\CommandLine\Option[]
+     * @var \Peg\Lib\CommandLine\Option[]
      */
     private $options;
 
     /**
      * List of sub-commands registered on the parser.
-     * @var \Peg\CommandLine\Command[]
+     * @var \Peg\Lib\CommandLine\Command[]
      */
     private $commands;
 
@@ -73,7 +73,7 @@ class Parser
 
     /**
      * Get array of options.
-     * @return \Peg\CommandLine\Option[]
+     * @return \Peg\Lib\CommandLine\Option[]
      */
     public function GetOptions()
     {
@@ -83,7 +83,7 @@ class Parser
     /**
      * Get an option by its long name.
      * @param string $name
-     * @return \Peg\CommandLine\Option|boolean
+     * @return \Peg\Lib\CommandLine\Option|boolean
      */
     public function GetOption($name)
     {
@@ -95,7 +95,7 @@ class Parser
 
     /**
      * Get array of commands
-     * @return \Peg\CommandLine\Command[]
+     * @return \Peg\Lib\CommandLine\Command[]
      */
     public function GetCommands()
     {
@@ -105,7 +105,7 @@ class Parser
     /**
      * Get a command object by its name.
      * @param string $name
-     * @return \Peg\CommandLine\Command|boolean
+     * @return \Peg\Lib\CommandLine\Command|boolean
      */
     public function GetCommand($name)
     {
@@ -117,7 +117,7 @@ class Parser
 
     /**
      * Adds a sub command to the parser.
-     * @param \Peg\CommandLine\Command $command
+     * @param \Peg\Lib\CommandLine\Command $command
      * @throws Exception
      */
     public function RegisterCommand(Command $command)
@@ -130,7 +130,7 @@ class Parser
 
     /**
      * Adds an option to the parser.
-     * @param \Peg\CommandLine\Option $option
+     * @param \Peg\Lib\CommandLine\Option $option
      * @throws Exception
      */
     public function RegisterOption(Option $option)
@@ -305,7 +305,7 @@ class Parser
     /**
      * Checks if a given option exists on a given options array
      * @param type $name
-     * @param \Peg\CommandLine\Option[] $options
+     * @param \Peg\Lib\CommandLine\Option[] $options
      */
     private function OptionExists($name, $options)
     {
@@ -322,10 +322,10 @@ class Parser
      * Parses the command line options depending on a set of given options.
      * The given options are updated with the values assigned on the
      * command line.
-     * @param \Peg\CommandLine\Option[] $options
-     * @param \Peg\CommandLine\Command $command
+     * @param \Peg\Lib\CommandLine\Option[] $options
+     * @param \Peg\Lib\CommandLine\Command $command
      */
-    private function ParseOptions(&$options, \Peg\CommandLine\Command $command = null)
+    private function ParseOptions(&$options, \Peg\Lib\CommandLine\Command $command = null)
     {
         // In case command doesn't has any options just copy any values passed to it
         if($command)

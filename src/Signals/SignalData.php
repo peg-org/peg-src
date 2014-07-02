@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-namespace Peg\Signals;
+namespace Peg\Lib\Signals;
 
 /**
  * Container of variable references that is passed to every signal listener.

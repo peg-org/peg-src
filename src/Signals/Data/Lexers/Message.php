@@ -5,12 +5,12 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Signals\Data\Lexers;
+namespace Peg\Lib\Signals\Data\Lexers;
 
 /**
  * Object sent by the LEXER_MESSAGE signal. 
  */
-class Message extends \Peg\Signals\SignalData
+class Message extends \Peg\Lib\Signals\SignalData
 {
     /**
      * A message representing current task been performed by the lexer.

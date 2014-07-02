@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a function or class method overload element.
@@ -21,13 +21,13 @@ class Overload
     
     /**
      * The return type of the overload.
-     * @var \Peg\Definitions\Element\ReturnType
+     * @var \Peg\Lib\Definitions\Element\ReturnType
      */
     public $return_type;
     
     /**
      * Holds the list of parameters for the overload.
-     * @var \Peg\Definitions\Element\Parameter[]
+     * @var \Peg\Lib\Definitions\Element\Parameter[]
      */
     public $parameters;
     
@@ -69,7 +69,7 @@ class Overload
     
     /**
      * Reference to the parent function element.
-     * @var \Peg\Definitions\Element\FunctionElement
+     * @var \Peg\Lib\Definitions\Element\FunctionElement
      */
     public $function;
     
@@ -84,10 +84,10 @@ class Overload
     
     /**
      * Helper function to set the overload return type.
-     * @param \Peg\Definitions\Element\ReturnType $return_type
-     * @return \Peg\Definitions\Element\Overload
+     * @param \Peg\Lib\Definitions\Element\ReturnType $return_type
+     * @return \Peg\Lib\Definitions\Element\Overload
      */
-    public function SetReturnType(\Peg\Definitions\Element\ReturnType $return_type)
+    public function SetReturnType(\Peg\Lib\Definitions\Element\ReturnType $return_type)
     {
         $return_type->overload =& $this;
         
@@ -98,10 +98,10 @@ class Overload
     
     /**
      * Adds a new parameter.
-     * @param \Peg\Definitions\Element\Parameter $parameter
-     * @return \Peg\Definitions\Element\Overload
+     * @param \Peg\Lib\Definitions\Element\Parameter $parameter
+     * @return \Peg\Lib\Definitions\Element\Overload
      */
-    public function AddParameter(\Peg\Definitions\Element\Parameter $parameter)
+    public function AddParameter(\Peg\Lib\Definitions\Element\Parameter $parameter)
     {
         $parameter->overload =& $this;
         

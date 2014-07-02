@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Definitions\Element;
+namespace Peg\Lib\Definitions\Element;
 
 /**
  * Represents a namespace.
@@ -27,37 +27,37 @@ class NamespaceElement
     
     /**
      * Array of constants declared on the namespace.
-     * @var \Peg\Definitions\Element\Constant[]
+     * @var \Peg\Lib\Definitions\Element\Constant[]
      */
     public $constants;
 
     /**
      * Array of enumerations declared on the namespace.
-     * @var \Peg\Definitions\Element\Enumeration[]
+     * @var \Peg\Lib\Definitions\Element\Enumeration[]
      */
     public $enumerations;
 
     /**
      * Array of type definitions declared on the file.
-     * @var \Peg\Definitions\Element\TypeDef[]
+     * @var \Peg\Lib\Definitions\Element\TypeDef[]
      */
     public $type_definitions;
 
     /**
      * Array of variables declared on the namespace.
-     * @var \Peg\Definitions\Element\GlobalVariable[]
+     * @var \Peg\Lib\Definitions\Element\GlobalVariable[]
      */
     public $global_variables;
     
     /**
      * Array of functions declared on the namespace.
-     * @var \Peg\Definitions\Element\FunctionElement[]
+     * @var \Peg\Lib\Definitions\Element\FunctionElement[]
      */
     public $functions;
 
     /**
      * Array of classes declared on the namespace.
-     * @var \Peg\Definitions\Element\ClassElement[]
+     * @var \Peg\Lib\Definitions\Element\ClassElement[]
      */
     public $classes;
 

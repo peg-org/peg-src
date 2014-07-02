@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\CommandLine;
+namespace Peg\Lib\CommandLine;
 
 /**
  * Represents a command line option.
@@ -29,7 +29,7 @@ class Option
 
     /**
      * Data type of the option represented by one of the constants from
-     * \Peg\CommandLine\OptionType
+     * \Peg\Lib\CommandLine\OptionType
      * @var integer
      */
     public $type;

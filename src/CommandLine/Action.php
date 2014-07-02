@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\CommandLine;
+namespace Peg\Lib\CommandLine;
 
 /**
  * Class that represents an action executed when a specific command is called.

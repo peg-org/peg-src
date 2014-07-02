@@ -5,7 +5,7 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Localization;
+namespace Peg\Localization;
 
 /**
  * Defines the language class used for translating system strings by using

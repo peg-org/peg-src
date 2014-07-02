@@ -43,8 +43,8 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
         if($this->verbose)
         {
             $this->lexer->Listen(
-                \Peg\Signals\Lexers::LEXER_MESSAGE, 
-                function(\Peg\Signals\Lexers\Message $signal_data){
+                \Peg\Signals\Type\Lexers::LEXER_MESSAGE, 
+                function(\Peg\Signals\Data\Lexers\Message $signal_data){
                     print $signal_data->message . "\n";
                 }
             );
@@ -56,8 +56,8 @@ class Doxygen extends \Peg\Command\Action\Parse\Base
         if($this->verbose)
         {
             $this->lexer->exporter->Listen(
-                \Peg\Signals\Definitions::EXPORT_MESSAGE, 
-                function(\Peg\Signals\Definitions\ExportMessage $signal_data){
+                \Peg\Signals\Type\Definitions::EXPORT_MESSAGE, 
+                function(\Peg\Signals\Data\Definitions\ExportMessage $signal_data){
                     print $signal_data->message . "\n";
                 }
             );

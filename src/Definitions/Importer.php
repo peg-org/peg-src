@@ -12,7 +12,7 @@ use Peg\Utilities\Json;
 /**
  * Loads cached definitions into a symbols object.
  */
-class Importer extends \Signals\Signal
+class Importer extends \Peg\Signals\Signal
 {
     /**
      * Reference to the symbols object that is going to be 
@@ -36,7 +36,7 @@ class Importer extends \Signals\Signal
     
     /**
      * Data that is send each time a signal is launched.
-     * @var \Peg\Signals\Definitions\ImportMessage 
+     * @var \Peg\Signals\Data\Definitions\ImportMessage 
      */
     private $signal_data;
     
@@ -55,7 +55,7 @@ class Importer extends \Signals\Signal
         $this->symbols =& $symbols;
         $this->definitions_path = $path;
         $this->import_type = $import_type;
-        $this->signal_data = new \Peg\Signals\Definitions\ImportMessage;
+        $this->signal_data = new \Peg\Signals\Data\Definitions\ImportMessage;
     }
     
     /**
@@ -605,7 +605,7 @@ class Importer extends \Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Definitions::IMPORT_MESSAGE,
+            \Peg\Signals\Type\Definitions::IMPORT_MESSAGE,
             $this->signal_data
         );
     }

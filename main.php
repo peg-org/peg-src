@@ -1,6 +1,8 @@
 <?php
 /**
- * Main start point for the PHP Extensions Generator
+ * Basic cli implementation used for testing and development of the library. 
+ * If your are planning to use peg please use http://github.com/peg-org/peg-cli 
+ * which is the official and full featured cli interface of the project.
  *
  * @author Jefferson González
  * @license MIT
@@ -25,7 +27,7 @@ else
     define("PEG_LOCALE_PATH", __DIR__ . "/locale");
 
 
-if(!file_exists(PEG_LIBRARY_PATH . "lib"))
+if(!file_exists(PEG_LIBRARY_PATH . "src"))
     throw new Exception("Peg lib path not found.");
 
 if(!file_exists(PEG_SKELETON_PATH))
@@ -35,8 +37,9 @@ if(!file_exists(PEG_SKELETON_PATH))
 function peg_autoloader($class_name)
 {
     $file = str_replace("\\", "/", $class_name) . ".php";
+    $file = str_replace("Peg/", "", $file);
 
-    include(PEG_LIBRARY_PATH . "lib/" . $file);
+    include(PEG_LIBRARY_PATH . "src/" . $file);
 }
 
 spl_autoload_register("peg_autoloader");
@@ -49,7 +52,7 @@ function t($text)
 
     if(!$language_object)
     {
-        $language_object = new Localization\Language(PEG_LOCALE_PATH);
+        $language_object = new Peg\Localization\Language(PEG_LOCALE_PATH);
     }
 
     return $language_object->Translate($text);

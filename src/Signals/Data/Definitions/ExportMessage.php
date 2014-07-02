@@ -5,15 +5,15 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Signals\Definitions;
+namespace Peg\Signals\Data\Definitions;
 
 /**
- * Object sent by the IMPORT_MESSAGE signal. 
+ * Object sent by the EXPORT_MESSAGE signal. 
  */
-class ImportMessage extends \Signals\SignalData
+class ExportMessage extends \Peg\Signals\SignalData
 {
     /**
-     * A message representing current task been performed by the importer.
+     * A message representing current task been performed by the exporter.
      * @var string
      */
     public $message;

@@ -11,7 +11,7 @@ namespace Peg\Lexers;
  * Base for a lexer that extract and generates definition
  * files.
  */
-abstract class Base extends \Signals\Signal
+abstract class Base extends \Peg\Signals\Signal
 {
 
     /**
@@ -42,7 +42,7 @@ abstract class Base extends \Signals\Signal
     
     /**
      * Object used to send message signals.
-     * @var \Peg\Signals\Lexers\Message
+     * @var \Peg\Signals\Data\Lexers\Message
      */
     protected $signal_data;
     
@@ -67,7 +67,7 @@ abstract class Base extends \Signals\Signal
         
         $this->exporter = new \Peg\Definitions\Exporter($this->symbols);
         
-        $this->signal_data = new \Peg\Signals\Lexers\Message();
+        $this->signal_data = new \Peg\Signals\Data\Lexers\Message();
     }
 
     /**
@@ -97,7 +97,7 @@ abstract class Base extends \Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Lexers::LEXER_MESSAGE,
+            \Peg\Signals\Type\Lexers::LEXER_MESSAGE,
             $this->signal_data
         );
     }

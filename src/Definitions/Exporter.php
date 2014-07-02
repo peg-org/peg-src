@@ -13,7 +13,7 @@ use Peg\Utilities\FileSystem;
 /**
  * Export definitions from a symbols object into cache files.
  */
-class Exporter extends \Signals\Signal
+class Exporter extends \Peg\Signals\Signal
 {
     /**
      * Reference to the symbols object that is going to be cached into files.
@@ -36,7 +36,7 @@ class Exporter extends \Signals\Signal
     
     /**
      * Data that is send each time a signal is launched.
-     * @var \Peg\Signals\Definitions\ExportMessage 
+     * @var \Peg\Signals\Data\Definitions\ExportMessage 
      */
     private $signal_data;
     
@@ -55,7 +55,7 @@ class Exporter extends \Signals\Signal
         $this->symbols =& $symbols;
         $this->definitions_path = $path;
         $this->export_type = $export_type;
-        $this->signal_data = new \Peg\Signals\Definitions\ExportMessage;
+        $this->signal_data = new \Peg\Signals\Data\Definitions\ExportMessage;
     }
     
     /**
@@ -1077,7 +1077,7 @@ class Exporter extends \Signals\Signal
         $this->signal_data->message = $message;
         
         $this->Send(
-            \Peg\Signals\Definitions::EXPORT_MESSAGE,
+            \Peg\Signals\Type\Definitions::EXPORT_MESSAGE,
             $this->signal_data
         );
     }

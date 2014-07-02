@@ -670,6 +670,8 @@ class Doxygen extends \Peg\Lib\Lexers\Base
      * details, enumerations and member variables.
      * @param \DOMDocument $document
      * @param string $namespace
+     * @todo Also extract a class unnamed enums and handle array parameters
+     * with non bracket array elements.
      */
     private function ExtractClasses(\DOMDocument $document, $namespace = "")
     {

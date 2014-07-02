@@ -61,11 +61,11 @@ class Language
 
     /**
      * Gets the current system language.
+     * @todo Implement also for microsoft windows.
      * @return string One of the values from \Localization\LanguageCode
      */
     public function GetSystemLangauge()
     {
-        //TODO: Implement also for microsoft windows
         $language_parts = explode(":", $_SERVER["LANGUAGE"]);
 
         return $language_parts[0];

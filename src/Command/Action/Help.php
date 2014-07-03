@@ -121,5 +121,3 @@ class Help extends \Peg\Lib\CommandLine\Action
     }
 
 }
-
-?>

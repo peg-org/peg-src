@@ -18,5 +18,3 @@ abstract class Action
      */
     abstract public function OnCall(Command $command);
 }
-
-?>

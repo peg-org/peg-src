@@ -611,5 +611,3 @@ class Importer extends \Peg\Lib\Signals\Signal
     }
 
 }
-
-?>

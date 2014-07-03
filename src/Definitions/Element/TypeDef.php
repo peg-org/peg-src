@@ -45,5 +45,3 @@ class TypeDef extends VariableType
     }
 
 }
-
-?>

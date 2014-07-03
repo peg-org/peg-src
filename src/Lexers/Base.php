@@ -108,5 +108,3 @@ abstract class Base extends \Peg\Lib\Signals\Signal
      */
     abstract public function Start();
 }
-
-?>

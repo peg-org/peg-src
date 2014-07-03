@@ -84,5 +84,3 @@ abstract class Base
     abstract public function Write();
 
 }
-
-?>

@@ -97,5 +97,3 @@ class Init extends \Peg\Lib\CommandLine\Action
     }
 
 }
-
-?>

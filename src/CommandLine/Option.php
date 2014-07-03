@@ -163,5 +163,3 @@ class Option
     }
 
 }
-
-?>

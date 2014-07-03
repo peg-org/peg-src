@@ -29,5 +29,3 @@ class Help extends \Peg\Lib\CommandLine\Command
     }
 
 }
-
-?>

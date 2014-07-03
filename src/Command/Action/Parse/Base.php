@@ -107,5 +107,3 @@ abstract class Base extends \Peg\Lib\CommandLine\Action
      */
     abstract public function Start($path);
 }
-
-?>

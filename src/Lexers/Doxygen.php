@@ -1139,5 +1139,3 @@ class Doxygen extends \Peg\Lib\Lexers\Base
     }
 
 }
-
-?>

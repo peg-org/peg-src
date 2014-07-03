@@ -1082,5 +1082,3 @@ class Exporter extends \Peg\Lib\Signals\Signal
         );
     }
 }
-
-?>

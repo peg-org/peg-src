@@ -75,5 +75,3 @@ class ClassVariable extends VariableType
     }
 
 }
-
-?>

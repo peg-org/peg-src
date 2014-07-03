@@ -46,5 +46,3 @@ class GlobalVariable extends VariableType
     }
 
 }
-
-?>

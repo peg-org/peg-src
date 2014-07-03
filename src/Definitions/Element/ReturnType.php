@@ -20,5 +20,3 @@ class ReturnType extends VariableType
     public $overload;
 
 }
-
-?>

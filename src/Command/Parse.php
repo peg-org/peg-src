@@ -83,5 +83,3 @@ class Parse extends \Peg\Lib\CommandLine\Command
     }
 
 }
-
-?>

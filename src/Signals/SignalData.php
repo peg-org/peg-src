@@ -48,4 +48,3 @@ class SignalData
         return $this->arguments[$name];
     }
 }
-?>

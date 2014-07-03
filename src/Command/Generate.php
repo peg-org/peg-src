@@ -22,7 +22,7 @@ class Generate extends \Peg\Lib\CommandLine\Command
 
         $this->description = t("Generates the extension source code and configuration files.");
 
-        $this->RegisterAction(new \Peg\Lib\Command\Action\Generate());
+        $this->RegisterAction(new \Peg\Lib\Command\Action\Generate\ZendPHP);
         
         $format = new Option(array(
             "long_name"     => "format",
@@ -35,8 +35,29 @@ class Generate extends \Peg\Lib\CommandLine\Command
         ));
         
         $this->AddOption($format);
+        
+        $engine = new Option(array(
+            "long_name"     => "engine",
+            "short_name"    => "e",
+            "type"          => OptionType::STRING,
+            "required"      => false,
+            "description"   => t("The php engine to generate source code for. Default: zendphp") 
+                . "\n" . t("Allowed values:") . " zendphp",
+            "default_value" => "zendphp"
+        ));
+        
+        $this->AddOption($engine);
+        
+        $verbose = new Option(array(
+            "long_name"     => "verbose",
+            "short_name"    => "v",
+            "type"          => OptionType::FLAG,
+            "required"      => false,
+            "description"   => t("Turns verbosity on."),
+            "default_value" => "",
+        ));
+
+        $this->AddOption($verbose);
     }
 
 }
-
-?>

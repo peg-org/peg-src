@@ -67,5 +67,3 @@ class Doxygen extends \Peg\Lib\Command\Action\Parse\Base
     }
 
 }
-
-?>

@@ -69,6 +69,3 @@ $parser = Peg\Lib\Application::GetCLIParser();
 
 // Start the command line parser
 $parser->Start($argc, $argv);
-
-
-?>

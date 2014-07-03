@@ -224,19 +224,10 @@ class Application
             $importer = new Definitions\Importer(
                 self::$symbols, 
                 "definitions",
-                Definitions\Type::PHP
-            );
-            
-            $importer->Start();
-            
-            // Code to test exporter
-            $exporter = new Definitions\Exporter(
-                self::$symbols, 
-                "output", 
                 Definitions\Type::JSON
             );
             
-            $exporter->Start();
+            $importer->Start();
         }
 
         return self::$symbols;
@@ -251,5 +242,3 @@ class Application
         return self::$plugin_loader;
     }
 }
-
-?>

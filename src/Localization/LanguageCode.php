@@ -165,5 +165,3 @@ class LanguageCode
     const ZULU = "zu";
 
 }
-
-?>

@@ -169,5 +169,3 @@ class INI extends \Peg\Lib\Config\Base
     }
 
 }
-
-?>

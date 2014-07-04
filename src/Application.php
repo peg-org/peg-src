@@ -92,6 +92,7 @@ class Application
         if(self::ValidExtension())
         {
             self::$plugin_loader->Start(self::GetCwd() . "/plugins");
+            Settings::Load(self::GetCwd(), "peg.conf");
         }
     }
 

@@ -198,6 +198,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($constants_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $constants)
             {
                 foreach($constants as $constant_name => $constant_data)
@@ -233,6 +235,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($enumerations_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $enumerations)
             {
                 foreach($enumerations as $enumeration_name => $enumeration_data)
@@ -268,6 +272,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($typedef_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $typedefs)
             {
                 foreach($typedefs as $typedef_name => $typedef_data)
@@ -303,6 +309,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($variables_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $variables)
             {
                 foreach($variables as $variable_name => $variable_data)
@@ -340,6 +348,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($functions_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $functions)
             {
                 foreach($functions as $function_name => $function_overloads)
@@ -434,6 +444,8 @@ class Importer extends \Peg\Lib\Signals\Signal
 
         foreach($classes_def as $header => $namespaces)
         {
+            $this->symbols->AddHeader($header);
+            
             foreach($namespaces as $namespace => $classes)
             {
                 foreach($classes as $class_name => $methods)

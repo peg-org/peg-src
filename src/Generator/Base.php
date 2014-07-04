@@ -44,8 +44,75 @@ abstract class Base
     )
     {
         $this->symbols =& $symbols;
-        $this->templates_path = $templates;
-        $this->output_path = $output;
+        $this->templates_path = rtrim($templates, "\\/") . "/";
+        $this->output_path = rtrim($output, "\\/") . "/";
+    }
+    
+    /**
+     * Useful to indent the output of a template.
+     * @param string $code Output code of template.
+     * @param int $spaces Amount of spaces to indent the code.
+     * @return string Code indented.
+     */
+    public function Indent($code, $spaces)
+    {
+        $indent = "";
+        
+        for($i=0; $i<$spaces; $i++)
+        {
+            $indent .= " ";
+        }
+        
+        $code = $indent . str_replace("\n", "\n$indent", $code);
+        
+        return $code;
+    }
+    
+    /**
+     * Converts a header file name into a suitable flag for the compiler 
+     * pre-processor. Eg: header.h -> PHP_HEADER_H this can be used for
+     * #ifndef checks on the generated code to prevent double inclusions.
+     * @param string $name
+     */
+    public function GetHeaderDefine($name)
+    {
+        return "PHP_" . strtoupper(
+            str_replace(
+                array("/", ".", "-"), 
+                "_", 
+                $name
+            )
+        );
+    }
+    
+    /**
+     * Converts a header filename into one that doesn't conflicts with
+     * original which can be used to store the generated code. Eg:
+     * header.h -> php_header.h or lib/header.h -> php_lib_header.h
+     * @param string $name
+     */
+    public function GetHeaderNamePHP($name)
+    {
+        return "php_" . strtolower(
+            str_replace(
+                array("/", "-"), 
+                "_", 
+                $name
+            )
+        );
+    }
+    
+    /**
+     * Converts a header file into a valid function name that should be
+     * used when generating the function which registers constants. 
+     * Eg: header.h -> php_header_h_constants
+     * @param string $name Name of the header file.
+     */
+    public function GetConstantsFunctionName($name)
+    {
+        return strtolower(
+            $this->GetHeaderDefine($name)
+        ) . "_constants";
     }
     
     abstract public function Start();

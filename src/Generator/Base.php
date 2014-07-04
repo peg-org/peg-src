@@ -63,7 +63,7 @@ abstract class Base
             $indent .= " ";
         }
         
-        $code = $indent . str_replace("\n", "\n$indent", $code);
+        $code = str_replace("\n", "\n$indent", $code);
         
         return $code;
     }
@@ -103,6 +103,21 @@ abstract class Base
     }
     
     /**
+     * Converts a header filename into a source file name which can be used 
+     * to store the generated code. 
+     * Eg: header.h -> php_header.cpp or lib/header.h -> php_lib_header.cpp
+     * @param string $name
+     */
+    public function GetSourceNamePHP($name)
+    {
+        return str_replace(
+            ".h", 
+            ".cpp", 
+            $this->GetHeaderNamePHP($name)
+        );
+    }
+    
+    /**
      * Converts a header file into a valid function name that should be
      * used when generating the function which registers constants. 
      * Eg: header.h -> php_header_h_constants
@@ -115,5 +130,14 @@ abstract class Base
         ) . "_constants";
     }
     
+    /**
+     * Generate all the sources.
+     */
     abstract public function Start();
+    
+    /**
+     * Generate the header source of a specific header file.
+     * @param string $header_name
+     */
+    abstract public function GenerateHeader($header_name);
 }

@@ -11,3 +11,5 @@
 
 #ifndef <?=$header_define?> 
 
+#include "common.h"
+

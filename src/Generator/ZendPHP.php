@@ -71,33 +71,35 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         $header_define = $this->GetHeaderDefine($header_name);
 
         $header_content = "";
+        
+        // Get heading of header file
+        ob_start();
+            include($this->GetHeaderTemplate($header_name));
+            $header_content .= ob_get_contents();
+        ob_end_clean();
 
-        foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+        // Get constants function template content
+        if($header_object->HasConstants())
         {
-            // Get heading of header file
+            // Name used for the constants_function_decl template
+            $function_name = $this->GetConstantsFunctionName($header_name);
+
             ob_start();
-                include($this->GetHeaderTemplate($header_name));
-                $header_content .= ob_get_contents();
-            ob_end_clean();
-
-            // Get constants function template content
-            if($header_object->HasConstants())
-            {
-                // Name used for the constants_function_decl template
-                $function_name = $this->GetConstantsFunctionName($header_name);
-
-                ob_start();
-                    include($this->GetConstantsFunctionTemplate($header_name));
-                    $header_content .= ob_get_contents();
-                ob_end_clean();
-            }
-
-            // Get footer of header file
-            ob_start();
-                include($this->GetHeaderTemplate($header_name, "footer"));
+                include($this->GetConstantsFunctionTemplate($header_name));
                 $header_content .= ob_get_contents();
             ob_end_clean();
         }
+
+        foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+        {
+            // Do something here.
+        }
+        
+        // Get footer of header file
+        ob_start();
+            include($this->GetHeaderTemplate($header_name, "footer"));
+            $header_content .= ob_get_contents();
+        ob_end_clean();
 
         return $header_content;
     }
@@ -115,7 +117,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         $source_content = "";
         
-        // Get heading of header file
+        // Get heading of source file
         ob_start();
             include($this->GetSourceTemplate($header_name));
             $source_content .= ob_get_contents();
@@ -151,7 +153,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             ob_end_clean();
         }
 
-        // Get footer of header file
+        // Get footer of source file
         ob_start();
             include($this->GetSourceTemplate($header_name, "footer"));
             $source_content .= ob_get_contents();

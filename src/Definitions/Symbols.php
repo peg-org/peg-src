@@ -205,11 +205,11 @@ class Symbols
                     $standard_type = StandardType::OBJECT;
                 }
                 //Check if enumartion of class
-                elseif(is_class_enum($cleaned_type))
+                elseif($this->HasClassEnum($type->type))
                 {
                     $standard_type = StandardType::CLASS_ENUM;
                 }
-                //Check if global enumartion
+                //Check if global enumertion
                 elseif($this->HasEnumeration($type->type))
                 {
                     $standard_type = StandardType::ENUM;
@@ -221,6 +221,93 @@ class Symbols
         }
         
         return $standard_type;
+    }
+    
+    /**
+     * Get the components of a variable type as namespace and class by
+     * checking the whole symbols object for matches.
+     * @param string $type A plain variable type 
+     * eg: somens::sometype, somens::someclass::sometype.
+     * @return \Peg\Lib\Definitions\Element\TypeComponents
+     */
+    public function GetComponents($type)
+    {
+        $type = trim(str_replace("::", "\\", $type));
+        
+        $type_elements = explode("\\", $type);
+        
+        $components = new Element\TypeComponents();
+        
+        if(count($type_elements) > 1)
+        {
+            $last_element = $type_elements[count($type_elements)-1];
+            unset($type_elements[count($type_elements)-1]);
+            
+            $prelast_element = $type_elements[count($type_elements)-1];
+            
+            $last_element_index = count($type_elements)-1;
+            
+            $namespace = "";
+            
+            for($ri=$last_element_index; $ri>=0; $ri--)
+            {
+                $namespace = implode("\\", $type_elements);
+                
+                if($this->HasNamespace($namespace))
+                {
+                    break;
+                }
+                
+                $namespace = "";
+                
+                unset($type_elements[count($type_elements)-1]);
+            }
+            
+            if($namespace)
+                $components->namespace = $namespace;
+            
+            // If pre-last component isn't part of the namespace then
+            // it must be a class.
+            if(strstr($namespace, "\\$prelast_element") === false)
+                $components->class = $prelast_element;
+            
+            $components->type = $last_element;
+        }
+        else
+        {
+            $components->type = $type;
+        }
+        
+        return $components;
+    }
+    
+    /**
+     * Check if the symbols object has a given namespace.
+     * @param string $namespace
+     * @param string $header A specific header to search in.
+     * @return bool
+     */
+    public function HasNamespace($namespace, $header="")
+    {
+        if($header)
+        {
+            if(isset($this->headers[$header]->namespaces[$namespace]))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                if(isset($header_object->namespaces[$namespace]))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -281,6 +368,7 @@ class Symbols
     
     /**
      * Check if the symbols object has an enumeration.
+     * @todo Resolve namespaces that are part of the name.
      * @param string $name Name of the enumeration.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
@@ -337,6 +425,7 @@ class Symbols
     
     /**
      * Check if the symbols object has a typedef.
+     * @todo Resolve namespaces that are part of the name.
      * @param string $name Name of the typedef.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
@@ -393,6 +482,7 @@ class Symbols
     
     /**
      * Check if the symbols object has a global variable.
+     * @todo Resolve namespaces that are part of the name.
      * @param string $name Name of the global variable.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
@@ -449,6 +539,7 @@ class Symbols
     
     /**
      * Check if the symbols object has a function.
+     * @todo Resolve namespaces that are part of the name.
      * @param string $name Name of the function.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
@@ -505,6 +596,7 @@ class Symbols
     
     /**
      * Check if the symbols object has a class.
+     * @todo Resolve namespaces that are part of the name.
      * @param string $name Name of the class.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
@@ -552,6 +644,48 @@ class Symbols
                     {
                         return true;
                     }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Checks if a given type is a class enumeration.
+     * and class names separated by the :: operator or \.
+     * @param string $type
+     * @return bool
+     */
+    public function HasClassEnum($type)
+    {   
+        $components = $this->GetComponents($type);
+        
+        if($components->HasClass())
+        {
+            foreach($this->headers as $header_object)
+            {
+                if($components->HasNamespace())
+                {
+                    if(
+                        isset(
+                            $header_object->namespaces[$components->namespace]
+                                ->classes[$components->class]
+                                ->enumerations[$components->type]
+                        )
+                    )
+                        return true;
+                }
+                else
+                {
+                    if(
+                        isset(
+                            $header_object->namespaces["\\"]
+                                ->classes[$components->class]
+                                ->enumerations[$components->type]
+                        )
+                    )
+                        return true;
                 }
             }
         }

@@ -1,3 +1,3 @@
 BEGIN_EXTERN_C()
-void <?=$function_name?>();
+void <?=strtolower($header_define)?>_constants(int module_number TSRMLS_DC);
 END_EXTERN_C()

@@ -60,6 +60,12 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         }
     }
 
+    /**
+     * Generates a sepcific header file.
+     * @todo Handle namespaces.
+     * @param string $header_name
+     * @return string Source code.
+     */
     public function GenerateHeader($header_name)
     {
         // Variables used by some template files.
@@ -81,13 +87,23 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         // Get constants function template content
         if($header_object->HasConstants())
         {
-            // Name used for the constants_function_decl template
-            $function_name = $this->GetConstantsFunctionName($header_name);
-
             ob_start();
                 include($this->GetConstantsFunctionTemplate($header_name));
                 $header_content .= ob_get_contents();
             ob_end_clean();
+            
+            $header_content .= "\n";
+        }
+        
+        // Get enums function template content
+        if($header_object->HasEnumerations())
+        {
+            ob_start();
+                include($this->GetEnumsFunctionTemplate($header_name));
+                $header_content .= ob_get_contents();
+            ob_end_clean();
+            
+            $header_content .= "\n";
         }
 
         foreach($header_object->namespaces as $namespace_name=>$namespace_object)
@@ -104,6 +120,12 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         return $header_content;
     }
     
+    /**
+     * Generates a sepcific header source file.
+     * @todo Handle namespaces.
+     * @param string $header_name
+     * @return string Source code.
+     */
     public function GenerateSource($header_name)
     {
         // Variables used by some template files.
@@ -126,9 +148,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         // Get constants function template content
         if($header_object->HasConstants())
         {
-            // Name used for the constants_function_decl template
-            $function_name = $this->GetConstantsFunctionName($header_name);
-
             ob_start();
                 include($this->GetConstantsFunctionTemplate($header_name, "header"));
                 $source_content .= ob_get_contents();
@@ -151,6 +170,43 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 include($this->GetConstantsFunctionTemplate($header_name, "footer"));
                 $source_content .= ob_get_contents();
             ob_end_clean();
+            
+            $source_content .= "\n";
+        }
+        
+        // Get enums function template content
+        if($header_object->HasEnumerations())
+        {
+            ob_start();
+                include($this->GetEnumsFunctionTemplate($header_name, "header"));
+                $source_content .= ob_get_contents();
+            ob_end_clean();
+
+            foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+            {
+                foreach($namespace_object->enumerations as $enum_name=>$enum_object)
+                {
+                    ob_start();
+                        include($this->GetEnumsFunctionTemplate($enum_name, "class"));
+                        $source_content .= $this->Indent(ob_get_contents(), 4);
+                    ob_end_clean();
+                        
+                    foreach($enum_object->options as $enum_option)
+                    {
+                        ob_start();
+                            include($this->GetEnumsFunctionTemplate($enum_name, "constant"));
+                            $source_content .= $this->Indent(ob_get_contents(), 4);
+                        ob_end_clean();
+                    }
+                }
+            }
+            
+            ob_start();
+                include($this->GetEnumsFunctionTemplate($header_name, "footer"));
+                $source_content .= ob_get_contents();
+            ob_end_clean();
+            
+            $source_content .= "\n";
         }
 
         // Get footer of source file
@@ -165,11 +221,11 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     /**
      * Retrieve the template path for a header, also checks if a valid override
      * exists and returns that instead.
-     * @param string $name
+     * @param string $header_name Name of header.
      * @param string $type Can be header or footer.
      * @return string Path to template file.
      */
-    public function GetHeaderTemplate($name, $type="header")
+    public function GetHeaderTemplate($header_name, $type="header")
     {
         $override = $this->templates_path
             . "zend_php/helpers/header_overrides/"
@@ -177,7 +233,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 str_replace(
                     array("/", "-", "."),
                     "_",
-                    $name
+                    $header_name
                 )
             )
             . ".php"
@@ -197,11 +253,11 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     /**
      * Retrieve the template path for a source, also checks if a valid override
      * exists and returns that instead.
-     * @param string $name
+     * @param string $header_name Name of header.
      * @param string $type Can be header or footer.
      * @return string Path to template file.
      */
-    public function GetSourceTemplate($name, $type="header")
+    public function GetSourceTemplate($header_name, $type="header")
     {
         $override = $this->templates_path
             . "zend_php/helpers/source_overrides/"
@@ -209,7 +265,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 str_replace(
                     array("/", "-", "."),
                     "_",
-                    $name
+                    $header_name
                 )
             )
             . ".php"
@@ -227,21 +283,21 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
 
     /**
-     * Retrieve the template path for constant functions, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $name
+     * Retrieve the template path for constants registration function, 
+     * also checks if a valid override exists and returns that instead.
+     * @param string $header_name Name of header file.
      * @param string $type Can be header, footer or decl.
      * @return string Path to template file.
      */
-    public function GetConstantsFunctionTemplate($name, $type="decl")
+    public function GetConstantsFunctionTemplate($header_name, $type="decl")
     {
         $override = $this->templates_path
-            . "zend_php/helpers/constants_function_overrides/"
+            . "zend_php/helpers/constant_overrides/"
             . "{$type}_" . strtolower(
                 str_replace(
                     array("/", "-", "."),
                     "_",
-                    $name
+                    $header_name
                 )
             )
             . ".php"
@@ -259,10 +315,10 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
     
     /**
-     * Retrieve the template path for constant functions, also checks
+     * Retrieve the template path for registering constants, also checks
      * if a valid override exists and returns that instead.
      * @todo Improve this to handle various types.
-     * @param string $name
+     * @param string $name Name of constant.
      * @return string Path to template file.
      */
     public function GetRegisterConstantTemplate($name)
@@ -270,6 +326,70 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         return $this->templates_path
             . "zend_php/constants/"
             . "integer.php"
+        ;
+    }
+    
+    /**
+     * Retrieve the template path for enums registration function, 
+     * also checks if a valid override exists and returns that instead.
+     * @param string $header_name Name of header file.
+     * @param string $type Can be header, footer or decl.
+     * @return string Path to template file.
+     */
+    public function GetEnumsFunctionTemplate($header_name, $type="decl")
+    {
+        $override = $this->templates_path
+            . "zend_php/helpers/enum_overrides/"
+            . "function_{$type}_" . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $header_name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
+        return $this->templates_path
+            . "zend_php/helpers/"
+            . "enums_function_$type.php"
+        ;
+    }
+    
+    /**
+     * Retrieve the template path for registering enums, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $name Name of the enumaration.
+     * @param string $type Can be class or constant.
+     * @return string Path to template file.
+     */
+    public function GetRegisterEnumTemplate($name, $type="class")
+    {
+        $override = $this->templates_path
+            . "zend_php/helpers/enum_overrides/"
+            . "declare_{$type}_" . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
+        return $this->templates_path
+            . "zend_php/helpers/"
+            . "enums_declare_$type.php"
         ;
     }
 }

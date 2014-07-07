@@ -1,2 +1,2 @@
 
-#endif <?=$header_define?>
+#endif //<?=$header_define?>

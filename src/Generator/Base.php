@@ -118,19 +118,6 @@ abstract class Base
     }
     
     /**
-     * Converts a header file into a valid function name that should be
-     * used when generating the function which registers constants. 
-     * Eg: header.h -> php_header_h_constants
-     * @param string $name Name of the header file.
-     */
-    public function GetConstantsFunctionName($name)
-    {
-        return strtolower(
-            $this->GetHeaderDefine($name)
-        ) . "_constants";
-    }
-    
-    /**
      * Generate all the sources.
      */
     abstract public function Start();
@@ -140,4 +127,10 @@ abstract class Base
      * @param string $header_name
      */
     abstract public function GenerateHeader($header_name);
+    
+    /**
+     * Generate the source file of a specific header file.
+     * @param string $header_name
+     */
+    abstract public function GenerateSource($header_name);
 }

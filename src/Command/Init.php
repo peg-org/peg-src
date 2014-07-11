@@ -69,6 +69,18 @@ class Init extends \Peg\Lib\CommandLine\Command
         ));
 
         $this->AddOption($version);
+        
+        $config_type = new Option(array(
+            "long_name"     => "config-type",
+            "short_name"    => "t",
+            "type"          => OptionType::STRING,
+            "required"      => false,
+            "description"   => t("Set the configuration file type. Default: json.")
+                . "\n" . t("Allowed values:") . " json, ini",
+            "default_value" => "json"
+        ));
+
+        $this->AddOption($config_type);
 
         $force = new Option(array(
             "long_name"     => "force",

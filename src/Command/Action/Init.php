@@ -26,6 +26,7 @@ class Init extends \Peg\Lib\CommandLine\Action
         $name = $command->GetOption("name")->GetValue();
         $version = $command->GetOption("initial-version")->GetValue();
         $force = $command->GetOption("force")->active;
+        $config_type = $command->GetOption("config-type")->GetValue();
 
         // Set output directory
         $extension_dir = Application::GetCwd();
@@ -51,6 +52,18 @@ class Init extends \Peg\Lib\CommandLine\Action
             if(count($files) > 0)
                 Error::Show(t("The directory you are trying to initialize is not empty."));
         }
+        
+        // Create configuration file
+        if($config_type == "json")
+        {
+            Settings::SetBackEnd(new \Peg\Lib\Config\JSON);
+            Settings::Load($extension_dir, "peg.json");
+        }
+        else
+        {
+            Settings::SetBackEnd(new \Peg\Lib\Config\INI);
+            Settings::Load($extension_dir, "peg.conf");
+        }
 
         $this->CopySkeleton($extension_dir, $extension, $version, $authors, $contributors);
     }
@@ -64,8 +77,6 @@ class Init extends \Peg\Lib\CommandLine\Action
      */
     private function CopySkeleton($directory, $extension, $version, $authors, $contributors)
     {
-        Settings::Load($directory);
-
         Settings::SetExtensionName($extension);
         Settings::SetAuthors($authors);
         Settings::SetContributors($contributors);

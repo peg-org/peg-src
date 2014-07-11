@@ -64,9 +64,6 @@ class Application
      */
     public static function Initialize()
     {
-        // Set the settings backend to ini by default.
-        Settings::SetBackEnd(new Config\INI);
-        
         self::$cli_parser = new CommandLine\Parser;
 
         // Set Application details
@@ -92,7 +89,17 @@ class Application
         if(self::ValidExtension())
         {
             self::$plugin_loader->Start(self::GetCwd() . "/plugins");
-            Settings::Load(self::GetCwd(), "peg.conf");
+            
+            if(file_exists(self::GetCwd() . "/peg.conf"))
+            {
+                Settings::SetBackEnd(new Config\INI);
+                Settings::Load(self::GetCwd(), "peg.conf");
+            }
+            else
+            {
+                Settings::SetBackEnd(new Config\JSON);
+                Settings::Load(self::GetCwd(), "peg.json");
+            }
         }
     }
 
@@ -105,31 +112,11 @@ class Application
         $dir = self::GetCwd();
 
         if(
-            // Class templates
-            file_exists($dir . "/templates/zend_php/class/constructor.php") &&
-            file_exists($dir . "/templates/zend_php/class/get.php") &&
-            file_exists($dir . "/templates/zend_php/class/declaration.php") &&
-            file_exists($dir . "/templates/zend_php/class/method.php") &&
-            file_exists($dir . "/templates/zend_php/class/object_constructor.php") &&
-            file_exists($dir . "/templates/zend_php/class/object_destructor.php") &&
-            file_exists($dir . "/templates/zend_php/class/virtual_method.php") &&
-            file_exists($dir . "/templates/zend_php/class/constructor.php") &&
-            // Config templates
-            file_exists($dir . "/templates/zend_php/config/config.m4.php") &&
-            file_exists($dir . "/templates/zend_php/config/config.w32.php") &&
-            // Function template
-            file_exists($dir . "/templates/zend_php/function/function.php") &&
-            // Source templates
-            file_exists($dir . "/templates/zend_php/source/common.h.php") &&
-            file_exists($dir . "/templates/zend_php/source/extension.cpp.php") &&
-            file_exists($dir . "/templates/zend_php/source/functions.cpp.php") &&
-            file_exists($dir . "/templates/zend_php/source/functions.h.php") &&
-            file_exists($dir . "/templates/zend_php/source/object_types.h.php") &&
-            file_exists($dir . "/templates/zend_php/source/php_extension.h.php") &&
-            file_exists($dir . "/templates/zend_php/source/references.cpp.php") &&
-            file_exists($dir . "/templates/zend_php/source/references.h.php") &&
+            // Templates
+            is_dir($dir . "/templates") &&
+            
             // Peg configuration file
-            file_exists($dir . "/peg.conf")
+            (file_exists($dir . "/peg.conf") || file_exists($dir . "/peg.json"))
         )
         {
             return true;

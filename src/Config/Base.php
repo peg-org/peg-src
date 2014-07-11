@@ -15,10 +15,19 @@ abstract class Base
 {
 
     /**
-     * All settings stored on a configuration file.
+     * All preferences stored on a configuration file. 
+     * 
+     * Format of this array for single options:
+     * $settings["option"] = "value" 
+     * 
+     * Format of this array for a group of options:
+     * $settings["group"] = array(
+     *     "option" => "value",
+     *     "option2" => "value2"
+     * )
      * @var array
      */
-    protected $settings;
+    protected $preferences;
 
     /**
      * Directory of configuration file.
@@ -39,48 +48,80 @@ abstract class Base
      * @param string $configuration_file
      */
     abstract public function Load($directory, $configuration_file);
-
-    /**
-     * Get a setting value.
-     * @param string $valueName
-     * @return boolean
-     */
-    abstract public function Get($valueName);
-
-    /**
-     * Get all settings.
-     * @return array
-     */
-    abstract public function GetAll();
-
-    /**
-     * Get the value of a setting on a specific configuration section.
-     * @param string $sectionName
-     * @param string $valueName
-     * @return boolean|string
-     */
-    abstract public function GetSectionValue($sectionName, $valueName);
-
-    /**
-     * Modifies or adds a global value and writes it to the configuration
-     * file immediately.
-     * @param type $valueName
-     * @param type $value
-     */
-    abstract public function Set($valueName, $value);
-
-    /**
-     * Edits or creates a new section and value and writes it to the 
-     * configuration file immediately.
-     * @param string $sectionName
-     * @param string $valueName
-     * @param string $value
-     */
-    abstract public function SetSectionValue($sectionName, $valueName, $value);
-
+    
     /**
      * Writes a configuration file using the settings array.
      */
     abstract public function Write();
+
+    /**
+     * Get an option value.
+     * @param string $option
+     * @return boolean
+     */
+    public function Get($option)
+    {
+        if(isset($this->preferences[$option]))
+        {
+            return $this->preferences[$option];
+        }
+
+        return false;
+    }
+
+    /**
+     * Get all preferences.
+     * @return array
+     */
+    public function GetAll()
+    {
+        return $this->preferences;
+    }
+
+    /**
+     * Get the value of an option on a specific configuration group.
+     * @param string $group
+     * @param string $option
+     * @return boolean|string
+     */
+    public function GetGroupValue($group, $option)
+    {
+        if(isset($this->preferences[$group]))
+        {
+            if(isset($this->preferences[$group][$option]))
+            {
+                return $this->preferences[$group][$option];
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Modifies or adds an option value and writes it to the configuration
+     * file immediately.
+     * @param type $option
+     * @param type $value
+     */
+    public function Set($option, $value)
+    {
+        $this->preferences[$option] = $value;
+
+        $this->Write();
+    }
+
+    /**
+     * Edits or creates a new group and option and writes it to the 
+     * configuration file immediately.
+     * @param string $group
+     * @param string $option
+     * @param string $value
+     */
+    public function SetGroupValue($group, $option, $value)
+    {
+        $this->preferences[$group][$option] = $value;
+
+        $this->Write();
+    }
 
 }

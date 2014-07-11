@@ -21,7 +21,7 @@ class INI extends \Peg\Lib\Config\Base
      */
     public function Load($directory, $configuration_file)
     {
-        $this->settings = array();
+        $this->preferences = array();
 
         $this->directory = $directory;
 
@@ -29,76 +29,8 @@ class INI extends \Peg\Lib\Config\Base
 
         if(file_exists($this->file))
         {
-            $this->settings = parse_ini_file($this->file, true);
+            $this->preferences = parse_ini_file($this->file, true);
         }
-    }
-
-    /**
-     * Get a setting value.
-     * @param string $valueName
-     * @return boolean
-     */
-    public function Get($valueName)
-    {
-        if(isset($this->settings[$valueName]))
-        {
-            return $this->settings[$valueName];
-        }
-
-        return false;
-    }
-
-    /**
-     * Get all settings.
-     * @return array
-     */
-    public function GetAll()
-    {
-        return $this->settings;
-    }
-
-    /**
-     * Get the value of a setting on a specific configuration section.
-     * @param string $sectionName
-     * @param string $valueName
-     * @return boolean|string
-     */
-    public function GetSectionValue($sectionName, $valueName)
-    {
-        if(isset($this->settings[$sectionName]))
-        {
-            if(isset($this->settings[$sectionName][$valueName]))
-            {
-                return $this->settings[$sectionName][$valueName];
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Modifies or adds a global value.
-     * @param type $valueName
-     * @param type $value
-     */
-    public function Set($valueName, $value)
-    {
-        $this->settings[$valueName] = $value;
-
-        self::Write();
-    }
-
-    /**
-     * Edits or creates a new section and value.
-     * @param string $sectionName
-     * @param string $valueName
-     * @param string $value
-     */
-    public function SetSectionValue($sectionName, $valueName, $value)
-    {
-        $this->settings[$sectionName][$valueName] = $value;
-
-        self::Write();
     }
 
     /**
@@ -108,7 +40,7 @@ class INI extends \Peg\Lib\Config\Base
     {
         $content = "";
 
-        foreach($this->settings as $key => $data)
+        foreach($this->preferences as $key => $data)
         {
             if(is_array($data))
             {

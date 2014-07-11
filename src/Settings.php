@@ -34,14 +34,15 @@ class Settings
     }
 
     /**
-     * Loads the peg.conf file on the given directory.
+     * Loads the configuration file on the given directory.
      * @param string $directory
+     * @param string $file
      */
-    public static function Load($directory)
+    public static function Load($directory, $file)
     {
         self::CheckBackend();
         
-        self::$backend->Load($directory, "peg.conf");
+        self::$backend->Load($directory, $file);
     }
     
     /**
@@ -57,16 +58,16 @@ class Settings
     }
     
     /**
-     * Gets the value of a specific option inside a section.
-     * @param string $section Eg: parser
+     * Gets the value of a specific option inside a group.
+     * @param string $group Eg: parser
      * @param string $option Eg: input_format
      * @return string|bool
      */
-    public static function GetSectionValue($section, $option)
+    public static function GetGroupValue($group, $option)
     {
         self::CheckBackend();
         
-        return self::$backend->GetSectionValue($section, $option);
+        return self::$backend->GetGroupValue($group, $option);
     }
 
     /**
@@ -128,7 +129,7 @@ class Settings
     /**
      * Modify or add a new option.
      * @param string $option Option to add or modify.
-     * @param string $value New value of the option.
+     * @param string $value Value of the option.
      */
     public static function Set($option, $value)
     {
@@ -138,16 +139,16 @@ class Settings
     }
     
     /**
-     * Modify or add a new section with an option.
-     * @param string $section Name of section to modify or create.
-     * @param string $option Name of option to add or modify in the section.
-     * @param string $value New value of the option.
+     * Modify or add a new group with an option.
+     * @param string $group Name of group to modify or create.
+     * @param string $option Name of option to add or modify in the group.
+     * @param string $value Value of the option.
      */
-    public static function SetSectionValue($section, $option, $value)
+    public static function SetGroupValue($group, $option, $value)
     {
         self::CheckBackend();
 
-        self::$backend->SetSectionValue($section, $option, $value);
+        self::$backend->SetGroupValue($group, $option, $value);
     }
 
     /**

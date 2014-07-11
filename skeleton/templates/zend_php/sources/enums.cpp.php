@@ -18,11 +18,44 @@
 
 #include "enums.h"
 
+#include <zend_exceptions.h>
+#include <ext/spl/spl_exceptions.h>
+
+/* enum object */
+struct _peg_enum_object {
+    zend_object std;
+    zend_bool   is_constructed;
+    long        value;
+    HashTable  *elements;
+};
+
+/* enum struct object */
+typedef struct _peg_enum_object peg_enum_object;
+
+#define PHP_PEG_EXCEPTIONS \
+    zend_error_handling error_handling; \
+    zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling TSRMLS_CC);
+
+#define PHP_PEG_RESTORE_ERRORS \
+    zend_restore_error_handling(&error_handling TSRMLS_CC);
+
+/* ----------------------------------------------------------------
+    Helper functions prototype
+------------------------------------------------------------------*/
+
+static int peg_enum_apply_set(long *option TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
+static int peg_enum_collect_elements(long *value TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
+static int peg_enum_collect_constants(zval **pzconst TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
+static void peg_enum_object_free(void *object TSRMLS_DC);
+
+
 /* ----------------------------------------------------------------
     Peg\Enum C API
 ------------------------------------------------------------------*/
 
+BEGIN_EXTERN_C()
 /* {{{ exported function to take a zval** enum instance and give you back the long value */
+
 ZEND_API long php_peg_get_enum_value(zval** enumclass TSRMLS_DC)
 {
     peg_enum_object *enum_object;
@@ -42,6 +75,7 @@ ZEND_API void php_peg_set_enum_value(zval** enumclass, long value TSRMLS_DC)
     enum_object->value = value;
 }
 /* }}} */
+END_EXTERN_C()
 
 /* ----------------------------------------------------------------
     Peg\Enum class API
@@ -129,18 +163,6 @@ PHP_METHOD(Peg_Enum, getName)
 }
 /* }}} */
 
-/* {{{ peg_enum_collect_elements
-       helper function for getElements call to collect all values */
-static int peg_enum_collect_elements(long *value TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-    zval *return_value = va_arg(args, zval*);
-
-    add_assoc_long(return_value, hash_key->arKey, *value);
-
-    return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
 /* {{{ proto array Enum->getElements()
                    get array of available name => value pairs */
 PHP_METHOD(Peg_Enum, getElements)
@@ -163,37 +185,6 @@ PHP_METHOD(Peg_Enum, getElements)
 /* ----------------------------------------------------------------
     Peg\Enum Object management
 ------------------------------------------------------------------*/
-
-/* {{{ peg_enum_collect_constants */
-static int peg_enum_collect_constants(zval **pzconst TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
-{
-    HashTable *elements = va_arg(args, HashTable*);
-    char *classname = va_arg(args, char*);
-
-    if(Z_TYPE_PP(pzconst) != IS_LONG) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Constant %s is being cast to an integer in Enum subclass %s", hash_key->arKey, classname);
-        convert_to_long(*pzconst);
-    }
-    zend_hash_add(elements, hash_key->arKey, hash_key->nKeyLength, &Z_LVAL_PP(pzconst), sizeof(long), NULL);
-
-    return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-/* {{{ peg_enum_object_free */
-static void peg_enum_object_free(void *object TSRMLS_DC)
-{
-    peg_enum_object *enum_object = (peg_enum_object *)object;
-
-    zend_object_std_dtor(&enum_object->std TSRMLS_CC);
-    enum_object->is_constructed = FALSE;
-    enum_object->value = 0;
-    zend_hash_destroy(enum_object->elements);
-    FREE_HASHTABLE(enum_object->elements);
-
-    efree(enum_object);
-}
-/* }}} */
 
 /* {{{ peg_enum_object_create */
 static zend_object_value peg_enum_object_create(zend_class_entry *ce TSRMLS_DC)
@@ -235,20 +226,6 @@ static zval* peg_enum_get(zval *zobject TSRMLS_DC)
     Z_SET_REFCOUNT_P(value, 0);
 
     return value;
-} /* }}} */
-
-/* {{{ peg_enum_apply_set */
-static int peg_enum_apply_set(long *option TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) 
-{
-    long *value = va_arg(args, long*);
-    zend_bool *found = va_arg(args, zend_bool*);
-
-    if(*value == *option) {
-        *found = TRUE;
-        return ZEND_HASH_APPLY_STOP;
-    }
-
-    return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -374,3 +351,103 @@ static HashTable* peg_enum_debug_info(zval *obj, int *is_temp TSRMLS_DC)
     return debug_info;
 }
 /* }}} */
+
+/* ----------------------------------------------------------------
+    Helper functions
+------------------------------------------------------------------*/
+
+/* {{{ peg_enum_object_free */
+static void peg_enum_object_free(void *object TSRMLS_DC)
+{
+    peg_enum_object *enum_object = (peg_enum_object *)object;
+
+    zend_object_std_dtor(&enum_object->std TSRMLS_CC);
+    enum_object->is_constructed = FALSE;
+    enum_object->value = 0;
+    zend_hash_destroy(enum_object->elements);
+    FREE_HASHTABLE(enum_object->elements);
+
+    efree(enum_object);
+}
+/* }}} */
+
+/* {{{ peg_enum_apply_set */
+static int peg_enum_apply_set(long *option TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) 
+{
+    long *value = va_arg(args, long*);
+    zend_bool *found = va_arg(args, zend_bool*);
+
+    if(*value == *option) {
+        *found = TRUE;
+        return ZEND_HASH_APPLY_STOP;
+    }
+
+    return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{{ peg_enum_collect_elements
+       helper function for getElements call to collect all values */
+static int peg_enum_collect_elements(long *value TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+{
+    zval *return_value = va_arg(args, zval*);
+
+    add_assoc_long(return_value, hash_key->arKey, *value);
+
+    return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{{ peg_enum_collect_constants */
+static int peg_enum_collect_constants(zval **pzconst TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+    HashTable *elements = va_arg(args, HashTable*);
+    char *classname = va_arg(args, char*);
+
+    if(Z_TYPE_PP(pzconst) != IS_LONG) {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Constant %s is being cast to an integer in Enum subclass %s", hash_key->arKey, classname);
+        convert_to_long(*pzconst);
+    }
+    zend_hash_add(elements, hash_key->arKey, hash_key->nKeyLength, &Z_LVAL_PP(pzconst), sizeof(long), NULL);
+
+    return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* ----------------------------------------------------------------
+    Peg\Enum registration
+------------------------------------------------------------------*/
+
+zend_class_entry *peg_enum_ce;
+zend_object_handlers peg_enum_handlers;
+
+/* {{{ class methods */
+static const zend_function_entry peg_enum_methods[] = {
+    PHP_ME(Peg_Enum, __construct, Enum___construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+    PHP_ME(Peg_Enum, getName, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Peg_Enum, getElements, NULL, ZEND_ACC_PUBLIC)
+    ZEND_FE_END
+};
+/* }}} */
+
+BEGIN_EXTERN_C()
+/* {{{ registration function */
+void register_enum_class(int module_number TSRMLS_DC)
+{
+    zend_class_entry ce;
+    
+    INIT_NS_CLASS_ENTRY(ce, "Peg", "Enum", peg_enum_methods);
+    peg_enum_ce = zend_register_internal_class(&ce TSRMLS_CC);
+    peg_enum_ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+
+    peg_enum_ce->create_object = peg_enum_object_create;
+    memcpy(&peg_enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+    peg_enum_handlers.cast_object = peg_enum_cast;
+    peg_enum_handlers.get_debug_info = peg_enum_debug_info;
+    peg_enum_handlers.get = peg_enum_get;
+    peg_enum_handlers.set = peg_enum_set;
+    peg_enum_handlers.clone_obj = peg_enum_clone;
+    peg_enum_handlers.compare_objects = peg_enum_compare;
+}
+/* }}} */
+END_EXTERN_C()

@@ -61,7 +61,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
 
     /**
-     * Generates a sepcific header file.
+     * Generates a specific header file.
      * @todo Handle namespaces.
      * @param string $header_name
      * @return string Source code.
@@ -121,7 +121,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
     
     /**
-     * Generates a sepcific header source file.
+     * Generates a specific header source file.
      * @todo Handle namespaces.
      * @param string $header_name
      * @return string Source code.
@@ -157,6 +157,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
             foreach($header_object->namespaces as $namespace_name=>$namespace_object)
             {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+                
+                $namespace_name_cpp = str_replace(
+                    "\\", 
+                    "::", 
+                    $namespace_name
+                );
+                
                 foreach($namespace_object->constants as $constant_name=>$constant_object)
                 {
                     ob_start();
@@ -184,17 +193,32 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
             foreach($header_object->namespaces as $namespace_name=>$namespace_object)
             {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+                
+                $namespace_name_cpp = str_replace(
+                    "\\", 
+                    "::", 
+                    $namespace_name
+                );
+                
+                $namespace_name_var = str_replace(
+                    "\\", 
+                    "_", 
+                    $namespace_name
+                );
+                
                 foreach($namespace_object->enumerations as $enum_name=>$enum_object)
                 {
                     ob_start();
-                        include($this->GetEnumsFunctionTemplate($enum_name, "class"));
+                        include($this->GetRegisterEnumTemplate($enum_name, $namespace_name, "class"));
                         $source_content .= $this->Indent(ob_get_contents(), 4);
                     ob_end_clean();
                         
                     foreach($enum_object->options as $enum_option)
                     {
                         ob_start();
-                            include($this->GetEnumsFunctionTemplate($enum_name, "constant"));
+                            include($this->GetRegisterEnumTemplate($enum_name, $namespace_name, "constant"));
                             $source_content .= $this->Indent(ob_get_contents(), 4);
                         ob_end_clean();
                     }
@@ -319,10 +343,31 @@ class ZendPHP extends \Peg\Lib\Generator\Base
      * if a valid override exists and returns that instead.
      * @todo Improve this to handle various types.
      * @param string $name Name of constant.
+     * @param string $namespace Namespace where resides the constant.
      * @return string Path to template file.
      */
-    public function GetRegisterConstantTemplate($name)
+    public function GetRegisterConstantTemplate($name, $namespace="", $type="")
     {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"), 
+                "_", 
+                $namespace
+            ) . "_";
+        }
+        
+        $override = $this->templates_path
+            . "zend_php/constants/overrides/"
+            . "{$type}"
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
         return $this->templates_path
             . "zend_php/constants/"
             . "integer.php"
@@ -365,14 +410,24 @@ class ZendPHP extends \Peg\Lib\Generator\Base
      * Retrieve the template path for registering enums, also checks
      * if a valid override exists and returns that instead.
      * @param string $name Name of the enumaration.
+     * @param string $namespace Namespace where resides the enum.
      * @param string $type Can be class or constant.
      * @return string Path to template file.
      */
-    public function GetRegisterEnumTemplate($name, $type="class")
+    public function GetRegisterEnumTemplate($name, $namespace="", $type="class")
     {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"), 
+                "_", 
+                $namespace
+            ) . "_";
+        }
+        
         $override = $this->templates_path
             . "zend_php/helpers/enum_overrides/"
-            . "declare_{$type}_" . strtolower(
+            . "declare_{$type}_" . $namespace . strtolower(
                 str_replace(
                     array("/", "-", "."),
                     "_",

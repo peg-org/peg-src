@@ -22,8 +22,7 @@
 #include "common.h"
 
 extern zend_class_entry *peg_enum_ce;
-extern zend_object_handlers peg_enum_handlers;
-    
+
 /* {{{ exported function to take a zval** enum instance and give you back the long value */
 BEGIN_EXTERN_C()
 ZEND_API long php_peg_get_enum_value(zval** enumclass TSRMLS_DC);
@@ -36,5 +35,5 @@ BEGIN_EXTERN_C()
 void register_enum_class(int module_number TSRMLS_DC);
 END_EXTERN_C()
 /* }}} */
-    
+
 #endif //PEG_ENUMS_H

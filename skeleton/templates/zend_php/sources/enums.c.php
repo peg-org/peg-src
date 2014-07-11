@@ -21,6 +21,9 @@
 #include <zend_exceptions.h>
 #include <ext/spl/spl_exceptions.h>
 
+zend_class_entry *peg_enum_ce;
+zend_object_handlers peg_enum_handlers;
+
 /* enum object */
 struct _peg_enum_object {
     zend_object std;
@@ -372,7 +375,7 @@ static void peg_enum_object_free(void *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ peg_enum_apply_set */
-static int peg_enum_apply_set(long *option TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) 
+static int peg_enum_apply_set(long *option TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
     long *value = va_arg(args, long*);
     zend_bool *found = va_arg(args, zend_bool*);
@@ -418,9 +421,6 @@ static int peg_enum_collect_constants(zval **pzconst TSRMLS_DC, int num_args, va
     Peg\Enum registration
 ------------------------------------------------------------------*/
 
-zend_class_entry *peg_enum_ce;
-zend_object_handlers peg_enum_handlers;
-
 /* {{{ class methods */
 static const zend_function_entry peg_enum_methods[] = {
     PHP_ME(Peg_Enum, __construct, Enum___construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
@@ -435,7 +435,7 @@ BEGIN_EXTERN_C()
 void register_enum_class(int module_number TSRMLS_DC)
 {
     zend_class_entry ce;
-    
+
     INIT_NS_CLASS_ENTRY(ce, "Peg", "Enum", peg_enum_methods);
     peg_enum_ce = zend_register_internal_class(&ce TSRMLS_CC);
     peg_enum_ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;

@@ -56,9 +56,7 @@ static void peg_enum_object_free(void *object TSRMLS_DC);
     Peg\Enum C API
 ------------------------------------------------------------------*/
 
-BEGIN_EXTERN_C()
 /* {{{ exported function to take a zval** enum instance and give you back the long value */
-
 ZEND_API long php_peg_get_enum_value(zval** enumclass TSRMLS_DC)
 {
     peg_enum_object *enum_object;
@@ -78,7 +76,6 @@ ZEND_API void php_peg_set_enum_value(zval** enumclass, long value TSRMLS_DC)
     enum_object->value = value;
 }
 /* }}} */
-END_EXTERN_C()
 
 /* ----------------------------------------------------------------
     Peg\Enum class API
@@ -430,7 +427,6 @@ static const zend_function_entry peg_enum_methods[] = {
 };
 /* }}} */
 
-BEGIN_EXTERN_C()
 /* {{{ registration function */
 void register_enum_class(int module_number TSRMLS_DC)
 {
@@ -450,4 +446,3 @@ void register_enum_class(int module_number TSRMLS_DC)
     peg_enum_handlers.compare_objects = peg_enum_compare;
 }
 /* }}} */
-END_EXTERN_C()

@@ -385,10 +385,10 @@ class Importer extends \Peg\Lib\Signals\Signal
                                     $parameter["description"]
                                 );
                                 
-                                if(isset($parameter["is_array"]))
-                                {
-                                    $param->is_array = true;
-                                }
+                                if(!isset($parameter["is_array"]))
+                                    $param->is_array = false;
+                                else
+                                    $param->is_array = $parameter["is_array"];
                                 
                                 $overload->AddParameter($param);
                             }

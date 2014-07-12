@@ -58,6 +58,8 @@ class FunctionElement
     {
         $this->name = $name;
         $this->description = $description;
+        
+        $this->overloads = array();
     }
     
     /**

@@ -80,6 +80,8 @@ class Overload
     public function __construct($description="")
     {
         $this->description = $description;
+        
+        $this->parameters = array();
     }
     
     /**

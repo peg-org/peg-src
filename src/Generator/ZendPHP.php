@@ -62,7 +62,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
     /**
      * Generates a specific header file.
-     * @todo Handle namespaces.
      * @param string $header_name
      * @return string Source code.
      */
@@ -85,7 +84,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         ob_end_clean();
 
         // Get constants function template content
-        if($header_object->HasConstants())
+        if($header_object->HasConstants() || $header_object->HasGlobalVariables())
         {
             ob_start();
                 include($this->GetConstantsFunctionTemplate($header_name));
@@ -122,7 +121,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     
     /**
      * Generates a specific header source file.
-     * @todo Handle namespaces.
      * @param string $header_name
      * @return string Source code.
      */
@@ -146,7 +144,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         ob_end_clean();
 
         // Get constants function template content
-        if($header_object->HasConstants())
+        if($header_object->HasConstants() || $header_object->HasGlobalVariables())
         {
             ob_start();
                 include($this->GetConstantsFunctionTemplate($header_name, "header"));
@@ -166,10 +164,24 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     $namespace_name
                 );
                 
+                $namespace_name_var = str_replace(
+                    "\\", 
+                    "_", 
+                    $namespace_name
+                );
+                
                 foreach($namespace_object->constants as $constant_name=>$constant_object)
                 {
                     ob_start();
                         include($this->GetRegisterConstantTemplate($constant_name));
+                        $source_content .= $this->Indent(ob_get_contents(), 4);
+                    ob_end_clean();
+                }
+                
+                foreach($namespace_object->global_variables as $constant_name=>$constant_object)
+                {
+                    ob_start();
+                        include($this->GetRegisterVarConstantTemplate($constant_object));
                         $source_content .= $this->Indent(ob_get_contents(), 4);
                     ob_end_clean();
                 }
@@ -359,7 +371,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         
         $override = $this->templates_path
             . "zend_php/constants/overrides/"
-            . "{$type}"
+            . "define_{$name}"
             . ".php"
         ;
 
@@ -372,6 +384,84 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             . "zend_php/constants/"
             . "integer.php"
         ;
+    }
+    
+    /**
+     * Retrieve the template path for registering constants registered as global
+     * variables, also checks if a valid override exists and returns that instead.
+     * @param \Peg\Lib\Definitions\Element\GlobalVariable $variable
+     * @param string $namespace Namespace where resides the constant.
+     * @return string Path to template file.
+     */
+    public function GetRegisterVarConstantTemplate(
+        \Peg\Lib\Definitions\Element\GlobalVariable $variable, 
+        $namespace=""
+    )
+    {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"), 
+                "_", 
+                $namespace
+            ) . "_";
+        }
+        
+        $ptr = "";
+        if($variable->is_pointer)
+        {
+            for($i=0; $i<$variable->indirection_level; $i++)
+            {
+                $ptr .= "_ptr";
+            }
+        }
+        
+        $ref = "";
+        if($variable->is_reference)
+        {
+            $ref .= "_ref";
+        }
+        
+        $array = "";
+        if($variable->is_array)
+        {
+            $array .= "_arr";
+        }
+        
+        $override = $this->templates_path
+            . "zend_php/constants/overrides/"
+            . $variable->type
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
+        $standard_type = $this->symbols->GetStandardType($variable);
+        
+        $template = $this->templates_path
+            . "zend_php/constants/"
+            . $standard_type
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+        
+        if(!file_exists($template))
+        {
+            return $this->templates_path
+                . "zend_php/constants/"
+                . "unknown.php"
+            ;
+        }
+        
+        return $template;
     }
     
     /**

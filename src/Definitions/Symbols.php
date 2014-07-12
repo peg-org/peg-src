@@ -214,6 +214,11 @@ class Symbols
                 {
                     $standard_type = StandardType::ENUM;
                 }
+                //Check if typedef
+                elseif($typedef = $this->HasTypeDef($type->type))
+                {
+                    $standard_type = $this->GetStandardType($typedef);
+                }
                 else
                 {
                     $standard_type = StandardType::UNKNOWN;
@@ -285,7 +290,7 @@ class Symbols
      * Check if the symbols object has a given namespace.
      * @param string $namespace
      * @param string $header A specific header to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\NamespaceElement or null if nothing found.
      */
     public function HasNamespace($namespace, $header="")
     {
@@ -293,7 +298,7 @@ class Symbols
         {
             if(isset($this->headers[$header]->namespaces[$namespace]))
             {
-                return true;
+                return $this->headers[$header]->namespaces[$namespace];
             }
         }
         else
@@ -302,30 +307,42 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace];
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has a constant.
-     * @param string $name Name of the constant.
+     * @param string $name Name of the constant can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\Constant or null if nothing found.
      */
     public function HasConstant($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->constants[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->constants[$name];
                 }
             }
             else
@@ -334,7 +351,7 @@ class Symbols
                 {
                     if(isset($namespace_object->constants[$name]))
                     {
-                        return true;
+                        return $namespace_object->constants[$name];
                     }
                 }
             }
@@ -345,7 +362,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->constants[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->constants[$name];
                 }
             }
         }
@@ -357,32 +374,43 @@ class Symbols
                 {
                     if(isset($namespace_object->constants[$name]))
                     {
-                        return true;
+                        return $namespace_object->constants[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has an enumeration.
-     * @todo Resolve namespaces that are part of the name.
-     * @param string $name Name of the enumeration.
+     * @param string $name Name of the enumeration can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\Enumeration or null if nothing found.
      */
     public function HasEnumeration($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->enumerations[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->enumerations[$name];
                 }
             }
             else
@@ -391,7 +419,7 @@ class Symbols
                 {
                     if(isset($namespace_object->enumerations[$name]))
                     {
-                        return true;
+                        return $namespace_object->enumerations[$name];
                     }
                 }
             }
@@ -402,7 +430,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->enumerations[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->enumerations[$name];
                 }
             }
         }
@@ -414,32 +442,44 @@ class Symbols
                 {
                     if(isset($namespace_object->enumerations[$name]))
                     {
-                        return true;
+                        return $namespace_object->enumerations[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has a typedef.
-     * @todo Resolve namespaces that are part of the name.
-     * @param string $name Name of the typedef.
+     * @todo Resolve classes that are part of the name.
+     * @param string $name Name of the typedef can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\TypeDef or null if nothing found.
      */
     public function HasTypeDef($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->type_definitions[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->type_definitions[$name];
                 }
             }
             else
@@ -448,7 +488,7 @@ class Symbols
                 {
                     if(isset($namespace_object->type_definitions[$name]))
                     {
-                        return true;
+                        return $namespace_object->type_definitions[$name];
                     }
                 }
             }
@@ -459,7 +499,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->type_definitions[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->type_definitions[$name];
                 }
             }
         }
@@ -471,32 +511,43 @@ class Symbols
                 {
                     if(isset($namespace_object->type_definitions[$name]))
                     {
-                        return true;
+                        return $namespace_object->type_definitions[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has a global variable.
-     * @todo Resolve namespaces that are part of the name.
-     * @param string $name Name of the global variable.
+     * @param string $name Name of the global variable can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\GlobalVariable or null if nothing found.
      */
     public function HasGlobalVariable($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->global_variables[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->global_variables[$name];
                 }
             }
             else
@@ -505,7 +556,7 @@ class Symbols
                 {
                     if(isset($namespace_object->global_variables[$name]))
                     {
-                        return true;
+                        return $namespace_object->global_variables[$name];
                     }
                 }
             }
@@ -516,7 +567,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->global_variables[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->global_variables[$name];
                 }
             }
         }
@@ -528,32 +579,43 @@ class Symbols
                 {
                     if(isset($namespace_object->global_variables[$name]))
                     {
-                        return true;
+                        return $namespace_object->global_variables[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has a function.
-     * @todo Resolve namespaces that are part of the name.
-     * @param string $name Name of the function.
+     * @param string $name Name of the function can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\FunctionElement or null if nothing found.
      */
     public function HasFunction($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->functions[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->functions[$name];
                 }
             }
             else
@@ -562,7 +624,7 @@ class Symbols
                 {
                     if(isset($namespace_object->functions[$name]))
                     {
-                        return true;
+                        return $namespace_object->functions[$name];
                     }
                 }
             }
@@ -573,7 +635,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->functions[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->functions[$name];
                 }
             }
         }
@@ -585,32 +647,44 @@ class Symbols
                 {
                     if(isset($namespace_object->functions[$name]))
                     {
-                        return true;
+                        return $namespace_object->functions[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Check if the symbols object has a class.
-     * @todo Resolve namespaces that are part of the name.
-     * @param string $name Name of the class.
+     * @todo Resolve classes that are part of the name.
+     * @param string $name Name of the class can include 
+     * namespace separated by the :: operator or \.
      * @param string $header A specific header to search in.
      * @param string $namespace A specific namespace to search in.
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\ClassElement or null if nothing found.
      */
     public function HasClass($name, $header="", $namespace="")
     {
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $name = $components->type;
+            }
+        }
+        
         if($header)
         {
             if($namespace)
             {
                 if(isset($this->headers[$header]->namespaces[$namespace]->classes[$name]))
                 {
-                    return true;
+                    return $this->headers[$header]->namespaces[$namespace]->classes[$name];
                 }
             }
             else
@@ -619,7 +693,7 @@ class Symbols
                 {
                     if(isset($namespace_object->classes[$name]))
                     {
-                        return true;
+                        return $namespace_object->classes[$name];
                     }
                 }
             }
@@ -630,7 +704,7 @@ class Symbols
             {
                 if(isset($header_object->namespaces[$namespace]->classes[$name]))
                 {
-                    return true;
+                    return $header_object->namespaces[$namespace]->classes[$name];
                 }
             }
         }
@@ -642,20 +716,20 @@ class Symbols
                 {
                     if(isset($namespace_object->classes[$name]))
                     {
-                        return true;
+                        return $namespace_object->classes[$name];
                     }
                 }
             }
         }
         
-        return false;
+        return null;
     }
     
     /**
      * Checks if a given type is a class enumeration.
      * and class names separated by the :: operator or \.
      * @param string $type
-     * @return bool
+     * @return \Peg\Lib\Definitions\Element\Enumeration or null if nothing found.
      */
     public function HasClassEnum($type)
     {   
@@ -674,7 +748,10 @@ class Symbols
                                 ->enumerations[$components->type]
                         )
                     )
-                        return true;
+                        return $header_object->namespaces[$components->namespace]
+                            ->classes[$components->class]
+                            ->enumerations[$components->type]
+                        ;
                 }
                 else
                 {
@@ -685,11 +762,293 @@ class Symbols
                                 ->enumerations[$components->type]
                         )
                     )
-                        return true;
+                        return $header_object->namespaces["\\"]
+                            ->classes[$components->class]
+                            ->enumerations[$components->type]
+                        ;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Removes a header from the symbols object.
+     * @param string $name
+     * @param string $header A specific header.
+     */
+    public function RemoveHeader($name)
+    {
+        unset($this->headers[$name]);
+    }
+    
+    /**
+     * Removes a namespace from the symbols object.
+     * @param string $name
+     * @param string $header A specific header.
+     */
+    public function RemoveNamespace($name, $header="")
+    {
+        if($header)
+        {
+            unset($this->headers[$header]->namespaces[$name]);
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$name]);
+            }
+        }
+    }
+    
+    /**
+     * Removes a constant from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveConstant($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->constants[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->constants[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->constants[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->constants[$name]);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Removes an enumeration from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveEnumeration($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->enumerations[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->enumerations[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->enumerations[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->enumerations[$name]);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Removes a typedef from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveTypeDef($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->type_definitions[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->type_definitions[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->type_definitions[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->type_definitions[$name]);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Removes a global variable from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveGlobalVariable($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->global_variables[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->global_variables[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->global_variables[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->global_variables[$name]);
                 }
             }
         }
         
         return false;
     }
+    
+    /**
+     * Removes a function from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveFunction($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->functions[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->functions[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->functions[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->functions[$name]);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Removes a class from the symbols object.
+     * @param string $name
+     * @param string $namespace A specific namespace.
+     * @param string $header A specific header.
+     */
+    public function RemoveClass($name, $namespace="", $header="")
+    {
+        if($header)
+        {
+            if($namespace)
+            {
+                unset($this->headers[$header]->namespaces[$namespace]->classes[$name]);
+            }
+            else
+            {
+                foreach($this->headers[$header]->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->classes[$name]);
+                }
+            }
+        }
+        elseif($namespace)
+        {
+            foreach($this->headers as $header_object)
+            {
+                unset($header_object->namespaces[$namespace]->classes[$name]);
+            }
+        }
+        else
+        {
+            foreach($this->headers as $header_object)
+            {
+                foreach($header_object->namespaces as $namespace_object)
+                {
+                    unset($namespace_object->classes[$name]);
+                }
+            }
+        }
+    }
+    
 }

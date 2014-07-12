@@ -104,6 +104,17 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             
             $header_content .= "\n";
         }
+        
+        // Get functions function template content
+        if($header_object->HasFunctions())
+        {
+            ob_start();
+                include($this->GetFunctionsFunctionTemplate($header_name));
+                $header_content .= ob_get_contents();
+            ob_end_clean();
+            
+            $header_content .= "\n";
+        }
 
         foreach($header_object->namespaces as $namespace_name=>$namespace_object)
         {
@@ -239,6 +250,67 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             
             ob_start();
                 include($this->GetEnumsFunctionTemplate($header_name, "footer"));
+                $source_content .= ob_get_contents();
+            ob_end_clean();
+            
+            $source_content .= "\n";
+        }
+        
+        // Get functions function template content
+        if($header_object->HasFunctions())
+        {
+            ob_start();
+                include($this->GetFunctionsFunctionTemplate($header_name, "header"));
+                $source_content .= ob_get_contents();
+            ob_end_clean();
+            
+            $source_content .= "    ";
+            
+            ob_start();
+                include($this->GetFunctionsTableTemplate($header_name, "", "begin"));
+                $source_content .= $this->Indent(ob_get_contents(), 4);
+            ob_end_clean();
+            
+            $source_content .= "    ";
+
+            foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+            {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+                
+                $namespace_name_cpp = str_replace(
+                    "\\", 
+                    "::", 
+                    $namespace_name
+                );
+                
+                $namespace_name_var = str_replace(
+                    "\\", 
+                    "_", 
+                    $namespace_name
+                );
+                
+                foreach($namespace_object->functions as $function_name=>$function_object)
+                {
+                    ob_start();
+                        include($this->GetFunctionsTableTemplate($header_name, "", "entry"));
+                        $source_content .= $this->Indent(ob_get_contents(), 8);
+                    ob_end_clean();
+                }
+            }
+            
+            ob_start();
+                include($this->GetFunctionsTableTemplate($header_name, "", "end"));
+                $source_content .= $this->Indent(ob_get_contents(), 4);
+            ob_end_clean();
+            
+            ob_start();
+                include($this->GetFunctionsTableTemplate($header_name, "", "register"));
+                $source_content .= $this->Indent(ob_get_contents(), 4);
+            ob_end_clean();
+            
+            ob_start();
+                include($this->GetFunctionsFunctionTemplate($header_name, "footer"));
                 $source_content .= ob_get_contents();
             ob_end_clean();
             
@@ -535,6 +607,80 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         return $this->templates_path
             . "zend_php/helpers/"
             . "enums_declare_$type.php"
+        ;
+    }
+    
+    /**
+     * Retrieve the template path for functions registration function, 
+     * also checks if a valid override exists and returns that instead.
+     * @param string $header_name Name of header file.
+     * @param string $type Can be header, footer or decl.
+     * @return string Path to template file.
+     */
+    public function GetFunctionsFunctionTemplate($header_name, $type="decl")
+    {
+        $override = $this->templates_path
+            . "zend_php/helpers/function_overrides/"
+            . "function_{$type}_" . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $header_name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
+        return $this->templates_path
+            . "zend_php/helpers/"
+            . "functions_function_$type.php"
+        ;
+    }
+    
+    /**
+     * Retrieve the template path for registering functions, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $name Name of the function.
+     * @param string $namespace Namespace where resides the enum.
+     * @param string $type Can be begin, end, entry or register.
+     * @return string Path to template file.
+     */
+    public function GetFunctionsTableTemplate($name, $namespace="", $type="entry")
+    {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"), 
+                "_", 
+                $namespace
+            ) . "_";
+        }
+        
+        $override = $this->templates_path
+            . "zend_php/helpers/function_overrides/"
+            . "table_{$type}_" . $namespace . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+        
+        return $this->templates_path
+            . "zend_php/helpers/"
+            . "functions_table_$type.php"
         ;
     }
 }

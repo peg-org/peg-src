@@ -12,6 +12,7 @@ bool already_called = false;
 bool return_is_user_initialized = false;
 
 <?=$parameters_code?>
+<?=$parse_code?>
 <?=$call_code?>
 <?=$return_code?>
 

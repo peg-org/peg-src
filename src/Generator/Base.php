@@ -63,6 +63,9 @@ abstract class Base
             $indent .= " ";
         }
         
+        if(substr_count($code, "\n") <= 1)
+            return $indent . $code;
+        
         $code = str_replace("\n", "\n$indent", $code);
         
         return $code;

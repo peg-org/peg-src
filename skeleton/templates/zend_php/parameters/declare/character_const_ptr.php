@@ -1,2 +1,2 @@
-char* <?=$parameter_name?><?=$overload?>;
-long <?=$parameter_name?><?=$overload?>_len;
+char* <?=$parameter_name?>_<?=$overload?>;
+long <?=$parameter_name?>_<?=$overload?>_len;

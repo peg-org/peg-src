@@ -1,2 +1,2 @@
-double* <?=$parameter_name?><?=$overload?>;
-zval* <?=$parameter_name?><?=$overload?>_ref;
+double* <?=$parameter_name?>_<?=$overload?>;
+zval* <?=$parameter_name?>_<?=$overload?>_ref;

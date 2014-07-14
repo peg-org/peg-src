@@ -132,5 +132,23 @@ class Overload
     {
         return count($this->parameters) > 0 ? true : false;
     }
+    
+    public function GetParametersCount()
+    {
+        return count($this->parameters);
+    }
+    
+    public function GetRequiredParametersCount()
+    {
+        $required = 0;
+        
+        foreach($this->parameters as $parameter)
+        {
+            if($parameter->default_value)
+                $required++;
+        }
+        
+        return $required;
+    }
 
 }

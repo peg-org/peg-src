@@ -1,1 +1,1 @@
-long <?=$parameter_name?><?=$overload?>;
+long <?=$parameter_name?>_<?=$overload?>;

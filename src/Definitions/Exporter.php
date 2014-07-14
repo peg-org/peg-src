@@ -862,23 +862,23 @@ class Exporter extends \Peg\Lib\Signals\Signal
                         {
                             foreach($overload->parameters as $parameter)
                             {
+                                $parameter_array = array();
+                                
+                                $parameter_array["name"] = $parameter->name;
+                                $parameter_array["type"] = $parameter->original_type;
+                                
+                                if($parameter->is_array)
+                                    $parameter_array["is_array"] = $parameter->is_array;
+                                
+                                if($parameter->default_value)
+                                    $parameter_array["value"] = $parameter->default_value;
+                                
+                                
                                 if(trim($parameter->description))
-                                {
-                                    $parameters[] = [
-                                        "name" => $parameter->name,
-                                        "type" => $parameter->original_type,
-                                        "is_array" => $parameter->is_array,
-                                        "description" => $parameter->description
-                                    ];
-                                }
-                                else
-                                {
-                                    $parameters[] = [
-                                        "name" => $parameter->name,
-                                        "type" => $parameter->original_type,
-                                        "is_array" => $parameter->is_array
-                                    ];
-                                }
+                                    $parameter_array["description"] = $parameter->description;
+                                
+                                $parameters[] = $parameter_array;
+                                
                             }
                             
                             $functions[$header->name][$namespace->name]
@@ -948,23 +948,22 @@ class Exporter extends \Peg\Lib\Signals\Signal
                             {
                                 foreach($overload->parameters as $parameter)
                                 {
+                                    $parameter_array = array();
+                                
+                                    $parameter_array["name"] = $parameter->name;
+                                    $parameter_array["type"] = $parameter->original_type;
+
+                                    if($parameter->is_array)
+                                        $parameter_array["is_array"] = $parameter->is_array;
+
+                                    if($parameter->default_value)
+                                        $parameter_array["value"] = $parameter->default_value;
+
+
                                     if(trim($parameter->description))
-                                    {
-                                        $parameters[] = [
-                                            "name" => $parameter->name,
-                                            "type" => $parameter->original_type,
-                                            "is_array" => $parameter->is_array,
-                                            "description" => $parameter->description
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $parameters[] = [
-                                            "name" => $parameter->name,
-                                            "type" => $parameter->original_type,
-                                            "is_array" => $parameter->is_array
-                                        ];
-                                    }
+                                        $parameter_array["description"] = $parameter->description;
+
+                                    $parameters[] = $parameter_array;
                                 }
 
                                 $classes[$header->name][$namespace->name]

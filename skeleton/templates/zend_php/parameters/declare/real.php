@@ -1,1 +1,1 @@
-double <?=$parameter_name?><?=$overload?>;
+double <?=$parameter_name?>_<?=$overload?>;

@@ -1,1 +1,1 @@
-bool <?=$parameter_name?><?=$overload?>;
+bool <?=$parameter_name?>_<?=$overload?>;

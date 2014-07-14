@@ -6,3 +6,4 @@ PHP_FUNCTION(php_<?=$namespace_name?>_<?=$function_name?>)
 PHP_FUNCTION(php_<?=$function_name?>)
 <?php } ?>
 {
+    

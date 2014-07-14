@@ -19,5 +19,8 @@ bool return_is_user_initialized = false;
 /* In case wrong type/count of parameters was passed */
 if(!already_called)
 {
-    zend_error(E_ERROR, "Wrong type or count of parameters passed to <?=$function_name?>()\n");
+    zend_error(
+        E_ERROR, 
+        "Wrong type or count of parameters passed to <?=$function_name?>()\n"
+    );
 }

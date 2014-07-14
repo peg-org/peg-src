@@ -377,6 +377,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         );
 
         $function_name = $function_object->name;
+        $overloads_count = count($function_object->overloads);
 
         $function_content = "";
 
@@ -421,32 +422,29 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             $parameters_count = $overload_object->GetParametersCount();
             $required_parameters = $overload_object->GetRequiredParametersCount();
             
-            $clause = $required_parameters == $parameters_count ? 
-                "arguments_received == $required_parameters" 
-                : 
-                "arguments_received >= $required_parameters  && arguments_received <= $parameters_count"
-            ;
-            
-            $parse_code .= "//Overload $overload\n";
-            $parse_code .= "overload_{$overload}:\n";
-            $parse_code .= "if(!already_called && $clause)\n";
-            $parse_code .= "{\n";
+            ob_start();
+                include($this->GetOverloadTemplate($function_name, "", "parse_header"));
+                $parse_code .= ob_get_contents();
+            ob_end_clean();
             
             $parse_string = "";
             $parameters_optional = false;
             $parse_parameters = "";
             
+            $parse_references = "";
             $parse_string_ref = "";
             $parse_reference = "";
             $references_found = false;
             
-            $object_retrieve_code = "";
+            $object_validate_code = "";
             
+            $parameter_index = 0;
             foreach($overload_object->parameters as $parameter_name=>$parameter_object)
             {
                 if($parameter_object->default_value && !$parameters_optional)
                 {
                     $parse_string .= "|";
+                    $parse_string_ref = "|";
                     $parameters_optional = true;
                 }
             
@@ -472,85 +470,52 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     include($this->GetParameterTemplate($parameter_object, $namespace_name, "parse_reference"));
                     $parse_reference .= ob_get_contents() . ", ";
                 ob_end_clean();
+                
+                if(
+                    $this->symbols->GetStandardType($parameter_object)
+                    ==
+                    \Peg\Lib\Definitions\StandardType::OBJECT
+                )
+                {
+                    ob_start();
+                        include($this->GetParameterTemplate($parameter_object, $namespace_name, "object_validate"));
+                        $object_validate_code .= $this->Indent(ob_get_contents(), 4);
+                    ob_end_clean();
+                }
+                
+                $parameter_index++;
             }
             
-            // No need to parse parameters
+            // No parameters to parse
             if($required_parameters == 0 && $parameters_count < 1)
             {
-                $parse_code .= $this->Indent(
-                    "overload_{$overload}_called = true;\n", 
-                    4
-                );
-                    
-                $parse_code .= $this->Indent(
-                    "already_called = true;\n", 
-                    4
-                );
+                ob_start();
+                    include($this->GetOverloadTemplate($function_name, "", "no_parse_body"));
+                    $parse_code .= $this->Indent(ob_get_contents(), 4);
+                ob_end_clean();
             }
-            // Theres a need to parse parameters
+            // There is parameters to parse
             else
             {
-                $parse_code .= $this->Indent(
-                    "char parse_parameters_string[] = \"$parse_string\";\n", 
-                    4
-                );
-                
-                $parse_code .= $this->Indent(
-                    "if(zend_parse_parameters_ex("
-                    . "ZEND_PARSE_PARAMS_QUIET, "
-                    . "arguments_received TSRMLS_CC, "
-                    . "parse_parameters_string, "
-                    . trim($parse_parameters, ", ").") == SUCCESS)\n", 
-                    4
-                );
-                
-                $parse_code .= $this->Indent(
-                    "{\n", 
-                    4
-                );
-                
-                $parse_code .= $object_retrieve_code;
-                
-                $parse_code .= $this->Indent(
-                    "overload_{$overload}_called = true;\n", 
-                    8
-                );
-                
-                $parse_code .= $this->Indent(
-                    "already_called = true;\n", 
-                    8
-                );
-
-                // Just get variables not originally parsed as 
-                // zvals since they are references
                 if($references_found)
                 {
-                    $parse_code .= "\n";
-                    
-                    $parse_code .= $this->Indent(
-                        "char parse_references_string[] = "
-                        . "\"$parse_string_ref\";\n", 
-                        8
-                    );
-                    
-                    $parse_code .= $this->Indent(
-                        "zend_parse_parameters_ex("
-                        . "ZEND_PARSE_PARAMS_QUIET, "
-                        . "arguments_received TSRMLS_CC, "
-                        . "parse_references_string, "
-                        . trim($parse_reference, ", ").");\n", 
-                        8
-                    );
+                    ob_start();
+                        include($this->GetOverloadTemplate($function_name, "", "no_parse_body"));
+                        $parse_references .= $this->Indent(ob_get_contents(), 8);
+                    ob_end_clean();
                 }
-
-                $parse_code .= $this->Indent("}\n", 4);
+                
+                ob_start();
+                    include($this->GetOverloadTemplate($function_name, "", "parse_body"));
+                    $parse_code .= $this->Indent(ob_get_contents(), 4);
+                ob_end_clean();
             }
 
-            $parse_code .= "}\n";
-            $parse_code .= "\n";
+            ob_start();
+                include($this->GetOverloadTemplate($function_name, "", "parse_footer"));
+                $parse_code .= ob_get_contents();
+            ob_end_clean();
         }
-
-        $function_content .= "    ";
 
         // Get body of function
         ob_start();
@@ -966,13 +931,57 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             . "function_$type.php"
         ;
     }
+    
+    /**
+     * Retrieve the template path of overload, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $name Name of the function.
+     * @param string $namespace
+     * @param string $type Can be parse_header, parse_body, parse_footer, 
+     * no_parse_body, parse_references.
+     * @return string Path to template file.
+     */
+    public function GetOverloadTemplate($name, $namespace="", $type="entry")
+    {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"),
+                "_",
+                $namespace
+            ) . "_";
+        }
+
+        $override = $this->templates_path
+            . "zend_php/helpers/overload_overrides/"
+            . "{$type}_" . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+
+        return $this->templates_path
+            . "zend_php/helpers/"
+            . "overloads_$type.php"
+        ;
+    }
 
     /**
      * Retrieve the template path for parameters, also checks
      * if a valid override exists and returns that instead.
      * @param string $parameter Name of the function.
-     * @param string $namespace Namespace where resides the enum.
-     * @param string $type Can be declare, parse_string, parse, parse_reference...
+     * @param string $namespace
+     * @param string $type Can be declare, parse_string, parse, 
+     * parse_string_ref, parse_reference or object_validate.
      * @return string Path to template file.
      */
     public function GetParameterTemplate(

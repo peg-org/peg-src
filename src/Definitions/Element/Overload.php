@@ -20,6 +20,12 @@ class Overload
     public $description;
     
     /**
+     * List of platforms where the element is supported.
+     * @var array 
+     */
+    public $platforms;
+    
+    /**
      * The return type of the overload.
      * @var \Peg\Lib\Definitions\Element\ReturnType
      */
@@ -82,6 +88,7 @@ class Overload
         $this->description = $description;
         
         $this->parameters = array();
+        $this->platforms = array();
     }
     
     /**

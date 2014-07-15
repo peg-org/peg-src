@@ -287,6 +287,59 @@ class Symbols
     }
     
     /**
+     * Gets a list of child classes that inherit from the given class.
+     * @param string $class_name
+     * @return \Peg\Lib\Definitions\Element\ClassElement[]
+     */
+    public function GetClassChilds($class_name, $namespace="")
+    {   
+        $childs = array();
+        
+        if(!$namespace)
+        {
+            $components = $this->GetComponents($class_name);
+            
+            if($components->HasNamespace())
+            {
+                $namespace = $components->namespace;
+                $class_name = $components->type;
+            }
+            else
+            {
+                $namespace = "\\";
+            }
+        }
+        
+        $parent_class = "";
+        
+        if($namespace != "\\")
+            $parent_class .= $namespace . "\\" . $class_name;
+        else
+            $parent_class .= $class_name;
+        
+        foreach($this->headers as $header_object)
+        {
+            foreach($header_object->namespaces as $namespace_object)
+            {
+                foreach($namespace_object->classes as $class_object)
+                {
+                    if(in_array($parent_class, $class_object->parents))
+                    {
+                        $childs[$class_object->name] = $class_object;
+                        
+                        $childs += $this->GetClassChilds(
+                            $class_object->name,
+                            $class_object->namespace->name
+                        );
+                    }
+                }
+            }
+        }
+        
+        return $childs;
+    }
+    
+    /**
      * Check if the symbols object has a given namespace.
      * @param string $namespace
      * @param string $header A specific header to search in.

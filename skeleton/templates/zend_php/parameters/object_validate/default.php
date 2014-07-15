@@ -1,3 +1,15 @@
+<?php
+$childs = $this->symbols->GetClassChilds($parameter_object->type);
+$conditions = array();
+$conditions[] = "argument_type != PHP_".strtoupper($parameter_object->type)."_TYPE";
+
+foreach($childs as $child_name=>$child_object)
+{
+    $conditions[] = "argument_type != PHP_".strtoupper($child_name)."_TYPE";
+}
+
+$valid_types = trim(implode(" && ", $conditions));
+?>
 if(arguments_received >= <?=$parameter_index+1?>)
 {
     if(Z_TYPE_P(<?=$parameter_name?>_<?=$overload?>) == IS_OBJECT)
@@ -18,7 +30,7 @@ if(arguments_received >= <?=$parameter_index+1?>)
         
         <?=$parameter_name?>_<?=$overload?>_native = (<?=$parameter_object->type?>*) argument_native_object;
         
-        if(!<?=$parameter_name?>_<?=$overload?>_native || ($typeVerifierStr))
+        if(!<?=$parameter_name?>_<?=$overload?>_native || (<?=$valid_types?>))
         {
 <?php if(($overload+1) != $overloads_count && $overloads_count > 1){ ?>
             goto overload_<?=$overload+1?>;

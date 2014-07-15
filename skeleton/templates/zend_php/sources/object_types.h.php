@@ -1,11 +1,11 @@
 /*
- * @author <?=$authors?>
- * @contributors <?=$contributors?>
+ * @author <?=$authors?> 
+ * @contributors <?=$contributors?> 
  * 
  * @license 
  * This file is part of <?=$extension?> check the LICENSE file for information.
  * 
- * @descirption
+ * @description
  * File that stores all types of classes used to check if an object 
  * passed to a method or function is castable to another type by
  * inheritance.
@@ -18,7 +18,7 @@
 #ifndef <?=strtoupper($extension)?>_OBJECT_TYPES_H_GUARD
 #define <?=strtoupper($extension)?>_OBJECT_TYPES_H_GUARD
 
-enum <?=$extension?>_object_type
+enum <?=strtolower($extension)?>_object_type
 {
 	<?=$object_types?>
 };

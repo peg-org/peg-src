@@ -20,6 +20,12 @@ class ClassElement
     public $name;
     
     /**
+     * List of platforms where the element is supported.
+     * @var array 
+     */
+    public $platforms;
+    
+    /**
      * Flag that indicates if this class should be treated as a struct.
      * @var bool
      */
@@ -93,6 +99,7 @@ class ClassElement
         $this->variables = array();
         $this->enumerations = array();
         $this->methods = array();
+        $this->platforms = array();
     }
     
     /**

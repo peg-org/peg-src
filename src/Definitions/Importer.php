@@ -481,6 +481,7 @@ class Importer extends \Peg\Lib\Signals\Signal
                     
                     if(isset($methods["_platforms"]))
                     {
+                        $class->platforms = $methods["_platforms"];
                         unset($methods["_platforms"]);
                     }
                     

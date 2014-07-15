@@ -937,6 +937,50 @@ class Exporter extends \Peg\Lib\Signals\Signal
                 
                 foreach($namespace->classes as $class)
                 {   
+                    // Set class details
+                    if($class->description)
+                    {
+                        $classes[$header->name][$namespace->name]
+                            [$class->name]
+                            ["_description"] = $class->description
+                        ;
+                    }
+                    
+                    if($class->parents)
+                    {
+                        foreach($class->parents as $parent)
+                        {
+                            $classes[$header->name][$namespace->name]
+                                [$class->name]
+                                ["_parents"][] = $parent
+                            ;
+                        }
+                    }
+                    
+                    if($class->struct)
+                    {
+                        $classes[$header->name][$namespace->name]
+                            [$class->name]
+                            ["_struct"] = $class->struct
+                        ;
+                    }
+                    
+                    if($class->forward_declaration)
+                    {
+                        $classes[$header->name][$namespace->name]
+                            [$class->name]
+                            ["_forward_declaration"] = $class->forward_declaration
+                        ;
+                    }
+                    
+                    if($class->platforms)
+                    {
+                        $classes[$header->name][$namespace->name]
+                            [$class->name]
+                            ["_platforms"] = $class->platforms
+                        ;
+                    }
+                    
                     // Get methods
                     foreach($class->methods as $function)
                     {

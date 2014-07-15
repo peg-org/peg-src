@@ -779,7 +779,11 @@ class Doxygen extends \Peg\Lib\Lexers\Base
                                         ->nodeValue
                                     ;
                                     
-                                    $class_parents[] = $parent_class_name;
+                                    $class_parents[] = str_replace(
+                                        "::",
+                                        "\\",
+                                        $parent_class_name
+                                    );
                                 }
                             }
                         }

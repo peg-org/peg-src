@@ -180,5 +180,31 @@ class FileSystem
             return true;
         }
     }
+    
+    /**
+     * Only saves content to a file if the new content is not the same
+     * as the original. This is helpful to prevent an unneccesary timestamp 
+     * modification which is used by compilers to decide wether the file
+     * needs recompilation.
+     * @param string $file Path to file.
+     * @param string $content New content of file.
+     * @return bool True on success or false if file content is the same.
+     */
+    function WriteFileIfDifferent($file, &$contents)
+    {
+        $actual_file_content = "";
+
+        if(file_exists($file))
+            $actual_file_content = file_get_contents($file);
+
+        if(crc32($actual_file_content) != crc32($contents))
+        {
+            file_put_contents($file, $contents);
+
+            return true;
+        }
+
+        print false;
+    }
 
 }

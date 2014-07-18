@@ -16,7 +16,6 @@ void* argument_native_object = NULL;
 
 <?=$parameters_code?>
 <?=$parse_code?>
-<?=$call_code?>
 <?=$return_code?>
 
 /* In case wrong type/count of parameters was passed */

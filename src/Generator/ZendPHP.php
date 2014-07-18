@@ -12,27 +12,30 @@ namespace Peg\Lib\Generator;
  */
 class ZendPHP extends \Peg\Lib\Generator\Base
 {
+    public function __construct($templates, $output, \Peg\Lib\Definitions\Symbols &$symbols)
+    {
+        parent::__construct($templates, $output, $symbols);
+        
+        $this->generator_name = "zend_php";
+        
+        $this->output_path .= $this->generator_name . "/";
+    }
+    
     public function Start()
     {
-        // Remove old header files or create includes directory.
+        // Create includes directory if doesn't exists.
         if(!file_exists($this->output_path . "includes"))
             \Peg\Lib\Utilities\FileSystem::MakeDir(
-                $this->output_path . "includes"
-            );
-        else
-            \Peg\Lib\Utilities\FileSystem::RecursiveRemoveDir(
                 $this->output_path . "includes",
+                0755,
                 true
             );
 
-        // Remove old source files or create src directory.
+        // Create src directory if doesn't exists.
         if(!file_exists($this->output_path . "src"))
             \Peg\Lib\Utilities\FileSystem::MakeDir(
-                $this->output_path . "src"
-            );
-        else
-            \Peg\Lib\Utilities\FileSystem::RecursiveRemoveDir(
                 $this->output_path . "src",
+                0755,
                 true
             );
 
@@ -40,23 +43,20 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         {
             // Skip disabled headers
             if(!$header_object->enabled)
+            {
+                $this->RemoveHeader($header_name);
                 continue;
+            }
 
             // Generate header file
             $header_content = $this->GenerateHeader($header_name);
 
-            file_put_contents(
-                $this->output_path . "includes/" . $this->GetHeaderNamePHP($header_name),
-                $header_content
-            );
+            $this->AddHeader($header_name, $header_content);
 
             // Generate source file
             $source_content = $this->GenerateSource($header_name);
 
-            file_put_contents(
-                $this->output_path . "src/" . $this->GetSourceNamePHP($header_name),
-                $source_content
-            );
+            $this->AddSource($header_name, $source_content);
         }
     }
 
@@ -164,8 +164,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
-            $source_content .= "    ";
-
             foreach($header_object->namespaces as $namespace_name=>$namespace_object)
             {
                 if($namespace_name == "\\")
@@ -264,21 +262,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             // Generate function wrappers
             foreach($header_object->namespaces as $namespace_name=>$namespace_object)
             {
-                if($namespace_name == "\\")
-                    $namespace_name = "";
-
-                $namespace_name_cpp = str_replace(
-                    "\\",
-                    "::",
-                    $namespace_name
-                );
-
-                $namespace_name_var = str_replace(
-                    "\\",
-                    "_",
-                    $namespace_name
-                );
-
                 foreach($namespace_object->functions as $function_name=>$function_object)
                 {
                     $source_content .= $this->GenerateFunction($function_object);
@@ -383,7 +366,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         $parameters_code = "";
         $parse_code = "";
-        $call_code = "";
         $return_code = "";
 
         $proto_header = "";
@@ -500,7 +482,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 if($references_found)
                 {
                     ob_start();
-                        include($this->GetOverloadTemplate($function_name, "", "no_parse_body"));
+                        include($this->GetOverloadTemplate($function_name, "", "parse_references"));
                         $parse_references .= $this->Indent(ob_get_contents(), 8);
                     ob_end_clean();
                 }

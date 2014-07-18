@@ -109,6 +109,8 @@ class ClassElement
      */
     public function AddParent($parent)
     {
+        $parent = str_replace("::", "\\", $parent);
+        
         $this->parents[$parent] = $parent;
         $this->has_parent = true;
         

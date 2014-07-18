@@ -32,6 +32,13 @@ abstract class Base
     public $output_path;
     
     /**
+     * Name of the generator implementing this base class. Useful to determine
+     * the directory where generated source code is going to be stored.
+     * @var string
+     */
+    public $generator_name;
+    
+    /**
      * The symbols object with all definitions required to generate the code.
      * @param string $templates Path where template files reside.
      * @param string $output Path where the generated source code is going to be saved.
@@ -118,6 +125,59 @@ abstract class Base
             ".cpp", 
             $this->GetHeaderNamePHP($name)
         );
+    }
+    
+    /**
+     * Deletes a generated header declarations file and its source file
+     * @param string $header_name Original name of header.
+     */
+    public function RemoveHeader($header_name)
+    {
+        $header = $this->output_path 
+            . "includes/" 
+            . $this->GetHeaderNamePHP($header_name)
+        ;
+        
+        $source = $this->output_path 
+            . "src/" 
+            . $this->GetSourceNamePHP($header_name)
+        ;
+        
+        if(file_exists($header))
+            unlink($header);
+        
+        if(file_exists($source))
+            unlink($source);
+    }
+    
+    /**
+     * Adds or updates a header file if neccessary.
+     * @param string $header_name Original name of header.
+     * @param string $content
+     */
+    public function AddHeader($header_name, &$content)
+    {
+        $header = $this->output_path 
+            . "includes/" 
+            . $this->GetHeaderNamePHP($header_name)
+        ;
+        
+        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $contents);
+    }
+    
+    /**
+     * Adds or updates a header source file if neccessary.
+     * @param string $header_name Original name of header.
+     * @param string $content
+     */
+    public function AddSource($header_name, &$content)
+    {
+        $header = $this->output_path 
+            . "src/" 
+            . $this->GetSourceNamePHP($header_name)
+        ;
+        
+        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $contents);
     }
     
     /**

@@ -21,7 +21,7 @@ object_init_ex(return_value, php_<?=$overload_object->return_type->type?>_ce);
 
 ((<?=$overload_object->return_type->type?>_php*)ptr)->phpObj = return_value;
 
-<?php if(class_has_properties($return_type)){ ?>
+<?php if($this->symbols->ClassHasProperties($overload_object->return_type->type)){ ?>
 ((<?=$overload_object->return_type->type?>_php*)ptr)->InitProperties();
 <?php } ?>
 

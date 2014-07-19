@@ -162,7 +162,7 @@ abstract class Base
             . $this->GetHeaderNamePHP($header_name)
         ;
         
-        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $contents);
+        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $content);
     }
     
     /**
@@ -177,7 +177,7 @@ abstract class Base
             . $this->GetSourceNamePHP($header_name)
         ;
         
-        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $contents);
+        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $content);
     }
     
     /**

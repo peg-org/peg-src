@@ -155,6 +155,24 @@ class Symbols
 
         $this->headers[$header]->AddClass($class, $namespace);
     }
+    
+    /**
+     * Checks if a class has properties.
+     * @param string $class_name
+     * @return bool True if has properties, otherwise false.
+     */
+    public function ClassHasProperties($class_name)
+    {   
+        $class = $this->HasClass($class_name);
+        
+        if($class)
+        {
+            if(count($class->variables) > 0)
+                return true;
+        }
+        
+        return false;
+    }
 
     /**
      * Gets a standard type identifier for a variable type.

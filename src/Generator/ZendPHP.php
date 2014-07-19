@@ -437,7 +437,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 
                 ob_start();
                     include($this->GetParameterTemplate($parameter_object, $namespace_name, "parse"));
-                    $parse_parameters .= ob_get_contents() . ", ";
+                    $parse_parameters .= ob_get_contents();
                 ob_end_clean();
                 
                 if(!$parameter_object->is_const && $parameter_object->is_reference)
@@ -450,7 +450,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 
                 ob_start();
                     include($this->GetParameterTemplate($parameter_object, $namespace_name, "parse_reference"));
-                    $parse_reference .= ob_get_contents() . ", ";
+                    $parse_reference .= ob_get_contents();
                 ob_end_clean();
                 
                 if(
@@ -483,7 +483,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 {
                     ob_start();
                         include($this->GetOverloadTemplate($function_name, "", "parse_references"));
-                        $parse_references .= $this->Indent(ob_get_contents(), 8);
+                        $parse_references .= $this->Indent(ob_get_contents(), 4);
                     ob_end_clean();
                 }
                 
@@ -496,6 +496,101 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             ob_start();
                 include($this->GetOverloadTemplate($function_name, "", "parse_footer"));
                 $parse_code .= ob_get_contents();
+            ob_end_clean();
+        }
+        
+        // Return code
+        foreach($function_object->overloads as $overload=>$overload_object)
+        {
+            $parameters_count = $overload_object->GetParametersCount();
+            $required_parameters = $overload_object->GetRequiredParametersCount();
+            
+            $call_declare_code = "";
+            
+            // Optional declarations before proceeding to call an overload
+            $parameter_index = 0;
+            foreach($overload_object->parameters as $parameter_name=>$parameter_object)
+            {
+                ob_start();
+                    include($this->GetParameterTemplate($parameter_object, "", "call_declare"));
+                    $call_declare_code .= $this->Indent(ob_get_contents(), 4);
+                ob_end_clean();
+                
+                $parameter_index++;
+            }
+            
+            // Generate the overload return heading
+            ob_start();
+                include($this->GetOverloadTemplate($function_name, "", "return_header"));
+                $return_code .= ob_get_contents();
+            ob_end_clean();
+            
+            // Variables used by after call object template.
+            $class_name = "";
+            $is_constructor = false;
+            
+            for(
+                $required_parameters; 
+                $required_parameters<=$parameters_count; 
+                $required_parameters++
+            )
+            {
+                ob_start();
+                    include($this->GetOverloadTemplate($function_name, "", "return_body_header"));
+                    $return_code .= $this->Indent(ob_get_contents(), 8);
+                ob_end_clean();
+            
+                $parameter_index = 0;
+                $parameters_string = "";
+                $after_call = "";
+                
+                foreach($overload_object->parameters as $parameter_name=>$parameter_object)
+                {
+                    if($parameter_index<$required_parameters)
+                    {
+                        ob_start();
+                            include($this->GetParameterTemplate($parameter_object, "", "before_call"));
+                            $before_call = $this->Indent(ob_get_contents(), 12);
+                        ob_end_clean();
+                        
+                        if(trim($before_call))
+                            $return_code .= $before_call;
+                        
+                        ob_start();
+                            include($this->GetParameterTemplate($parameter_object, "", "call"));
+                            $parameters_string .= ob_get_contents();
+                        ob_end_clean();
+                        
+                        ob_start();
+                            include($this->GetParameterTemplate($parameter_object, "", "after_call"));
+                            $after_call .= ob_get_contents();
+                        ob_end_clean();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    
+                    $parameter_index++;
+                }
+                
+                ob_start();
+                    include($this->GetReturnTemplate($overload_object->return_type, "", "function"));
+                    $return_code .= $this->Indent(ob_get_contents(), 12);
+                ob_end_clean();
+                
+                $return_code .= $after_call;
+                
+                ob_start();
+                    include($this->GetOverloadTemplate($function_name, "", "return_body_footer"));
+                    $return_code .= $this->Indent(ob_get_contents(), 8);
+                ob_end_clean();
+            }
+
+            // Generate the overload return footer
+            ob_start();
+                include($this->GetOverloadTemplate($function_name, "", "return_footer"));
+                $return_code .= ob_get_contents();
             ob_end_clean();
         }
 
@@ -1058,6 +1153,113 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         {
             return $this->templates_path
                 . "zend_php/parameters/{$type}/"
+                . "default.php"
+            ;
+        }
+
+        return $template;
+    }
+    
+    /**
+     * Retrieve the template path for return, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $return Name of the function.
+     * @param string $namespace
+     * @param string $type Can be function, method or static_method.
+     * @return string Path to template file.
+     */
+    public function GetReturnTemplate(
+        \Peg\Lib\Definitions\Element\ReturnType $return,
+        $namespace="",
+        $type="function"
+    )
+    {
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"),
+                "_",
+                $namespace
+            ) . "_";
+        }
+
+        $function_name = strtolower($return->overload->function->name);
+
+        $return_type = strtolower($return->type);
+
+        $const = "";
+        if($return->is_const)
+        {
+            $const .= "_const";
+        }
+
+        $ptr = "";
+        if($return->is_pointer)
+        {
+            for($i=0; $i<$return->indirection_level; $i++)
+            {
+                $ptr .= "_ptr";
+            }
+        }
+
+        $ref = "";
+        if($return->is_reference)
+        {
+            $ref .= "_ref";
+        }
+
+        $array = "";
+        if($return->is_array)
+        {
+            $array .= "_arr";
+        }
+
+        $override_function = $this->templates_path
+            . "zend_php/return/{$type}/overrides/"
+            . $function_name . "_" . $return_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override_function))
+        {
+            return $override_function;
+        }
+
+        $override = $this->templates_path
+            . "zend_php/return/{$type}/overrides/"
+            . $return_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+
+        $standard_type = $this->symbols->GetStandardType($return);
+
+        $template = $this->templates_path
+            . "zend_php/return/{$type}/"
+            . $standard_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(!file_exists($template))
+        {
+            return $this->templates_path
+                . "zend_php/return/{$type}/"
                 . "default.php"
             ;
         }

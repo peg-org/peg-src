@@ -4,5 +4,5 @@ zend_parse_parameters_ex(
     ZEND_PARSE_PARAMS_QUIET,
     arguments_received TSRMLS_CC,
     parse_references_string,
-    <?=trim($parse_reference, ", ")?>
+    <?=trim($parse_reference, ", ")?> 
 );

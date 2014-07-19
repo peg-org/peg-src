@@ -151,7 +151,7 @@ class Overload
         
         foreach($this->parameters as $parameter)
         {
-            if($parameter->default_value)
+            if(!$parameter->default_value)
                 $required++;
         }
         

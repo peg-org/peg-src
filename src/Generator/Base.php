@@ -128,6 +128,65 @@ abstract class Base
     }
     
     /**
+     * Get a php template file path based on the given parameters.
+     * @param string $name Name of element.
+     * @param string $type Main type of template.
+     * @param string $subtype Subtype of template.
+     * @param string $dir Relative dir to templates path where template resides.
+     * @param string $overrides_prefix In case $dir is shared with other template types.
+     * @param string $namespace Namespace of the $name element.
+     * @return string
+     * @throws \Exception
+     */
+    public function GetTemplatePath(
+        $name, $type, $subtype, $dir, $overrides_prefix="", $namespace=""
+    )
+    {
+        if(!$this->generator_name)
+        {
+            throw new \Exception(t("The generator name wasn't set."));
+        }
+        
+        if($namespace)
+        {
+            $namespace = strtolower(
+                str_replace(
+                    array("\\", "::"),
+                    "_",
+                    $namespace
+                )
+            ) . "_";
+        }
+        
+        if($overrides_prefix)
+        {
+            $overrides_prefix = rtrim($overrides_prefix, "_") . "_";
+        }
+
+        $override = $this->templates_path . $this->generator_name . "/"
+            . "{$dir}/{$overrides_prefix}overrides/"
+            . "{$subtype}_" . $namespace . strtolower(
+                str_replace(
+                    array("/", "-", "."),
+                    "_",
+                    $name
+                )
+            )
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+
+        return $this->templates_path . $this->generator_name . "/"
+            . "{$dir}/"
+            . "{$type}_{$subtype}.php"
+        ;
+    }
+    
+    /**
      * Deletes a generated header declarations file and its source file
      * @param string $header_name Original name of header.
      */

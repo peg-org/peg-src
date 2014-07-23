@@ -12,7 +12,11 @@ namespace Peg\Lib\Generator;
  */
 class ZendPHP extends \Peg\Lib\Generator\Base
 {
-    public function __construct($templates, $output, \Peg\Lib\Definitions\Symbols &$symbols)
+    public function __construct(
+        $templates, 
+        $output, 
+        \Peg\Lib\Definitions\Symbols &$symbols
+    )
     {
         parent::__construct($templates, $output, $symbols);
         
@@ -80,7 +84,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         // Get heading of header file
         ob_start();
-            include($this->GetHeaderTemplate($header_name));
+            include($this->GetTemplatePath(
+                $header_name, 
+                "headers", 
+                "header", 
+                "helpers", 
+                "header"
+            ));
             $header_content .= ob_get_contents();
         ob_end_clean();
 
@@ -88,7 +98,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         if($header_object->HasConstants() || $header_object->HasGlobalVariables())
         {
             ob_start();
-                include($this->GetConstantsFunctionTemplate($header_name));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "constants", 
+                    "function_decl", 
+                    "helpers", 
+                    "constant"
+                ));
                 $header_content .= ob_get_contents();
             ob_end_clean();
 
@@ -99,7 +115,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         if($header_object->HasEnumerations())
         {
             ob_start();
-                include($this->GetEnumsFunctionTemplate($header_name));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "enums", 
+                    "function_decl", 
+                    "helpers", 
+                    "enum"
+                ));
                 $header_content .= ob_get_contents();
             ob_end_clean();
 
@@ -110,7 +132,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         if($header_object->HasFunctions())
         {
             ob_start();
-                include($this->GetFunctionsFunctionTemplate($header_name));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "function_decl", 
+                    "helpers", 
+                    "function"
+                ));
                 $header_content .= ob_get_contents();
             ob_end_clean();
 
@@ -124,7 +152,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         // Get footer of header file
         ob_start();
-            include($this->GetHeaderTemplate($header_name, "footer"));
+            include($this->GetTemplatePath(
+                $header_name, 
+                "headers", 
+                "footer", 
+                "helpers", 
+                "header"
+            ));
             $header_content .= ob_get_contents();
         ob_end_clean();
 
@@ -152,15 +186,28 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         // Get heading of source file
         ob_start();
-            include($this->GetSourceTemplate($header_name));
+            include($this->GetTemplatePath(
+                $header_name, 
+                "sources", 
+                "header", 
+                "helpers", 
+                "source"
+            ));
             $source_content .= ob_get_contents();
         ob_end_clean();
 
         // Get constants function template content
         if($header_object->HasConstants() || $header_object->HasGlobalVariables())
         {
+            // Constants function heading
             ob_start();
-                include($this->GetConstantsFunctionTemplate($header_name, "header"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "constants", 
+                    "function_header", 
+                    "helpers", 
+                    "constant"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
@@ -198,8 +245,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 }
             }
 
+            // Constants function footer
             ob_start();
-                include($this->GetConstantsFunctionTemplate($header_name, "footer"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "constants", 
+                    "function_footer", 
+                    "helpers", 
+                    "constant"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
@@ -209,8 +263,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         // Get enums function template content
         if($header_object->HasEnumerations())
         {
+            // Enums function heading
             ob_start();
-                include($this->GetEnumsFunctionTemplate($header_name, "header"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "enums", 
+                    "function_header", 
+                    "helpers", 
+                    "enum"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
@@ -234,22 +295,43 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 foreach($namespace_object->enumerations as $enum_name=>$enum_object)
                 {
                     ob_start();
-                        include($this->GetRegisterEnumTemplate($enum_name, $namespace_name, "class"));
+                        include($this->GetTemplatePath(
+                            $enum_name, 
+                            "enums", 
+                            "declare_class", 
+                            "helpers", 
+                            "enum",
+                            $namespace_name
+                        ));
                         $source_content .= $this->Indent(ob_get_contents(), 4);
                     ob_end_clean();
 
                     foreach($enum_object->options as $enum_option)
                     {
                         ob_start();
-                            include($this->GetRegisterEnumTemplate($enum_name, $namespace_name, "constant"));
+                            include($this->GetTemplatePath(
+                                $enum_name, 
+                                "enums", 
+                                "declare_constant", 
+                                "helpers", 
+                                "enum",
+                                $namespace_name
+                            ));
                             $source_content .= $this->Indent(ob_get_contents(), 4);
                         ob_end_clean();
                     }
                 }
             }
 
+            // Enums function footer
             ob_start();
-                include($this->GetEnumsFunctionTemplate($header_name, "footer"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "enums", 
+                    "function_footer", 
+                    "helpers", 
+                    "enum"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
@@ -269,13 +351,27 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             }
 
             // Generate functions registration code
+            
+            // Functions registration heading
             ob_start();
-                include($this->GetFunctionsFunctionTemplate($header_name, "header"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "function_header", 
+                    "helpers", 
+                    "function"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
             ob_start();
-                include($this->GetFunctionsTableTemplate($header_name, "", "begin"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "table_begin", 
+                    "helpers", 
+                    "function"
+                ));
                 $source_content .= $this->Indent(ob_get_contents(), 4);
             ob_end_clean();
 
@@ -299,24 +395,49 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 foreach($namespace_object->functions as $function_name=>$function_object)
                 {
                     ob_start();
-                        include($this->GetFunctionsTableTemplate($header_name, "", "entry"));
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "functions", 
+                            "table_entry", 
+                            "helpers", 
+                            "function"
+                        ));
                         $source_content .= $this->Indent(ob_get_contents(), 8);
                     ob_end_clean();
                 }
             }
 
             ob_start();
-                include($this->GetFunctionsTableTemplate($header_name, "", "end"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "table_end", 
+                    "helpers", 
+                    "function"
+                ));
                 $source_content .= $this->Indent(ob_get_contents(), 4);
             ob_end_clean();
 
             ob_start();
-                include($this->GetFunctionsTableTemplate($header_name, "", "register"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "table_register", 
+                    "helpers", 
+                    "function"
+                ));
                 $source_content .= $this->Indent(ob_get_contents(), 4);
             ob_end_clean();
 
+            // Functions registration footer
             ob_start();
-                include($this->GetFunctionsFunctionTemplate($header_name, "footer"));
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "functions", 
+                    "function_footer", 
+                    "helpers", 
+                    "function"
+                ));
                 $source_content .= ob_get_contents();
             ob_end_clean();
 
@@ -325,7 +446,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         // Get footer of source file
         ob_start();
-            include($this->GetSourceTemplate($header_name, "footer"));
+            include($this->GetTemplatePath(
+                $header_name, 
+                "sources", 
+                "footer", 
+                "helpers", 
+                "source"
+            ));
             $source_content .= ob_get_contents();
         ob_end_clean();
 
@@ -368,12 +495,19 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         $parse_code = "";
         $return_code = "";
 
-        $proto_header = "";
-        $proto_footer = "";
+        $proto_header = $this->GetProtoHeader($function_object);
+        $proto_footer = $this->GetProtoFooter();
 
         // Get header of function
         ob_start();
-            include($this->GetFunctionTemplate($function_name, $namespace_name, "head"));
+            include($this->GetTemplatePath(
+                $function_name, 
+                "function", 
+                "head", 
+                "functions", 
+                "",
+                $namespace_name
+            ));
             $function_content .= ob_get_contents();
         ob_end_clean();
 
@@ -404,8 +538,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             $parameters_count = $overload_object->GetParametersCount();
             $required_parameters = $overload_object->GetRequiredParametersCount();
             
+            // Overload parse header
             ob_start();
-                include($this->GetOverloadTemplate($function_name, "", "parse_header"));
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "parse_header", 
+                    "helpers", 
+                    "overload"
+                ));
                 $parse_code .= ob_get_contents();
             ob_end_clean();
             
@@ -471,8 +612,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             // No parameters to parse
             if($required_parameters == 0 && $parameters_count < 1)
             {
+                // Overload no parse body
                 ob_start();
-                    include($this->GetOverloadTemplate($function_name, "", "no_parse_body"));
+                    include($this->GetTemplatePath(
+                        $function_name, 
+                        "overloads", 
+                        "no_parse_body", 
+                        "helpers", 
+                        "overload"
+                    ));
                     $parse_code .= $this->Indent(ob_get_contents(), 4);
                 ob_end_clean();
             }
@@ -481,20 +629,41 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             {
                 if($references_found)
                 {
+                    // Overload parse references
                     ob_start();
-                        include($this->GetOverloadTemplate($function_name, "", "parse_references"));
+                        include($this->GetTemplatePath(
+                            $function_name, 
+                            "overloads", 
+                            "parse_references", 
+                            "helpers", 
+                            "overload"
+                        ));
                         $parse_references .= $this->Indent(ob_get_contents(), 4);
                     ob_end_clean();
                 }
                 
+                // Overload parse body
                 ob_start();
-                    include($this->GetOverloadTemplate($function_name, "", "parse_body"));
+                    include($this->GetTemplatePath(
+                        $function_name, 
+                        "overloads", 
+                        "parse_body", 
+                        "helpers", 
+                        "overload"
+                    ));
                     $parse_code .= $this->Indent(ob_get_contents(), 4);
                 ob_end_clean();
             }
 
+            // Overload parse footer
             ob_start();
-                include($this->GetOverloadTemplate($function_name, "", "parse_footer"));
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "parse_footer", 
+                    "helpers", 
+                    "overload"
+                ));
                 $parse_code .= ob_get_contents();
             ob_end_clean();
         }
@@ -521,7 +690,13 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             
             // Generate the overload return heading
             ob_start();
-                include($this->GetOverloadTemplate($function_name, "", "return_header"));
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "return_header", 
+                    "helpers", 
+                    "overload"
+                ));
                 $return_code .= ob_get_contents();
             ob_end_clean();
             
@@ -535,8 +710,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 $required_parameters++
             )
             {
+                // Overload return body header
                 ob_start();
-                    include($this->GetOverloadTemplate($function_name, "", "return_body_header"));
+                    include($this->GetTemplatePath(
+                        $function_name, 
+                        "overloads", 
+                        "return_body_header", 
+                        "helpers", 
+                        "overload"
+                    ));
                     $return_code .= $this->Indent(ob_get_contents(), 8);
                 ob_end_clean();
             
@@ -581,128 +763,117 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 
                 $return_code .= $after_call;
                 
+                // Overload return body footer
                 ob_start();
-                    include($this->GetOverloadTemplate($function_name, "", "return_body_footer"));
+                    include($this->GetTemplatePath(
+                        $function_name, 
+                        "overloads", 
+                        "return_body_footer", 
+                        "helpers", 
+                        "overload"
+                    ));
                     $return_code .= $this->Indent(ob_get_contents(), 8);
                 ob_end_clean();
             }
 
             // Generate the overload return footer
             ob_start();
-                include($this->GetOverloadTemplate($function_name, "", "return_footer"));
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "return_footer", 
+                    "helpers", 
+                    "overload"
+                ));
                 $return_code .= ob_get_contents();
             ob_end_clean();
         }
 
         // Get body of function
         ob_start();
-            include($this->GetFunctionTemplate($function_name, $namespace_name, "body"));
+            include($this->GetTemplatePath(
+                $function_name, 
+                "function", 
+                "body", 
+                "functions", 
+                "",
+                $namespace_name
+            ));
             $function_content .= $this->Indent(ob_get_contents(), 4);
         ob_end_clean();
 
         // Get footer of function
         ob_start();
-            include($this->GetFunctionTemplate($function_name, $namespace_name, "footer"));
+            include($this->GetTemplatePath(
+                $function_name, 
+                "function", 
+                "footer", 
+                "functions", 
+                "",
+                $namespace_name
+            ));
             $function_content .= ob_get_contents();
         ob_end_clean();
 
         return $function_content;
     }
-
+    
     /**
-     * Retrieve the template path for a header, also checks if a valid override
-     * exists and returns that instead.
-     * @param string $header_name Name of header.
-     * @param string $type Can be header or footer.
-     * @return string Path to template file.
+     * Generates proto doc comments header for a function.
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function
+     * @return string
      */
-    public function GetHeaderTemplate($header_name, $type="header")
+    public function GetProtoHeader(
+        \Peg\Lib\Definitions\Element\FunctionElement $function
+    )
     {
-        $override = $this->templates_path
-            . "zend_php/helpers/header_overrides/"
-            . "{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $header_name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
+        $proto = "/* {{{ ";
+        
+        foreach($function->overloads as $overload)
         {
-            return $override;
+            $proto .= "proto ";
+            
+            $proto .= $this->symbols->GetPHPStandardType($overload->return_type);
+            
+            $proto .= " " . $overload->function->name . "(";
+            
+            foreach($overload->parameters as $parameter)
+            {
+                $proto .= $this->symbols->GetPHPStandardType($parameter);
+                $proto .= " " . $parameter->name;
+                
+                if($parameter->default_value)
+                {
+                    $proto .= " = " . $parameter->default_value; 
+                }
+                
+                $proto .= ", ";
+            }
+            
+            $proto = rtrim($proto, ", ");
+            
+            $proto .= ")";
+            
+            if($overload->description)
+                $proto .= "\n       " . $overload->description;
+            
+            $proto .= "\n       ";
         }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "headers_$type.php"
-        ;
+        
+        $proto = rtrim($proto, " \n");
+        
+        $proto .= " */\n";
+        
+        return $proto;
     }
-
+    
     /**
-     * Retrieve the template path for a source, also checks if a valid override
-     * exists and returns that instead.
-     * @param string $header_name Name of header.
-     * @param string $type Can be header or footer.
-     * @return string Path to template file.
+     * Generates proto doc comments footer.
+     * @return string
      */
-    public function GetSourceTemplate($header_name, $type="header")
+    public function GetProtoFooter()
     {
-        $override = $this->templates_path
-            . "zend_php/helpers/source_overrides/"
-            . "{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $header_name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "sources_$type.php"
-        ;
-    }
-
-    /**
-     * Retrieve the template path for constants registration function,
-     * also checks if a valid override exists and returns that instead.
-     * @param string $header_name Name of header file.
-     * @param string $type Can be header, footer or decl.
-     * @return string Path to template file.
-     */
-    public function GetConstantsFunctionTemplate($header_name, $type="decl")
-    {
-        $override = $this->templates_path
-            . "zend_php/helpers/constant_overrides/"
-            . "{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $header_name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "constants_function_$type.php"
-        ;
+        return "/* }}} */\n";
     }
 
     /**
@@ -817,239 +988,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         }
 
         return $template;
-    }
-
-    /**
-     * Retrieve the template path for enums registration function,
-     * also checks if a valid override exists and returns that instead.
-     * @param string $header_name Name of header file.
-     * @param string $type Can be header, footer or decl.
-     * @return string Path to template file.
-     */
-    public function GetEnumsFunctionTemplate($header_name, $type="decl")
-    {
-        $override = $this->templates_path
-            . "zend_php/helpers/enum_overrides/"
-            . "function_{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $header_name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "enums_function_$type.php"
-        ;
-    }
-
-    /**
-     * Retrieve the template path for registering enums, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $name Name of the enumaration.
-     * @param string $namespace Namespace where resides the enum.
-     * @param string $type Can be class or constant.
-     * @return string Path to template file.
-     */
-    public function GetRegisterEnumTemplate($name, $namespace="", $type="class")
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $override = $this->templates_path
-            . "zend_php/helpers/enum_overrides/"
-            . "declare_{$type}_" . $namespace . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "enums_declare_$type.php"
-        ;
-    }
-
-    /**
-     * Retrieve the template path for functions registration function,
-     * also checks if a valid override exists and returns that instead.
-     * @param string $header_name Name of header file.
-     * @param string $type Can be header, footer or decl.
-     * @return string Path to template file.
-     */
-    public function GetFunctionsFunctionTemplate($header_name, $type="decl")
-    {
-        $override = $this->templates_path
-            . "zend_php/helpers/function_overrides/"
-            . "function_{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $header_name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "functions_function_$type.php"
-        ;
-    }
-
-    /**
-     * Retrieve the template path for registering functions, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $name Name of the function.
-     * @param string $namespace Namespace where resides the enum.
-     * @param string $type Can be begin, end, entry or register.
-     * @return string Path to template file.
-     */
-    public function GetFunctionsTableTemplate($name, $namespace="", $type="entry")
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $override = $this->templates_path
-            . "zend_php/helpers/function_overrides/"
-            . "table_{$type}_" . $namespace . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "functions_table_$type.php"
-        ;
-    }
-
-    /**
-     * Retrieve the template path for generating functions, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $name Name of the function.
-     * @param string $namespace Namespace where resides the enum.
-     * @param string $type Can be head, footer or body.
-     * @return string Path to template file.
-     */
-    public function GetFunctionTemplate($name, $namespace="", $type="body")
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $override = $this->templates_path
-            . "zend_php/functions/overrides/"
-            . "{$type}_" . $namespace . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/functions/"
-            . "function_$type.php"
-        ;
-    }
-    
-    /**
-     * Retrieve the template path of overload, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $name Name of the function.
-     * @param string $namespace
-     * @param string $type Can be parse_header, parse_body, parse_footer, 
-     * no_parse_body, parse_references.
-     * @return string Path to template file.
-     */
-    public function GetOverloadTemplate($name, $namespace="", $type="entry")
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $override = $this->templates_path
-            . "zend_php/helpers/overload_overrides/"
-            . "{$type}_" . strtolower(
-                str_replace(
-                    array("/", "-", "."),
-                    "_",
-                    $name
-                )
-            )
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        return $this->templates_path
-            . "zend_php/helpers/"
-            . "overloads_$type.php"
-        ;
     }
 
     /**

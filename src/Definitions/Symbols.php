@@ -176,7 +176,7 @@ class Symbols
 
     /**
      * Gets a standard type identifier for a variable type.
-     * @todo Finish implementing this.
+     * @todo Add hook|signal so a plugin can modify the returned type.
      * @param \Peg\Lib\Definitions\Element\VariableType $type
      */
     public function GetStandardType(
@@ -244,6 +244,60 @@ class Symbols
         }
         
         return $standard_type;
+    }
+    
+    /**
+     * Gets the php standard type identifier for a variable type.
+     * @todo Add hook|signal so a plugin can modify the returned type.
+     * @param \Peg\Lib\Definitions\Element\VariableType $type
+     */
+    public function GetPHPStandardType(
+        \Peg\Lib\Definitions\Element\VariableType $type
+    )
+    {
+        $standard_type = $this->GetStandardType($type);
+        $type = "";
+
+        switch($standard_type)
+        {
+            case StandardType::BOOLEAN:
+                $type .= "bool";
+                break;
+
+            case StandardType::INTEGER:
+                $type .= "int";
+                break;
+
+            case StandardType::REAL:
+                $type .= "float";
+                break;
+
+            case StandardType::CHARACTER:
+                $type .= "string";
+                break;
+
+            case StandardType::VOID:
+                $type .= "void";
+                break;
+
+            case StandardType::OBJECT:
+                $type .= $type->type;
+                break;
+            
+            case StandardType::CLASS_ENUM:
+                $type .= $type->type . "| int";
+                break;
+            
+            case StandardType::ENUM:
+                $type .= "int";
+                break;
+            
+            case StandardType::UNKNOWN:
+                $type .= "unknown";
+                break;
+        }
+        
+        return $type;
     }
     
     /**

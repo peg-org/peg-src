@@ -14,7 +14,8 @@ abstract class Base
 {
 
     /**
-     * Reference to the symbols object with all definitions required to generate the code.
+     * Reference to the symbols object with all definitions required 
+     * to generate the code.
      * @var \Peg\Lib\Definitions\Symbols 
      */
     public $symbols;
@@ -42,17 +43,35 @@ abstract class Base
      * The symbols object with all definitions required to generate the code.
      * @param string $templates Path where template files reside.
      * @param string $output Path where the generated source code is going to be saved.
+     * @param string $generator_name Name of the generator being instantiated.
+     * Should be all lower case.
      * @param \Peg\Lib\Definitions\Symbols $symbols
      */
     public function __construct(
         $templates,
         $output,
+        $generator_name,
         \Peg\Lib\Definitions\Symbols &$symbols
     )
     {
         $this->symbols =& $symbols;
         $this->templates_path = rtrim($templates, "\\/") . "/";
         $this->output_path = rtrim($output, "\\/") . "/";
+        $this->generator_name = $generator_name;
+        
+        // Strip generator name if passed by user since it should be
+        // appended automatically by this constructor.
+        $this->output_path = str_replace(
+            "/$generator_name/", 
+            "/", 
+            $this->output_path
+        ) . $generator_name . "/";
+        
+        $this->templates_path = str_replace(
+            "/$generator_name/", 
+            "/", 
+            $this->templates_path
+        ) . $generator_name . "/";
     }
     
     /**
@@ -128,6 +147,30 @@ abstract class Base
     }
     
     /**
+     * Gets a list of custom source files on the custom_sources directory
+     * that resides in the templates/$generator_name directory with the .php
+     * extension stripped out.
+     */
+    public function GetCustomSources()
+    {
+        $sources = scandir($this->templates_path . "custom_sources");
+        
+        foreach($sources as $index=>$source)
+        {
+            // Skip non .php files
+            if(strpos($source, ".php") === false)
+            {
+                unset($sources[$index]);
+                continue;
+            }
+            
+            $sources[$index] = str_replace(".php", "", $source);
+        }
+        
+        return $sources;
+    }
+    
+    /**
      * Get a php template file path based on the given parameters.
      * @param string $name Name of element.
      * @param string $type Main type of template.
@@ -136,17 +179,11 @@ abstract class Base
      * @param string $overrides_prefix In case $dir is shared with other template types.
      * @param string $namespace Namespace of the $name element.
      * @return string
-     * @throws \Exception
      */
     public function GetTemplatePath(
         $name, $type, $subtype, $dir, $overrides_prefix="", $namespace=""
     )
-    {
-        if(!$this->generator_name)
-        {
-            throw new \Exception(t("The generator name wasn't set."));
-        }
-        
+    {   
         if($namespace)
         {
             $namespace = strtolower(
@@ -163,7 +200,7 @@ abstract class Base
             $overrides_prefix = rtrim($overrides_prefix, "_") . "_";
         }
 
-        $override = $this->templates_path . $this->generator_name . "/"
+        $override = $this->templates_path
             . "{$dir}/{$overrides_prefix}overrides/"
             . "{$subtype}_" . $namespace . strtolower(
                 str_replace(
@@ -180,10 +217,252 @@ abstract class Base
             return $override;
         }
 
-        return $this->templates_path . $this->generator_name . "/"
+        return $this->templates_path
             . "{$dir}/"
             . "{$type}_{$subtype}.php"
         ;
+    }
+    
+    /**
+     * Get a php template file for a given file name.
+     * @param string $name Filename of source file, eg: php_extension.h, config.m4
+     * @param string $subdir Relative path to the templates_path where the file resides.
+     * @return string Path to template file.
+     */
+    public function GetGenericTemplate($name, $subdir="")
+    {
+        if($subdir)
+            $subdir = trim($subdir, "\\/") . "/";
+        
+        return $this->templates_path
+            . $subdir
+            . "{$name}.php"
+        ;
+    }
+    
+    /**
+     * Retrieve the template path for parameters, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $parameter Name of the function.
+     * @param string $namespace
+     * @param string $type Can be declare, parse_string, parse, 
+     * parse_string_ref, parse_reference or object_validate.
+     * @return string Path to template file.
+     */
+    public function GetParameterTemplate(
+        \Peg\Lib\Definitions\Element\Parameter $parameter,
+        $namespace="",
+        $type="declare"
+    )
+    {
+        if(!$this->generator_name)
+        {
+            throw new \Exception(t("The generator name wasn't set."));
+        }
+        
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"),
+                "_",
+                $namespace
+            ) . "_";
+        }
+
+        $function_name = strtolower($parameter->overload->function->name);
+
+        $parameter_type = strtolower($parameter->type);
+
+        $const = "";
+        if($parameter->is_const)
+        {
+            $const .= "_const";
+        }
+
+        $ptr = "";
+        if($parameter->is_pointer)
+        {
+            for($i=0; $i<$parameter->indirection_level; $i++)
+            {
+                $ptr .= "_ptr";
+            }
+        }
+
+        $ref = "";
+        if($parameter->is_reference)
+        {
+            $ref .= "_ref";
+        }
+
+        $array = "";
+        if($parameter->is_array)
+        {
+            $array .= "_arr";
+        }
+
+        $override_function = $this->templates_path
+            . "parameters/{$type}/overrides/"
+            . $function_name . "_" . $parameter_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override_function))
+        {
+            return $override_function;
+        }
+
+        $override = $this->templates_path
+            . "parameters/{$type}/overrides/"
+            . $parameter_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+
+        $standard_type = $this->symbols->GetStandardType($parameter);
+
+        $template = $this->templates_path
+            . "parameters/{$type}/"
+            . $standard_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(!file_exists($template))
+        {
+            return $this->templates_path
+                . "parameters/{$type}/"
+                . "default.php"
+            ;
+        }
+
+        return $template;
+    }
+    
+    /**
+     * Retrieve the template path for return, also checks
+     * if a valid override exists and returns that instead.
+     * @param string $return Name of the function.
+     * @param string $namespace
+     * @param string $type Can be function, method or static_method.
+     * @return string Path to template file.
+     */
+    public function GetReturnTemplate(
+        \Peg\Lib\Definitions\Element\ReturnType $return,
+        $namespace="",
+        $type="function"
+    )
+    {
+        if(!$this->generator_name)
+        {
+            throw new \Exception(t("The generator name wasn't set."));
+        }
+        
+        if($namespace)
+        {
+            $namespace = str_replace(
+                array("\\", "::"),
+                "_",
+                $namespace
+            ) . "_";
+        }
+
+        $function_name = strtolower($return->overload->function->name);
+
+        $return_type = strtolower($return->type);
+
+        $const = "";
+        if($return->is_const)
+        {
+            $const .= "_const";
+        }
+
+        $ptr = "";
+        if($return->is_pointer)
+        {
+            for($i=0; $i<$return->indirection_level; $i++)
+            {
+                $ptr .= "_ptr";
+            }
+        }
+
+        $ref = "";
+        if($return->is_reference)
+        {
+            $ref .= "_ref";
+        }
+
+        $array = "";
+        if($return->is_array)
+        {
+            $array .= "_arr";
+        }
+
+        $override_function = $this->templates_path
+            . "return/{$type}/overrides/"
+            . $function_name . "_" . $return_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override_function))
+        {
+            return $override_function;
+        }
+
+        $override = $this->templates_path
+            . "return/{$type}/overrides/"
+            . $return_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(file_exists($override))
+        {
+            return $override;
+        }
+
+        $standard_type = $this->symbols->GetStandardType($return);
+
+        $template = $this->templates_path
+            . "return/{$type}/"
+            . $standard_type
+            . $const
+            . $ptr
+            . $ref
+            . $array
+            . ".php"
+        ;
+
+        if(!file_exists($template))
+        {
+            return $this->templates_path
+                . "return/{$type}/"
+                . "default.php"
+            ;
+        }
+
+        return $template;
     }
     
     /**
@@ -237,6 +516,37 @@ abstract class Base
         ;
         
         \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent($header, $content);
+    }
+    
+    /**
+     * Adds or updates a generic file if neccessary.
+     * @param string $file_name Original name of header.
+     * @param string $content
+     * @param string $subdir
+     */
+    public function AddGenericFile($file_name, &$content, $subdir="")
+    {
+        if($subdir)
+        {
+            $subdir = trim($subdir, "\\/") . "/";
+            
+            if(!file_exists($this->output_path . $subdir))
+                \Peg\Lib\Utilities\FileSystem::MakeDir(
+                    $this->output_path . $subdir, 
+                    0755, 
+                    true
+                );
+        }
+        
+        $output_file = $this->output_path 
+            . $subdir
+            . $file_name
+        ;
+        
+        \Peg\Lib\Utilities\FileSystem::WriteFileIfDifferent(
+            $output_file, 
+            $content
+        );
     }
     
     /**

@@ -20,7 +20,15 @@
 
 enum <?=strtolower($extension)?>_object_type
 {
-	<?=$object_types?>
+    <?=$object_types?>
 };
+
+typdef struct _php_<?=strtolower($extension)?>_zo
+{
+    zend_object zo;
+    void* native_object;
+    <?=strtolower($extension)?>_object_type object_type;
+    int is_user_initialized;
+} php_<?=strtolower($extension)?>_zo;
 
 #endif //<?=strtoupper($extension)?>_OBJECT_TYPES_H_GUARD

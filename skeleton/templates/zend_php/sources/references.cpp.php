@@ -1,6 +1,6 @@
 /*
- * @author <?=$authors?>
- * @contributors <?=$contributors?>
+ * @author <?=$authors?> 
+ * @contributors <?=$contributors?> 
  * 
  * @license 
  * This file is part of <?=$extension?> check the LICENSE file for information.
@@ -17,58 +17,58 @@
 
 <?=$extension?>_ObjectReferences::<?=$extension?>_ObjectReferences()
 {
-	m_userInitialized = 0x000000;
+    m_userInitialized = 0x000000;
 }
 
 <?=$extension?>_ObjectReferences::~<?=$extension?>_ObjectReferences()
 {
-	RemoveReferences();
+    RemoveReferences();
 }
 
 void <?=$extension?>_ObjectReferences::Initialize()
 {
-	m_userInitialized = 0xAAEECC;
+    m_userInitialized = 0xAAEECC;
 }
 
 void <?=$extension?>_ObjectReferences::UnInitialize()
 {
-	m_userInitialized = 0;
+    m_userInitialized = 0;
 }
 
 bool <?=$extension?>_ObjectReferences::IsUserInitialized()
 {
-	return (m_userInitialized == 0xAAEECC); 
+    return (m_userInitialized == 0xAAEECC); 
 }
-	
+    
 void <?=$extension?>_ObjectReferences::AddReference(zval* var, std::string class_and_method)
 {
-	if(IsUserInitialized())
-	{
-		#ifdef USE_<?=strtoupper($extension)?>_DEBUG
-		php_printf("Adding Reference on %s\n", class_and_method.c_str());
-		#endif
-		
-		Z_ADDREF_P(var);
-		
-		m_references.push_back(var); 
-	}
+    if(IsUserInitialized())
+    {
+        #ifdef USE_<?=strtoupper($extension)?>_DEBUG
+        php_printf("Adding Reference on %s\n", class_and_method.c_str());
+        #endif
+        
+        Z_ADDREF_P(var);
+        
+        m_references.push_back(var); 
+    }
 }
 
 void <?=$extension?>_ObjectReferences::RemoveReferences()
 {
-	if(IsUserInitialized())
-	{
-		#ifdef USE_<?=strtoupper($extension)?>_DEBUG
-		php_printf("Removing References\n");
-		#endif
-			
-		for(unsigned int i=0; i<m_references.size(); i++)
-		{
-			#ifdef USE_<?=strtoupper($extension)?>_DEBUG
-			php_printf("Removing reference: %i\n", i);
-			#endif
-			
-			zval_ptr_dtor(&m_references[i]);
-		}
-	}
+    if(IsUserInitialized())
+    {
+        #ifdef USE_<?=strtoupper($extension)?>_DEBUG
+        php_printf("Removing References\n");
+        #endif
+            
+        for(unsigned int i=0; i<m_references.size(); i++)
+        {
+            #ifdef USE_<?=strtoupper($extension)?>_DEBUG
+            php_printf("Removing reference: %i\n", i);
+            #endif
+            
+            zval_ptr_dtor(&m_references[i]);
+        }
+    }
 }

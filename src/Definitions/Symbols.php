@@ -256,48 +256,48 @@ class Symbols
     )
     {
         $standard_type = $this->GetStandardType($type);
-        $type = "";
+        $php_type = "";
 
         switch($standard_type)
         {
             case StandardType::BOOLEAN:
-                $type .= "bool";
+                $php_type .= "bool";
                 break;
 
             case StandardType::INTEGER:
-                $type .= "int";
+                $php_type .= "int";
                 break;
 
             case StandardType::REAL:
-                $type .= "float";
+                $php_type .= "float";
                 break;
 
             case StandardType::CHARACTER:
-                $type .= "string";
+                $php_type .= "string";
                 break;
 
             case StandardType::VOID:
-                $type .= "void";
+                $php_type .= "void";
                 break;
 
             case StandardType::OBJECT:
-                $type .= $type->type;
+                $php_type .= $type->type;
                 break;
             
             case StandardType::CLASS_ENUM:
-                $type .= $type->type . "| int";
+                $php_type .= $type->type . "| int";
                 break;
             
             case StandardType::ENUM:
-                $type .= "int";
+                $php_type .= "int";
                 break;
             
             case StandardType::UNKNOWN:
-                $type .= "unknown";
+                $php_type .= "unknown";
                 break;
         }
         
-        return $type;
+        return $php_type;
     }
     
     /**

@@ -7,6 +7,8 @@
 
 namespace Peg\Lib\Generator;
 
+use Peg\Lib\Utilities\FileSystem;
+
 /**
  * Class that implements a zend extension generator.
  */
@@ -18,18 +20,14 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         \Peg\Lib\Definitions\Symbols &$symbols
     )
     {
-        parent::__construct($templates, $output, $symbols);
-        
-        $this->generator_name = "zend_php";
-        
-        $this->output_path .= $this->generator_name . "/";
+        parent::__construct($templates, $output, "zend_php", $symbols);
     }
     
     public function Start()
     {
         // Create includes directory if doesn't exists.
         if(!file_exists($this->output_path . "includes"))
-            \Peg\Lib\Utilities\FileSystem::MakeDir(
+            FileSystem::MakeDir(
                 $this->output_path . "includes",
                 0755,
                 true
@@ -37,7 +35,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
         // Create src directory if doesn't exists.
         if(!file_exists($this->output_path . "src"))
-            \Peg\Lib\Utilities\FileSystem::MakeDir(
+            FileSystem::MakeDir(
                 $this->output_path . "src",
                 0755,
                 true
@@ -62,6 +60,12 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
             $this->AddSource($header_name, $source_content);
         }
+        
+        $this->GenerateOtherSources();
+        
+        $this->GenerateCustomSources();
+        
+        $this->GenerateConfigs();
     }
 
     /**
@@ -514,22 +518,38 @@ class ZendPHP extends \Peg\Lib\Generator\Base
          // Parameters declaration 
         foreach($function_object->overloads as $overload=>$overload_object)
         {
-            $parameters_code .= "/* Parameters for overload $overload */\n";
+            // Overload parameters declaration header
+            ob_start();
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "parameters_header", 
+                    "helpers", 
+                    "overload"
+                ));
+                $parameters_code .= ob_get_contents();
+            ob_end_clean();
 
             foreach($overload_object->parameters as $parameter_name=>$parameter_object)
             {
-               
+                // Overload parameter declarations
                 ob_start();
                     include($this->GetParameterTemplate($parameter_object, $namespace_name, "declare"));
                     $parameters_code .= ob_get_contents();
                 ob_end_clean();
-
-                $parameters_code .= "\n";
             }
             
-            $parameters_code .= "bool overload_{$overload}_called = false;\n";
-                
-            $parameters_code .= "\n";
+            // Overload parameters declaration footer
+            ob_start();
+                include($this->GetTemplatePath(
+                    $function_name, 
+                    "overloads", 
+                    "parameters_footer", 
+                    "helpers", 
+                    "overload"
+                ));
+                $parameters_code .= ob_get_contents();
+            ob_end_clean();
         }
         
         // Parse parameters code
@@ -819,6 +839,280 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
     
     /**
+     * Generates other sources required to build the extension, eg:
+     * php_extension.h, extension.c
+     */
+    public function GenerateOtherSources()
+    {
+        // Variables used by some template files.
+        $authors = \Peg\Lib\Settings::GetAuthors();
+        $contributors = \Peg\Lib\Settings::GetContributors();
+        $extension = \Peg\Lib\Settings::GetExtensionName();
+        $version = \Peg\Lib\Settings::GetVersion();
+        
+        // Variable to temporarily store a template file content.
+        $content = "";
+        
+        // Generate all_headers.h
+        $headers = "";
+        foreach($this->symbols->headers as $header_name=>$header_object)
+        {
+            if($header_object->enabled)
+            {
+                $headers .= '#include "'
+                    . $this->GetHeaderNamePHP($header_name)
+                    . '"' 
+                    . "\n"
+                ;
+            }
+        }
+        
+        ob_start();
+            include($this->GetGenericTemplate("all_headers.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("all_headers.h", $content, "includes");
+        
+        // Generate functions.h/cpp
+        ob_start();
+            include($this->GetGenericTemplate("functions.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("functions.h", $content, "includes");
+        
+        ob_start();
+            include($this->GetGenericTemplate("functions.cpp", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("functions.cpp", $content, "src");
+        
+        // Generate enums.h/c
+        ob_start();
+            include($this->GetGenericTemplate("enums.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("enums.h", $content, "includes");
+        
+        ob_start();
+            include($this->GetGenericTemplate("enums.c", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("enums.c", $content, "src");
+        
+        // Generate references.h/cpp
+        ob_start();
+            include($this->GetGenericTemplate("references.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("references.h", $content, "includes");
+        
+        ob_start();
+            include($this->GetGenericTemplate("references.cpp", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("references.cpp", $content, "src");
+        
+        // Generate php_extension.h/c
+        ob_start();
+            include($this->GetGenericTemplate("php_extension.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("php_" . strtolower($extension) . ".h", $content);
+        
+        ob_start();
+            include($this->GetGenericTemplate("extension.c", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile(strtolower($extension) . ".c", $content);
+        
+        // Generate object_types.h
+        $object_types = "";
+        foreach($this->symbols->headers as $header_name=>$header_object)
+        {
+            foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+            {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+
+                $namespace_name_var = strtoupper(
+                        str_replace(
+                        "\\",
+                        "_",
+                        $namespace_name
+                    )
+                );
+        
+                foreach($namespace_object->classes as $class_name=>$class_object)
+                {
+                    if($namespace_name)
+                    {
+                        $object_types .= "PHP_" 
+                            . $namespace_name_var . "_"
+                            . strtoupper($class_name) 
+                            . "_TYPE,"
+                            . "\n    "
+                        ;
+                    }
+                    else
+                    {
+                        $object_types .= "PHP_" 
+                            . strtoupper($class_name) 
+                            . "_TYPE,"
+                            . "\n    "
+                        ;
+                    }
+                }
+            }
+        }
+        
+        $object_types = rtrim($object_types, "\n, ") . "\n";
+        
+        ob_start();
+            include($this->GetGenericTemplate("object_types.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("object_types.h", $content, "includes");
+    }
+    
+    /**
+     * Generates config.m4 and config.w32.
+     */
+    public function GenerateConfigs()
+    {
+        // Variables used by some template files.
+        $authors = \Peg\Lib\Settings::GetAuthors();
+        $contributors = \Peg\Lib\Settings::GetContributors();
+        $extension = \Peg\Lib\Settings::GetExtensionName();
+        $version = \Peg\Lib\Settings::GetVersion();
+        
+        // Variable to temporarily store a template file content.
+        $content = "";
+        
+        // Generate sources list
+        $source_files = array(
+            "enums.c",
+            "functions.cpp",
+            "references.cpp"
+        );
+        
+        foreach($this->symbols->headers as $header_name=>$header_object)
+        {
+            if($header_object->enabled)
+            {
+                $source_files[] = $this->GetSourceNamePHP($header_name);
+            }
+        }
+        
+        // Generate custom sources list
+        $custom_sources = $this->GetCustomSources();
+        
+        if(count($custom_sources) > 0)
+        {
+            foreach($custom_sources as $custom_source)
+            {
+                if($custom_source != "." && $custom_source != "..")
+                {
+                    if(
+                        (strpos($custom_source, ".c") !== false)
+                        ||
+                        (strpos($custom_source, ".cpp") !== false)
+                    )
+                    {
+                        $source_files[] = $custom_source;
+                    }
+                }
+            }
+        }
+        
+        $source_files = implode(" ", $source_files);
+        
+        // Generate config.m4
+        ob_start();
+            include($this->GetGenericTemplate("config.m4", "configs"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("config.m4", $content);
+        
+        // Generate config.w32
+        ob_start();
+            include($this->GetGenericTemplate("config.w32", "configs"));
+            $content = ob_get_contents();
+        ob_end_clean();
+        
+        $this->AddGenericFile("config.w32", $content);
+    }
+    
+    /**
+     * Generates sources from the custom_sources templates directory.
+     */
+    public function GenerateCustomSources()
+    {
+        // Variables used by some template files.
+        $authors = \Peg\Lib\Settings::GetAuthors();
+        $contributors = \Peg\Lib\Settings::GetContributors();
+        $extension = \Peg\Lib\Settings::GetExtensionName();
+        $version = \Peg\Lib\Settings::GetVersion();
+        
+        // Variable to temporarily store a template file content.
+        $content = "";
+        
+        // Generate custom sources list
+        $custom_sources = $this->GetCustomSources();
+        
+        if(count($custom_sources) > 0)
+        {
+            foreach($custom_sources as $custom_source)
+            {
+                if($custom_source != "." && $custom_source != "..")
+                {
+                    ob_start();
+                        include($this->GetGenericTemplate(
+                            $custom_source, "custom_sources"
+                        ));
+                        $content = ob_get_contents();
+                    ob_end_clean();
+        
+                    if(
+                        (strpos($custom_source, ".c") !== false)
+                        ||
+                        (strpos($custom_source, ".cpp") !== false)
+                    )
+                    {
+                        $this->AddGenericFile(
+                            $custom_source, 
+                            $content, 
+                            "src"
+                        );
+                    }
+                    elseif(
+                        (strpos($custom_source, ".h") !== false)
+                        ||
+                        (strpos($custom_source, ".hpp") !== false)
+                    )
+                    {
+                        $this->AddGenericFile(
+                            $custom_source, 
+                            $content, 
+                            "includes"
+                        );
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Generates proto doc comments header for a function.
      * @param \Peg\Lib\Definitions\Element\FunctionElement $function
      * @return string
@@ -896,7 +1190,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         }
 
         $override = $this->templates_path
-            . "zend_php/constants/overrides/"
+            . "constants/overrides/"
             . "define_{$name}"
             . ".php"
         ;
@@ -907,7 +1201,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         }
 
         return $this->templates_path
-            . "zend_php/constants/"
+            . "constants/"
             . "integer.php"
         ;
     }
@@ -955,7 +1249,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         }
 
         $override = $this->templates_path
-            . "zend_php/constants/overrides/"
+            . "constants/overrides/"
             . $variable->type
             . $ptr
             . $ref
@@ -971,7 +1265,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         $standard_type = $this->symbols->GetStandardType($variable);
 
         $template = $this->templates_path
-            . "zend_php/constants/"
+            . "constants/"
             . $standard_type
             . $ptr
             . $ref
@@ -982,222 +1276,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         if(!file_exists($template))
         {
             return $this->templates_path
-                . "zend_php/constants/"
-                . "default.php"
-            ;
-        }
-
-        return $template;
-    }
-
-    /**
-     * Retrieve the template path for parameters, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $parameter Name of the function.
-     * @param string $namespace
-     * @param string $type Can be declare, parse_string, parse, 
-     * parse_string_ref, parse_reference or object_validate.
-     * @return string Path to template file.
-     */
-    public function GetParameterTemplate(
-        \Peg\Lib\Definitions\Element\Parameter $parameter,
-        $namespace="",
-        $type="declare"
-    )
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $function_name = strtolower($parameter->overload->function->name);
-
-        $parameter_type = strtolower($parameter->type);
-
-        $const = "";
-        if($parameter->is_const)
-        {
-            $const .= "_const";
-        }
-
-        $ptr = "";
-        if($parameter->is_pointer)
-        {
-            for($i=0; $i<$parameter->indirection_level; $i++)
-            {
-                $ptr .= "_ptr";
-            }
-        }
-
-        $ref = "";
-        if($parameter->is_reference)
-        {
-            $ref .= "_ref";
-        }
-
-        $array = "";
-        if($parameter->is_array)
-        {
-            $array .= "_arr";
-        }
-
-        $override_function = $this->templates_path
-            . "zend_php/parameters/{$type}/overrides/"
-            . $function_name . "_" . $parameter_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(file_exists($override_function))
-        {
-            return $override_function;
-        }
-
-        $override = $this->templates_path
-            . "zend_php/parameters/{$type}/overrides/"
-            . $parameter_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        $standard_type = $this->symbols->GetStandardType($parameter);
-
-        $template = $this->templates_path
-            . "zend_php/parameters/{$type}/"
-            . $standard_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(!file_exists($template))
-        {
-            return $this->templates_path
-                . "zend_php/parameters/{$type}/"
-                . "default.php"
-            ;
-        }
-
-        return $template;
-    }
-    
-    /**
-     * Retrieve the template path for return, also checks
-     * if a valid override exists and returns that instead.
-     * @param string $return Name of the function.
-     * @param string $namespace
-     * @param string $type Can be function, method or static_method.
-     * @return string Path to template file.
-     */
-    public function GetReturnTemplate(
-        \Peg\Lib\Definitions\Element\ReturnType $return,
-        $namespace="",
-        $type="function"
-    )
-    {
-        if($namespace)
-        {
-            $namespace = str_replace(
-                array("\\", "::"),
-                "_",
-                $namespace
-            ) . "_";
-        }
-
-        $function_name = strtolower($return->overload->function->name);
-
-        $return_type = strtolower($return->type);
-
-        $const = "";
-        if($return->is_const)
-        {
-            $const .= "_const";
-        }
-
-        $ptr = "";
-        if($return->is_pointer)
-        {
-            for($i=0; $i<$return->indirection_level; $i++)
-            {
-                $ptr .= "_ptr";
-            }
-        }
-
-        $ref = "";
-        if($return->is_reference)
-        {
-            $ref .= "_ref";
-        }
-
-        $array = "";
-        if($return->is_array)
-        {
-            $array .= "_arr";
-        }
-
-        $override_function = $this->templates_path
-            . "zend_php/return/{$type}/overrides/"
-            . $function_name . "_" . $return_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(file_exists($override_function))
-        {
-            return $override_function;
-        }
-
-        $override = $this->templates_path
-            . "zend_php/return/{$type}/overrides/"
-            . $return_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(file_exists($override))
-        {
-            return $override;
-        }
-
-        $standard_type = $this->symbols->GetStandardType($return);
-
-        $template = $this->templates_path
-            . "zend_php/return/{$type}/"
-            . $standard_type
-            . $const
-            . $ptr
-            . $ref
-            . $array
-            . ".php"
-        ;
-
-        if(!file_exists($template))
-        {
-            return $this->templates_path
-                . "zend_php/return/{$type}/"
+                . "constants/"
                 . "default.php"
             ;
         }

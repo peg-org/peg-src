@@ -13,37 +13,37 @@
 #define <?=strtoupper($extension)?>_COMMON_H_GUARD
 
 #ifdef PHP_WIN32
-	/* For disabling warnings about unreferenced local variable */
-	#pragma warning (disable : 4101)
-	#pragma warning (disable : 4102)
-	#pragma warning (disable : 4700)
+    /* For disabling warnings about unreferenced local variable */
+    #pragma warning (disable : 4101)
+    #pragma warning (disable : 4102)
+    #pragma warning (disable : 4700)
 
-	/* Disable forcing zend_bool to bool warnings */
-	#pragma warning (disable : 4800)
+    /* Disable forcing zend_bool to bool warnings */
+    #pragma warning (disable : 4800)
 #endif
+
+/* Include PHP Standard Headers */
+extern "C" {
 
 /*
  * Import configure options when building outside
  * of the PHP source tree
  */
 #ifdef HAVE_CONFIG_H
-	#include "config.h"
+    #include "config.h"
 #endif
 
 #ifdef WORDS_BIGENDIAN
-	#undef WORDS_BIGENDIAN
+    #undef WORDS_BIGENDIAN
 #endif
 
 #ifdef M_PI
-	#undef M_PI
+    #undef M_PI
 #endif
 
 #ifdef _WIN32_WINNT
-	#undef _WIN32_WINNT
+    #undef _WIN32_WINNT
 #endif
-
-/* Include PHP Standard Header */
-extern "C" {
 
 #include "php.h"
 #include "zend.h"
@@ -55,7 +55,7 @@ extern "C" {
  * that did not implemented this macro.
  */
 #ifndef PHP_FE_END
-	#define PHP_FE_END {NULL, NULL, NULL}
+    #define PHP_FE_END {NULL, NULL, NULL}
 #endif
 
 }

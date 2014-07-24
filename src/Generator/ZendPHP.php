@@ -23,6 +23,9 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         parent::__construct($templates, $output, "zend_php", $symbols);
     }
     
+    /**
+     * Generate all the files that needed to build a zend php extension.
+     */
     public function Start()
     {
         // Create includes directory if doesn't exists.
@@ -463,6 +466,11 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         return $source_content;
     }
 
+    /**
+     * Generates the PHP wrapping code from a C/C++ function.
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function_object
+     * @return string PHP C/C++ code.
+     */
     function GenerateFunction(
         \Peg\Lib\Definitions\Element\FunctionElement $function_object
     )
@@ -920,6 +928,79 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         $this->AddGenericFile("references.cpp", $content, "src");
         
         // Generate php_extension.h/c
+        $constants_register = "";
+        $enums_register = "";
+        $functions_register = "";
+        $classes_register = "";
+        
+        foreach($this->symbols->headers as $header_name=>$header_object)
+        {
+            $header_define = $this->GetHeaderDefine($header_name);
+            
+            if($header_object->enabled)
+            {
+                if($header_object->HasConstants())
+                {
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "constants", 
+                            "function_call", 
+                            "helpers", 
+                            "constant"
+                        ));
+                        $constants_register .= ob_get_contents();
+                    ob_end_clean();
+                }
+                
+                if($header_object->HasEnumerations())
+                {
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "enums", 
+                            "function_call", 
+                            "helpers", 
+                            "enum"
+                        ));
+                        $enums_register .= ob_get_contents();
+                    ob_end_clean();
+                }
+                
+                if($header_object->HasEnumerations())
+                {
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "functions", 
+                            "function_call", 
+                            "helpers", 
+                            "function"
+                        ));
+                        $functions_register .= ob_get_contents();
+                    ob_end_clean();
+                }
+                
+                /*if($header_object->HasClasses())
+                {
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "enums", 
+                            "function_call", 
+                            "helpers", 
+                            "enum"
+                        ));
+                        $enums_register .= ob_get_contents();
+                    ob_end_clean();
+                }*/
+            }
+        }
+        
+        $constants_register = $this->Indent($constants_register, 8);
+        $enums_register = $this->Indent($enums_register, 8);
+        $functions_register = $this->Indent($functions_register, 8);
+        
         ob_start();
             include($this->GetGenericTemplate("php_extension.h", "sources"));
             $content = ob_get_contents();

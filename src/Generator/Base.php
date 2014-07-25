@@ -216,10 +216,13 @@ abstract class Base
         {
             return $override;
         }
+        
+        if($type)
+            $type .= "_";
 
         return $this->templates_path
             . "{$dir}/"
-            . "{$type}_{$subtype}.php"
+            . "{$type}{$subtype}.php"
         ;
     }
     
@@ -492,11 +495,24 @@ abstract class Base
      * Adds or updates a header file if neccessary.
      * @param string $header_name Original name of header.
      * @param string $content
+     * @param string $subdir
      */
-    public function AddHeader($header_name, &$content)
+    public function AddHeader($header_name, &$content, $subdir="includes")
     {
+        if($subdir)
+        {
+            $subdir = trim($subdir, "\\/") . "/";
+            
+            if(!file_exists($this->output_path . $subdir))
+                \Peg\Lib\Utilities\FileSystem::MakeDir(
+                    $this->output_path . $subdir, 
+                    0755, 
+                    true
+                );
+        }
+        
         $header = $this->output_path 
-            . "includes/" 
+            . $subdir
             . $this->GetHeaderNamePHP($header_name)
         ;
         
@@ -507,11 +523,24 @@ abstract class Base
      * Adds or updates a header source file if neccessary.
      * @param string $header_name Original name of header.
      * @param string $content
+     * @param string $subdir
      */
-    public function AddSource($header_name, &$content)
+    public function AddSource($header_name, &$content, $subdir="src")
     {
+        if($subdir)
+        {
+            $subdir = trim($subdir, "\\/") . "/";
+            
+            if(!file_exists($this->output_path . $subdir))
+                \Peg\Lib\Utilities\FileSystem::MakeDir(
+                    $this->output_path . $subdir, 
+                    0755, 
+                    true
+                );
+        }
+        
         $header = $this->output_path 
-            . "src/" 
+            . $subdir
             . $this->GetSourceNamePHP($header_name)
         ;
         
@@ -557,12 +586,23 @@ abstract class Base
     /**
      * Generate the header source of a specific header file.
      * @param string $header_name
+     * @return string Source code.
      */
     abstract public function GenerateHeader($header_name);
     
     /**
      * Generate the source file of a specific header file.
      * @param string $header_name
+     * @return string Source code.
      */
     abstract public function GenerateSource($header_name);
+    
+    /**
+     * Generate the wrapping code of a specific C/C++ function.
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function_object
+     * @return string Source code.
+     */
+    abstract public function GenerateFunction(
+        \Peg\Lib\Definitions\Element\FunctionElement $function_object
+    );
 }

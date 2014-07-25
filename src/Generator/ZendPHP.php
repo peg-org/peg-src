@@ -28,22 +28,6 @@ class ZendPHP extends \Peg\Lib\Generator\Base
      */
     public function Start()
     {
-        // Create includes directory if doesn't exists.
-        if(!file_exists($this->output_path . "includes"))
-            FileSystem::MakeDir(
-                $this->output_path . "includes",
-                0755,
-                true
-            );
-
-        // Create src directory if doesn't exists.
-        if(!file_exists($this->output_path . "src"))
-            FileSystem::MakeDir(
-                $this->output_path . "src",
-                0755,
-                true
-            );
-
         foreach($this->symbols->headers as $header_name=>$header_object)
         {
             // Skip disabled headers
@@ -57,6 +41,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             $header_content = $this->GenerateHeader($header_name);
 
             $this->AddHeader($header_name, $header_content);
+            
+            // Generate classes header file
+            $classes_header_content = $this->GenerateClassesHeader($header_name);
+
+            $this->AddHeader(
+                $header_name, 
+                $classes_header_content, 
+                "includes/classes"
+            );
 
             // Generate source file
             $source_content = $this->GenerateSource($header_name);
@@ -151,10 +144,43 @@ class ZendPHP extends \Peg\Lib\Generator\Base
 
             $header_content .= "\n";
         }
-
-        foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+        
+        // Get classes function template content
+        if($header_object->HasClasses())
         {
-            // Do something here.
+            foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+            {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+
+                $namespace_name_cpp = str_replace(
+                    "\\",
+                    "::",
+                    $namespace_name
+                );
+
+                $namespace_name_var = str_replace(
+                    "\\",
+                    "_",
+                    $namespace_name
+                );
+                
+                foreach($namespace_object->classes as $class_name=>$class_object)
+                {
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $header_name, 
+                            "classes", 
+                            "function_decl", 
+                            "helpers", 
+                            "class"
+                        ));
+                        $header_content .= ob_get_contents();
+                    ob_end_clean();
+
+                    $header_content .= "\n";
+                }
+            }
         }
 
         // Get footer of header file
@@ -168,6 +194,94 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             ));
             $header_content .= ob_get_contents();
         ob_end_clean();
+
+        return $header_content;
+    }
+    
+    /**
+     * Generates a specific header file for classes.
+     * @param string $header_name
+     * @return string Source code.
+     */
+    public function GenerateClassesHeader($header_name)
+    {
+        // Variables used by some template files.
+        $authors = \Peg\Lib\Settings::GetAuthors();
+        $contributors = \Peg\Lib\Settings::GetContributors();
+        $extension = \Peg\Lib\Settings::GetExtensionName();
+        $version = \Peg\Lib\Settings::GetVersion();
+
+        $header_object = $this->symbols->headers[$header_name];
+        $header_define = $this->GetHeaderDefine($header_name);
+
+        $header_content = "";
+        
+        if($header_object->HasClasses())
+        {
+            // Get heading of header file
+            ob_start();
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "headers", 
+                    "header", 
+                    "classes", 
+                    "header"
+                ));
+                $header_content .= ob_get_contents();
+            ob_end_clean();
+        
+            foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+            {
+                if($namespace_name == "\\")
+                    $namespace_name = "";
+
+                $namespace_name_cpp = str_replace(
+                    "\\",
+                    "::",
+                    $namespace_name
+                );
+
+                $namespace_name_var = str_replace(
+                    "\\",
+                    "_",
+                    $namespace_name
+                );
+                
+                foreach($namespace_object->classes as $class_name=>$class_object)
+                {
+                    $constructor_code = "";
+                    $virtual_methods_code = "";
+                    $properties_init_code = "";
+                    $properties_uninit_code = "";
+                    
+                    // Get class declaration code
+                    ob_start();
+                        include($this->GetTemplatePath(
+                            $class_name, 
+                            "", 
+                            "declaration", 
+                            "classes", 
+                            "declaration"
+                        ));
+                        $header_content .= ob_get_contents();
+                    ob_end_clean();
+
+                    $header_content .= "\n";
+                }
+            }
+            
+            // Get footer of header file
+            ob_start();
+                include($this->GetTemplatePath(
+                    $header_name, 
+                    "headers", 
+                    "footer", 
+                    "classes", 
+                    "header"
+                ));
+                $header_content .= ob_get_contents();
+            ob_end_clean();
+        }
 
         return $header_content;
     }
@@ -986,10 +1100,10 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     ob_start();
                         include($this->GetTemplatePath(
                             $header_name, 
-                            "enums", 
+                            "classes", 
                             "function_call", 
                             "helpers", 
-                            "enum"
+                            "class"
                         ));
                         $enums_register .= ob_get_contents();
                     ob_end_clean();

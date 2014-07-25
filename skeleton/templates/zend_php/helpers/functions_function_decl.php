@@ -1,3 +1,3 @@
-BEGIN_EXTERN_C()
+/* {{{ Functions registration function */
 void <?=strtolower($header_define)?>_functions(int module_number TSRMLS_DC);
-END_EXTERN_C()
+/* }}} */

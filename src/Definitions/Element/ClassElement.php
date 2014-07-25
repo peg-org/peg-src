@@ -168,5 +168,17 @@ class ClassElement
         
         return $this;
     }
+    
+    /**
+     * Check of the class as any properties.
+     * @return boolean
+     */
+    public function HasProperties()
+    {
+        if(count($this->variables) > 0)
+            return true;
+        
+        return false;
+    }
 
 }

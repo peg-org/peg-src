@@ -1,3 +1,5 @@
+<?=$function_arginfo?>
+
 BEGIN_EXTERN_C()
 <?=$proto_header?>
 <?php if($namespace_name){ ?>

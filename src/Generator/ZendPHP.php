@@ -169,7 +169,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 {
                     ob_start();
                         include($this->GetTemplatePath(
-                            $header_name, 
+                            $class_name, 
                             "classes", 
                             "function_decl", 
                             "helpers", 
@@ -613,6 +613,7 @@ class ZendPHP extends \Peg\Lib\Generator\Base
         );
 
         $function_name = $function_object->name;
+        $function_arginfo = $this->GenerateArgInfo($function_object);
         $overloads_count = count($function_object->overloads);
 
         $function_content = "";
@@ -961,6 +962,105 @@ class ZendPHP extends \Peg\Lib\Generator\Base
     }
     
     /**
+     * Generates an arginfo php C structure which is basically used for
+     * reflection to work properly.
+     * @param \Peg\Lib\Definitions\Element\FunctionElement $function_object
+     */
+    public function GenerateArgInfo(
+        \Peg\Lib\Definitions\Element\FunctionElement $function_object
+    )
+    {   
+        $namespace_name = $function_object->namespace->name;
+
+        if($namespace_name == "\\")
+            $namespace_name = "";
+
+        $namespace_name_cpp = str_replace(
+            "\\",
+            "::",
+            $namespace_name
+        );
+
+        $namespace_name_var = str_replace(
+            "\\",
+            "_",
+            $namespace_name
+        );
+        
+        $arginfo_code = "";
+        
+        $function_name = $function_object->name;
+        
+        // Get the amount of required parameters from the 
+        // overload which require less.
+        $required_parameters = 1000;
+        
+        foreach($function_object->overloads as $overload=>$overload_object)
+        {
+            if($required_parameters > $overload_object->GetRequiredParametersCount())
+                $required_parameters = $overload_object->GetRequiredParametersCount();
+        }
+        
+        // Generate a list of argument objects from the overload
+        // with the longest amount of parameters.
+        $arguments_list = array();
+        foreach($function_object->overloads as $overload=>$overload_object)
+        {
+            if($overload_object->HasParameters())
+            {
+                if(count($arguments_list) < count($overload_object->parameters))
+                {
+                    $index = 0;
+                    
+                    foreach($overload_object->parameters as $parameter_object)
+                    {
+                        $arguments_list[$index] = $parameter_object;
+                        
+                        $index++;
+                    }
+                }
+            }
+        }
+        
+        // Get Header
+        ob_start();
+            include($this->GetTemplatePath(
+                $function_name, 
+                "arginfo", 
+                "header", 
+                "helpers", 
+                "arginfo"
+            ));
+            $arginfo_code .= ob_get_contents();
+        ob_end_clean();
+        
+        foreach($arguments_list as $parameter_object)
+        {
+            $parameter_name = $parameter_object->name;
+            
+            // Generate the entry of arguments
+            ob_start();
+                include($this->GetParameterTemplate($parameter_object, "", "arginfo"));
+                $arginfo_code .= $this->Indent(ob_get_contents(), 4);
+            ob_end_clean();
+        }
+        
+        // Get Header
+        ob_start();
+            include($this->GetTemplatePath(
+                $function_name, 
+                "arginfo", 
+                "footer", 
+                "helpers", 
+                "arginfo"
+            ));
+            $arginfo_code .= ob_get_contents();
+        ob_end_clean();
+        
+        return $arginfo_code;
+    }
+    
+    /**
      * Generates other sources required to build the extension, eg:
      * php_extension.h, extension.c
      */
@@ -1095,25 +1195,47 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     ob_end_clean();
                 }
                 
-                /*if($header_object->HasClasses())
+                if($header_object->HasClasses())
                 {
-                    ob_start();
-                        include($this->GetTemplatePath(
-                            $header_name, 
-                            "classes", 
-                            "function_call", 
-                            "helpers", 
-                            "class"
-                        ));
-                        $enums_register .= ob_get_contents();
-                    ob_end_clean();
-                }*/
+                    foreach($header_object->namespaces as $namespace_name=>$namespace_object)
+                    {
+                        if($namespace_name == "\\")
+                            $namespace_name = "";
+
+                        $namespace_name_cpp = str_replace(
+                            "\\",
+                            "::",
+                            $namespace_name
+                        );
+
+                        $namespace_name_var = str_replace(
+                            "\\",
+                            "_",
+                            $namespace_name
+                        );
+                        
+                        foreach($namespace_object->classes as $class_name=>$class_object)
+                        {   
+                            ob_start();
+                                include($this->GetTemplatePath(
+                                    $class_name, 
+                                    "classes", 
+                                    "function_call", 
+                                    "helpers", 
+                                    "class"
+                                ));
+                                $classes_register .= ob_get_contents();
+                            ob_end_clean();
+                        }
+                    }
+                }
             }
         }
         
         $constants_register = $this->Indent($constants_register, 8);
         $enums_register = $this->Indent($enums_register, 8);
         $functions_register = $this->Indent($functions_register, 8);
+        $classes_register = $this->Indent($classes_register, 4);
         
         ob_start();
             include($this->GetGenericTemplate("php_extension.h", "sources"));
@@ -1329,7 +1451,15 @@ class ZendPHP extends \Peg\Lib\Generator\Base
             foreach($overload->parameters as $parameter)
             {
                 $proto .= $this->symbols->GetPHPStandardType($parameter);
-                $proto .= " " . $parameter->name;
+                
+                if(!$parameter->is_const && ($parameter->is_pointer || $parameter->is_reference))
+                {
+                    $proto .= " &" . $parameter->name;
+                }
+                else
+                {
+                    $proto .= " " . $parameter->name;
+                }
                 
                 if($parameter->default_value)
                 {

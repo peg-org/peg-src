@@ -1,1 +1,1 @@
-<?=strtolower($header_define)?>_enums(module_number TSRMLS_CC);
+<?=strtolower($header_define)?>_enums(INIT_FUNC_ARGS_PASSTHRU);

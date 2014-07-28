@@ -648,7 +648,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "parameters_header", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $parameters_code .= ob_get_contents();
             ob_end_clean();
@@ -669,7 +670,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "parameters_footer", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $parameters_code .= ob_get_contents();
             ob_end_clean();
@@ -688,7 +690,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "parse_header", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $parse_code .= ob_get_contents();
             ob_end_clean();
@@ -760,9 +763,10 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     include($this->GetTemplatePath(
                         $function_name, 
                         "overloads", 
-                        "no_parse_body", 
+                        "parse_no_body", 
                         "helpers", 
-                        "overload"
+                        "overload",
+                        $namespace_name
                     ));
                     $parse_code .= $this->Indent(ob_get_contents(), 4);
                 ob_end_clean();
@@ -792,7 +796,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                         "overloads", 
                         "parse_body", 
                         "helpers", 
-                        "overload"
+                        "overload",
+                        $namespace_name
                     ));
                     $parse_code .= $this->Indent(ob_get_contents(), 4);
                 ob_end_clean();
@@ -805,7 +810,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "parse_footer", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $parse_code .= ob_get_contents();
             ob_end_clean();
@@ -838,7 +844,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "return_header", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $return_code .= ob_get_contents();
             ob_end_clean();
@@ -860,7 +867,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                         "overloads", 
                         "return_body_header", 
                         "helpers", 
-                        "overload"
+                        "overload",
+                        $namespace_name
                     ));
                     $return_code .= $this->Indent(ob_get_contents(), 8);
                 ob_end_clean();
@@ -913,7 +921,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                         "overloads", 
                         "return_body_footer", 
                         "helpers", 
-                        "overload"
+                        "overload",
+                        $namespace_name
                     ));
                     $return_code .= $this->Indent(ob_get_contents(), 8);
                 ob_end_clean();
@@ -926,7 +935,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                     "overloads", 
                     "return_footer", 
                     "helpers", 
-                    "overload"
+                    "overload",
+                    $namespace_name
                 ));
                 $return_code .= ob_get_contents();
             ob_end_clean();
@@ -1029,7 +1039,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 "arginfo", 
                 "header", 
                 "helpers", 
-                "arginfo"
+                "arginfo",
+                $namespace_name
             ));
             $arginfo_code .= ob_get_contents();
         ob_end_clean();
@@ -1052,7 +1063,8 @@ class ZendPHP extends \Peg\Lib\Generator\Base
                 "arginfo", 
                 "footer", 
                 "helpers", 
-                "arginfo"
+                "arginfo",
+                $namespace_name
             ));
             $arginfo_code .= ob_get_contents();
         ob_end_clean();

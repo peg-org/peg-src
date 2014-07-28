@@ -4,7 +4,7 @@ on the parent directory.
 1. For the templates that build the wrapping header file for a particular 
    header file the scheme is as follows:
 
-    [header|footer]_header_name_h.php
+    {header|footer}_header_name_h.php
 
     Examples:
         
@@ -17,3 +17,14 @@ on the parent directory.
 
             * header_anotherheader_h.php
             * footer_anotherheader_h.php
+
+Variables available:
+
+    * $authors
+    * $contributors
+    * $extension
+    * $version
+    * $this->symbols
+    * $header_name
+    * $header_define
+    * $header_object

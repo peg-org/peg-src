@@ -17,3 +17,15 @@ on the parent directory.
 
             * header_anotherheader_h.php
             * footer_anotherheader_h.php
+
+Variables available:
+
+    * $authors
+    * $contributors
+    * $extension
+    * $version
+    * $this->symbols
+    * $header_name
+    * $header_define
+    * $header_object
+    * $php_header_name

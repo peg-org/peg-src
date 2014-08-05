@@ -5,45 +5,27 @@
  * @link http://github.com/peg-org/peg-src Source code.
  */
 
-namespace Peg\Lib;
+namespace Peg\Config;
 
 /**
- * For managing the configuration options of a valid peg
- * managed extension directory.
+ * Base configuration class. Every frontend's configuration helper should extend this.
  */
 class Settings
 {
-
-    /**
-     * The configurations object used to manipulate the settings.
-     * @var \Peg\Lib\Config\Base
-     */
-    private static $backend;
     
     // Disable constructor
     private function __construct(){}
     
-    /**
-     * Sets the back-end or implementation that will be used to manage
-     * the retreival and storage of settings.
-     * @param \Peg\Lib\Config\Base $backend
-     */
-    public static function SetBackEnd(\Peg\Lib\Config\Base $backend)
-    {
-        self::$backend = $backend;
-    }
-
-    /**
-     * Loads the configuration file on the given directory.
-     * @param string $directory
-     * @param string $file
-     */
-    public static function Load($directory, $file)
-    {
-        self::CheckBackend();
+    
+    // The array where all settings are kept.
+    protected $settings = [
         
-        self::$backend->Load($directory, $file);
-    }
+        "ExtensionName" => null,
+        "ExtensionVersion" => null,
+        "Authors" => null,
+        "Contributors" => null,
+        
+        ];
     
     /**
      * Gets the value of a specific option.
@@ -52,105 +34,65 @@ class Settings
      */
     public static function Get($option)
     {
-        self::CheckBackend();
-        
-        return self::$backend->Get($option);
+        return $settings[$option];
     }
     
-    /**
-     * Gets the value of a specific option inside a group.
-     * @param string $group Eg: parser
-     * @param string $option Eg: input_format
-     * @return string|bool
-     */
-    public static function GetGroupValue($group, $option)
-    {
-        self::CheckBackend();
-        
-        return self::$backend->GetGroupValue($group, $option);
-    }
-
-    /**
-     * Get a comma separated list of authors.
-     * @return string
-     */
-    public static function GetAuthors()
-    {
-        self::CheckBackend();
-        
-        return self::$backend->Get("authors");
-    }
-
-    /**
-     * Get a comma separated list of contributors.
-     * @return string
-     */
-    public static function GetContributors()
-    {
-        self::CheckBackend();
-        
-        return self::$backend->Get("contributors");
-    }
-
     /**
      * Get the current extension name.
      * @return string
      */
     public static function GetExtensionName()
     {
-        self::CheckBackend();
-        
-        $name = self::$backend->Get("name");
-
-        if(strlen($name) <= 0)
-        {
-            $dir_parts = explode(
-                "/", 
-                str_replace("\\", "/", self::$backend->directory)
-            );
-            
-            $name = $dir_parts[count($dir_parts) - 1];
-        }
-
-        return $name;
+        return $settings["ExtensionVersion"];
     }
-
+    
     /**
      * Get the current extension version.
      * @return string
      */
-    public static function GetVersion()
+    public static function GetExtensionVersion()
     {
-        self::CheckBackend();
-        
-        return self::$backend->Get("version");
+        return $settings["ExtensionVersion"];
     }
     
     /**
-     * Modify or add a new option.
-     * @param string $option Option to add or modify.
-     * @param string $value Value of the option.
+     * Get a comma separated list of authors.
+     * @return string
      */
-    public static function Set($option, $value)
+    public static function GetAuthors()
     {
-        self::CheckBackend();
-
-        self::$backend->Set($option, $value);
+        return $settings["Authors"];
     }
     
     /**
-     * Modify or add a new group with an option.
-     * @param string $group Name of group to modify or create.
-     * @param string $option Name of option to add or modify in the group.
-     * @param string $value Value of the option.
+     * Get a comma separated list of contributors.
+     * @return string
      */
-    public static function SetGroupValue($group, $option, $value)
+    public static function GetContributors()
     {
-        self::CheckBackend();
-
-        self::$backend->SetGroupValue($group, $option, $value);
+        return $settings["Contributors"];
     }
-
+    
+    /**
+     * Set the extension name, which is used in some important parts of the
+     * code generator.
+     * @param string $name
+     */
+    public static function SetExtensionName($name)
+    {
+        $settings["ExtensionName"] = trim($name);
+    }
+    
+    /**
+     * Sets the version of the extension, which is used in some important
+     * parts of the code generator.
+     * @param string $number
+     */
+    public static function SetVersion($number)
+    {
+        $settings["ExtensionVersion"] = trim($number);
+    }
+    
     /**
      * Set the authors of the extension. This should be a comma 
      * seperated list with the names of the authors.
@@ -158,12 +100,10 @@ class Settings
      */
     public static function SetAuthors($authors)
     {
-        self::CheckBackend();
-        
         $authors = trim($authors);
         $authors = trim($authors, ",");
-
-        self::$backend->Set("authors", $authors);
+        
+        $settings["Authors"] = $authors;
     }
 
     /**
@@ -173,53 +113,9 @@ class Settings
      */
     public static function SetContributors($contributors)
     {
-        self::CheckBackend();
+        $authors = trim($contributors);
+        $authors = trim($contributors, ",");
         
-        $contributors = trim($contributors);
-        $contributors = trim($contributors, ",");
-
-        self::$backend->Set("contributors", $contributors);
+        $settings["Contributors"] = $contributors;
     }
-
-    /**
-     * Set the extension name, which is used in some important parts of the
-     * code generator.
-     * @param string $name
-     */
-    public static function SetExtensionName($name)
-    {
-        self::CheckBackend();
-        
-        $name = trim($name);
-
-        self::$backend->Set("name", $name);
-    }
-
-    /**
-     * Sets the version of the extension which is used in some important
-     * parts of the code generator.
-     * @param string $number
-     */
-    public static function SetVersion($number)
-    {
-        self::CheckBackend();
-        
-        $number = trim($number);
-
-        self::$backend->Set("version", $number);
-    }
-    
-    /**
-     * Helper called by all other methods to make sure that a backend 
-     * was set before calling them.
-     * @throws \Exception
-     */
-    private static function CheckBackend()
-    {   
-        if(!is_object(self::$backend))
-            throw new \Exception(
-                t("The back-end to manage the settings is not set.")
-            );
-    }
-
 }

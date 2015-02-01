@@ -32,6 +32,12 @@ class VariableType
     public $is_const;
     
     /**
+     * Flag that indicates if the variable is unsigned.
+     * @var bool
+     */
+    public $is_unsigned;
+    
+    /**
      * Flag that indicates if the variable is a reference (&).
      * @var bool
      */
@@ -88,6 +94,15 @@ class VariableType
             $this->is_const = false;
         }
         
+        if(substr_count($type, "unsigned ") > 0)
+        {
+            $this->is_unsigned = true;
+        }
+        else
+        {
+            $this->is_unsigned = false;
+        }
+        
         if(substr_count($type, "&") > 0)
         {
             $this->is_reference = true;
@@ -130,6 +145,9 @@ class VariableType
         
         if($this->is_const)
             $code .= "const ";
+        
+        if($this->is_unsigned)
+            $code .= "unsigned ";
         
         $code .= $this->type;
         

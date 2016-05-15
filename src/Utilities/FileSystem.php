@@ -13,7 +13,7 @@ namespace Peg\Lib\Utilities;
 class FileSystem
 {
 
-    // Disable constructor
+    /** Disabled */
     private function __construct(){}
 
     /**
@@ -50,7 +50,7 @@ class FileSystem
      * Same as php mkdir() but adds Operating system check and replaces
      * every / by \ on windows.
      * @param string $directory The directory to create.
-     * @param integer $mode the permissions granted to the directory.
+     * @param int $mode the permissions granted to the directory.
      * @param bool $recursive Recurse in to the path creating neccesary directories.
      * @return bool true on success false on fail.
      */
@@ -190,16 +190,16 @@ class FileSystem
      * @param string $content New content of file.
      * @return bool True on success or false if file content is the same.
      */
-    function WriteFileIfDifferent($file, &$contents)
+    public static function WriteFileIfDifferent($file, &$content)
     {
         $actual_file_content = "";
 
         if(file_exists($file))
             $actual_file_content = file_get_contents($file);
 
-        if(crc32($actual_file_content) != crc32($contents))
+        if(crc32($actual_file_content) != crc32($content))
         {
-            file_put_contents($file, $contents);
+            file_put_contents($file, $content);
 
             return true;
         }

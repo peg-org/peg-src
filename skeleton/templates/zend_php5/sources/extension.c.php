@@ -14,7 +14,6 @@
 
 #include "php_<?=strtolower($extension)?>.h"
 #include "functions.h"
-#include "enums.h"
 #include "all_headers.h"
 
 /**

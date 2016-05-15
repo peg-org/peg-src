@@ -7,8 +7,6 @@
 
 namespace Peg\Lib\Generator;
 
-use Peg\Lib\Utilities\FileSystem;
-
 /**
  * Class that implements a zend extension generator for php version 5.
  */
@@ -1086,6 +1084,14 @@ class ZendPHP5 extends \Peg\Lib\Generator\Base
 
         // Variable to temporarily store a template file content.
         $content = "";
+        
+        // Generate common.h
+        ob_start();
+            include($this->GetGenericTemplate("common.h", "sources"));
+            $content = ob_get_contents();
+        ob_end_clean();
+
+        $this->AddGenericFile("common.h", $content, "includes");
 
         // Generate all_headers.h
         $headers = "";
@@ -1122,21 +1128,6 @@ class ZendPHP5 extends \Peg\Lib\Generator\Base
         ob_end_clean();
 
         $this->AddGenericFile("functions.cpp", $content, "src");
-
-        // Generate enums.h/c
-        ob_start();
-            include($this->GetGenericTemplate("enums.h", "sources"));
-            $content = ob_get_contents();
-        ob_end_clean();
-
-        $this->AddGenericFile("enums.h", $content, "includes");
-
-        ob_start();
-            include($this->GetGenericTemplate("enums.c", "sources"));
-            $content = ob_get_contents();
-        ob_end_clean();
-
-        $this->AddGenericFile("enums.c", $content, "src");
 
         // Generate references.h/cpp
         ob_start();
@@ -1329,16 +1320,15 @@ class ZendPHP5 extends \Peg\Lib\Generator\Base
 
         // Generate sources list
         $source_files = array(
-            "enums.c",
-            "functions.cpp",
-            "references.cpp"
+            "src/functions.cpp",
+            "src/references.cpp"
         );
 
         foreach($this->symbols->headers as $header_name=>$header_object)
         {
             if($header_object->enabled)
             {
-                $source_files[] = $this->GetSourceNamePHP($header_name);
+                $source_files[] = "src/".$this->GetSourceNamePHP($header_name);
             }
         }
 
@@ -1357,13 +1347,13 @@ class ZendPHP5 extends \Peg\Lib\Generator\Base
                         (strpos($custom_source, ".cpp") !== false)
                     )
                     {
-                        $source_files[] = $custom_source;
+                        $source_files[] = "src/".$custom_source;
                     }
                 }
             }
         }
 
-        $source_files = implode(" ", $source_files);
+        $source_files = implode(" \\\n        ", $source_files);
 
         // Generate config.m4
         ob_start();
@@ -1513,6 +1503,7 @@ class ZendPHP5 extends \Peg\Lib\Generator\Base
      * @todo Improve this to handle various types.
      * @param string $name Name of constant.
      * @param string $namespace Namespace where resides the constant.
+     * @param string $type
      * @return string Path to template file.
      */
     public function GetRegisterConstantTemplate($name, $namespace="", $type="")

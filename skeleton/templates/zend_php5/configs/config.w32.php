@@ -3,10 +3,11 @@ ARG_ENABLE("<?=strtolower($extension)?>-debug", "enable <?=$extension?> debuggin
 
 if (PHP_<?=strtoupper($extension)?> != "no") {
     if (
-        CHECK_LIB("somelibrary.lib", "<?=strtolower($extension)?>", PHP_<?=strtoupper($extension)?> + "\\lib\\vc_lib") &&
+        //CHECK_LIB("somelibrary.lib", "<?=strtolower($extension)?>", PHP_<?=strtoupper($extension)?> + "\\lib\\vc_lib") &&
+        //CHECK_HEADER_ADD_INCLUDE("somelibrary\\header.h", "CFLAGS_<?=strtoupper($extension)?>", PHP_<?=strtoupper($extension)?> + "\\include") &&
         CHECK_LIB("msvcrt.lib", "<?=strtolower($extension)?>") &&
-        CHECK_HEADER_ADD_INCLUDE("somelibrary\\header.h", "CFLAGS_<?=strtoupper($extension)?>", PHP_<?=strtoupper($extension)?> + "\\include") &&
-        CHECK_HEADER_ADD_INCLUDE("php_<?=strtolower($extension)?>.h", "CFLAGS_<?=strtoupper($extension)?>", configure_module_dirname)) {
+        CHECK_HEADER_ADD_INCLUDE("php_<?=strtolower($extension)?>.h", "CFLAGS_<?=strtoupper($extension)?>", configure_module_dirname)
+    ) {
         
         //Compiler flags
         ADD_FLAG("CFLAGS_<?=strtoupper($extension)?>", "/Ox ");
@@ -42,7 +43,11 @@ if (PHP_<?=strtoupper($extension)?> != "no") {
         EXTENSION("<?=strtolower($extension)?>", "<?=strtolower($extension)?>.cpp", true, null, null);
         
         //Add extra sources
-        ADD_SOURCES(configure_module_dirname + "\\src", "<?=str_replace("src/", "", $source_files)?>", "<?=strtolower($extension)?>");
+        ADD_SOURCES(
+            configure_module_dirname + "\\src", 
+            "<?=str_replace(["src/", " \\\n        "], ["", "\" +\n            \""], $source_files)?>", 
+            "<?=strtolower($extension)?>"
+        );
     }
     else {
         WARNING("<?=$extension?> not enabled; libraries and headers not found");

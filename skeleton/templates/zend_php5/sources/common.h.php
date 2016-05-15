@@ -33,18 +33,6 @@ extern "C" {
     #include "config.h"
 #endif
 
-#ifdef WORDS_BIGENDIAN
-    #undef WORDS_BIGENDIAN
-#endif
-
-#ifdef M_PI
-    #undef M_PI
-#endif
-
-#ifdef _WIN32_WINNT
-    #undef _WIN32_WINNT
-#endif
-
 #include "php.h"
 #include "zend.h"
 #include "zend_API.h" //Declaration for zend_declare_class_constant_long

@@ -5,5 +5,5 @@ INIT_NS_CLASS_ENTRY(ce, "<?=$namespace_name?>", php_<?=$enum_name?>_name, NULL);
 <?php } else{ ?>
 INIT_CLASS_ENTRY(ce, php_<?=$enum_name?>_name, NULL);
 <?php } ?>
-php_<?=$enum_name?>_ce = zend_register_internal_class_ex(&ce, peg_enum_ce, NULL TSRMLS_CC);
+php_<?=$enum_name?>_ce = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 

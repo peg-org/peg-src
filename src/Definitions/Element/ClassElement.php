@@ -26,6 +26,24 @@ class ClassElement
     public $platforms;
     
     /**
+     * Flag that indicates if this is a generic class, eg: class_name<T>.
+     * @var bool
+     */
+    public $generic;
+    
+    /**
+     * The generic expression that goes after class name, eg: <T>.
+     * @var string
+     */
+    public $generic_expression;
+    
+    /**
+     * List of arguments on the generic expression.
+     * @var array
+     */
+    public $generic_arguments;
+    
+    /**
      * Flag that indicates if this class should be treated as a struct.
      * @var bool
      */
@@ -89,9 +107,26 @@ class ClassElement
     /**
      * Creates a class element.
      * @param string $name
+     * @param string $description
      */
     public function __construct($name, $description="")
     {
+        if(strstr($name, "<"))
+        {
+            $this->generic = true;
+            $name_parts = explode("<", $name);
+            $name = trim($name_parts[0]);
+            
+            $this->generic_expression = "<" . trim($name_parts[1], " >") . ">";
+            $this->generic_arguments = explode(",", trim($name_parts[1], " >"));
+            
+            array_walk($this->generic_arguments, 'trim');
+        }
+        else
+        {
+            $this->generic = false;
+        }
+        
         $this->name = $name;
         $this->description = $description;
         
@@ -171,7 +206,7 @@ class ClassElement
     
     /**
      * Check of the class as any properties.
-     * @return boolean
+     * @return bool
      */
     public function HasProperties()
     {

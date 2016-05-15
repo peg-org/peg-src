@@ -246,7 +246,7 @@ abstract class Base
     /**
      * Retrieve the template path for parameters, also checks
      * if a valid override exists and returns that instead.
-     * @param string $parameter Name of the function.
+     * @param \Peg\Lib\Definitions\Element\Parameter $parameter Name of the function.
      * @param string $namespace
      * @param string $type Can be declare, parse_string, parse, 
      * parse_string_ref, parse_reference or object_validate.
@@ -346,7 +346,7 @@ abstract class Base
         ;
 
         if(!file_exists($template))
-        {
+        {    
             return $this->templates_path
                 . "parameters/{$type}/"
                 . "default.php"
@@ -359,7 +359,7 @@ abstract class Base
     /**
      * Retrieve the template path for return, also checks
      * if a valid override exists and returns that instead.
-     * @param string $return Name of the function.
+     * @param \Peg\Lib\Definitions\Element\ReturnType $return
      * @param string $namespace
      * @param string $type Can be function, method or static_method.
      * @return string Path to template file.

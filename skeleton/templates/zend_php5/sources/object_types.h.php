@@ -23,7 +23,7 @@ enum <?=strtolower($extension)?>_object_type
     <?=$object_types?>
 };
 
-typdef struct _php_<?=strtolower($extension)?>_zo
+typedef struct _php_<?=strtolower($extension)?>_zo
 {
     zend_object zo;
     void* native_object;
